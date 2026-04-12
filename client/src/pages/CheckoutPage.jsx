@@ -6,11 +6,11 @@ import {
   markPaymentFailure,
   verifyPayment,
 } from "../api/storeApi.js";
+import { TrustMarkers } from "../components/TrustMarkers.jsx";
 import { useCart } from "../context/CartContext.jsx";
 import { formatCurrency } from "../utils/currency.js";
 import { loadRazorpayScript } from "../utils/payment.js";
-
-const COD_CONFIRMATION_AMOUNT = Number(import.meta.env.VITE_COD_CONFIRMATION_AMOUNT || 40);
+import { calculateCodConfirmationFee } from "../utils/pricing.js";
 
 const initialForm = {
   name: "",
@@ -67,8 +67,9 @@ export const CheckoutPage = () => {
   const effectiveCouponCode = couponAllowedForMode ? coupon?.code || "" : "";
   const discount = couponAllowedForMode ? coupon?.discountAmount || 0 : 0;
   const total = Math.max(0, subtotal - discount);
+  const codConfirmationFee = calculateCodConfirmationFee(items);
   const paymentAmount =
-    paymentMode === "cod_deposit" ? Math.min(total, COD_CONFIRMATION_AMOUNT) : total;
+    paymentMode === "cod_deposit" ? Math.min(total, codConfirmationFee) : total;
   const balanceDue = paymentMode === "cod_deposit" ? Math.max(0, total - paymentAmount) : 0;
 
   useEffect(() => {
@@ -152,7 +153,11 @@ export const CheckoutPage = () => {
         });
         clearCart();
         setCheckoutToken(generateCheckoutToken());
-        navigate(`/order-success/${order.orderNumber}`);
+        navigate(
+          paymentMode === "cod_deposit"
+            ? `/cod-success/${order.orderNumber}`
+            : `/order-success/${order.orderNumber}`
+        );
         return;
       }
 
@@ -192,7 +197,11 @@ export const CheckoutPage = () => {
           });
           clearCart();
           setCheckoutToken(generateCheckoutToken());
-          navigate(`/order-success/${order.orderNumber}`);
+          navigate(
+            paymentMode === "cod_deposit"
+              ? `/cod-success/${order.orderNumber}`
+              : `/order-success/${order.orderNumber}`
+          );
         },
         modal: {
           ondismiss: async () => {
@@ -202,6 +211,9 @@ export const CheckoutPage = () => {
             });
             setSubmitting(false);
             setCheckoutToken(generateCheckoutToken());
+            navigate(
+              `/payment-failure?orderNumber=${encodeURIComponent(order.orderNumber)}&reason=${encodeURIComponent("Customer closed Razorpay checkout.")}`
+            );
           },
         },
       });
@@ -214,6 +226,9 @@ export const CheckoutPage = () => {
         setErrorMessage(response.error?.description || "Payment failed. Please try again.");
         setSubmitting(false);
         setCheckoutToken(generateCheckoutToken());
+        navigate(
+          `/payment-failure?orderNumber=${encodeURIComponent(order.orderNumber)}&reason=${encodeURIComponent(response.error?.description || "Payment failed.")}`
+        );
       });
 
       razorpay.open();
@@ -270,7 +285,7 @@ export const CheckoutPage = () => {
                 onClick={() => setPaymentMode("cod_deposit")}
               >
                 <strong>Cash on Delivery</strong>
-                <span>Pay Rs 40 now for order confirmation and the rest on delivery.</span>
+                <span>Pay the per-product confirmation fee now and the rest on delivery.</span>
               </button>
             </div>
           </div>
@@ -292,8 +307,14 @@ export const CheckoutPage = () => {
               <span>Order total</span>
               <strong>{formatCurrency(total)}</strong>
             </div>
+            {paymentMode === "cod_deposit" ? (
+              <div className="summary-row">
+                <span>COD Confirmation Fee</span>
+                <strong>{formatCurrency(codConfirmationFee)}</strong>
+              </div>
+            ) : null}
             <div className="summary-row">
-              <span>Pay now</span>
+              <span>{paymentMode === "cod_deposit" ? "Pay Now to Confirm COD" : "Pay now"}</span>
               <strong>{formatCurrency(paymentAmount)}</strong>
             </div>
             {paymentMode === "cod_deposit" ? (
@@ -301,6 +322,11 @@ export const CheckoutPage = () => {
                 <span>Balance on delivery</span>
                 <strong>{formatCurrency(balanceDue)}</strong>
               </div>
+            ) : null}
+            {paymentMode === "cod_deposit" ? (
+              <p className="helper-text">
+                COD confirmation is charged at Rs 40 per product in the cart, including bundle items.
+              </p>
             ) : null}
             <div className="checkout-line-items">
               {items.map((item) => (
@@ -320,6 +346,9 @@ export const CheckoutPage = () => {
             </button>
           </aside>
         </div>
+      </section>
+      <section className="section-panel">
+        <TrustMarkers />
       </section>
     </div>
   );

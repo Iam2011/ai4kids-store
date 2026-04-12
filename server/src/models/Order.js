@@ -66,6 +66,7 @@ const orderSchema = new mongoose.Schema(
     discountAmount: { type: Number, default: 0, min: 0 },
     couponCode: { type: String, default: "", trim: true, uppercase: true },
     totalAmount: { type: Number, required: true, min: 0 },
+    codConfirmationFee: { type: Number, default: 0, min: 0 },
     paymentMode: {
       type: String,
       enum: ["cod_deposit", "full_payment"],

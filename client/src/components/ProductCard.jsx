@@ -32,6 +32,14 @@ export const ProductCard = ({
     );
   const detailPath = product.slug ? `/products/${product.slug}` : "/products";
   const canAddToCart = Boolean(product._id);
+  const socialProofLine =
+    badgeLabel === "Best Seller"
+      ? "Popular gift pick this week"
+      : badgeLabel === "Limited Stock"
+        ? "Selling fast in recent orders"
+        : badgeLabel === "Viral"
+          ? "Trending now with mobile shoppers"
+          : "Parent-picked for easy gifting";
   const badgeTone =
     badgeToneOverride ||
     (badgeLabel === "Limited Stock" || product.limitedStock
@@ -66,6 +74,7 @@ export const ProductCard = ({
         <Link to={detailPath} className="product-title">
           {displayName}
         </Link>
+        <p className="product-social-proof">{socialProofLine}</p>
         {displayCopy ? <p className="product-copy">{displayCopy}</p> : null}
         <div className="price-row">
           <div>

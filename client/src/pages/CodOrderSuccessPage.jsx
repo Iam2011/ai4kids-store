@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { getOrder } from "../api/storeApi.js";
 import { formatCurrency } from "../utils/currency.js";
 
-export const OrderSuccessPage = () => {
+export const CodOrderSuccessPage = () => {
   const { orderNumber } = useParams();
   const [order, setOrder] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
@@ -16,7 +16,7 @@ export const OrderSuccessPage = () => {
         setErrorMessage("");
       } catch (error) {
         setOrder(null);
-        setErrorMessage(error.response?.data?.message || "We could not load the full order summary.");
+        setErrorMessage(error.response?.data?.message || "We could not load the COD order details.");
       }
     };
 
@@ -25,12 +25,12 @@ export const OrderSuccessPage = () => {
 
   return (
     <div className="page-stack static-page payment-response-page">
-      <section className="section-panel static-page-panel response-panel success-panel">
-        <span className="eyebrow">Payment Success</span>
-        <h1>Payment received and order confirmed.</h1>
+      <section className="section-panel static-page-panel response-panel cod-panel">
+        <span className="eyebrow">COD Order Received</span>
+        <h1>Your order is confirmed for cash on delivery.</h1>
         <p>
-          Your payment has been captured successfully. We&apos;ve saved the order and the team can now
-          process it for dispatch.
+          We have received your COD confirmation fee. Our team will now process the order and the
+          remaining amount will be collected when the package is delivered.
         </p>
         <p>
           Order number: <strong>{orderNumber}</strong>
@@ -38,26 +38,17 @@ export const OrderSuccessPage = () => {
         {order ? (
           <div className="success-card">
             <p>
+              COD Confirmation Fee Paid: <strong>{formatCurrency(order.codConfirmationFee || order.paymentAmount)}</strong>
+            </p>
+            <p>
+              Paid now: <strong>{formatCurrency(order.paymentAmount)}</strong>
+            </p>
+            <p>
+              Remaining on delivery: <strong>{formatCurrency(order.balanceDue)}</strong>
+            </p>
+            <p>
               Payment status: <strong>{order.paymentStatus}</strong>
             </p>
-            <p>
-              Order status: <strong>{order.orderStatus}</strong>
-            </p>
-            <p>
-              Amount paid: <strong>{formatCurrency(order.paymentAmount)}</strong>
-            </p>
-            {order.items?.length ? (
-              <div className="success-order-items">
-                {order.items.map((item) => (
-                  <p key={`${item.sku}-${item.slug}`}>
-                    {item.name} x {item.quantity}
-                    {item.itemType === "combo" && item.bundleItems?.length
-                      ? ` (${item.bundleItems.map((bundleItem) => bundleItem.name).join(", ")})`
-                      : ""}
-                  </p>
-                ))}
-              </div>
-            ) : null}
           </div>
         ) : errorMessage ? (
           <p className="helper-text">{errorMessage}</p>
@@ -66,12 +57,12 @@ export const OrderSuccessPage = () => {
           <Link className="primary-button" to="/products">
             Continue Shopping
           </Link>
-          <Link className="secondary-button" to="/about">
-            Need Help?
+          <Link className="secondary-button" to="/">
+            Back to Home
           </Link>
         </div>
         <a className="text-button" href="mailto:support@ai4kids.in">
-          Email support for order help
+          Need help with delivery or COD? Contact support
         </a>
       </section>
     </div>

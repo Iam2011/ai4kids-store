@@ -267,6 +267,11 @@ export const AdminDashboardPage = () => {
               <div>
                 <span>{formatCurrency(order.totalAmount)}</span>
                 <p>{order.paymentStatus} | {order.orderStatus}</p>
+                {order.paymentMode === "cod_deposit" ? (
+                  <p>
+                    COD Fee {formatCurrency(order.codConfirmationFee || order.paymentAmount)} | Paid now {formatCurrency(order.paymentAmount)}
+                  </p>
+                ) : null}
               </div>
               <div>
                 <span>{order.paymentMode}</span>

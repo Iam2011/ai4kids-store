@@ -19,6 +19,26 @@
     {
       "source": "/order-success/:path*",
       "destination": "/index.html"
+    },
+    {
+      "source": "/cod-success/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/payment-failure",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/about",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/return-refund-policy",
+      "destination": "/index.html"
     }
   ]
 }

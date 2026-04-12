@@ -108,6 +108,11 @@ export const ProductPage = () => {
             <span>{product.stockCount} units currently available for this batch</span>
           </div>
 
+          <div className="product-proof-stack">
+            <span className="mini-label">Trending now</span>
+            <p className="helper-text">Viewed by shoppers looking for gifting and fast-moving picks this week.</p>
+          </div>
+
           <div className="detail-actions">
             <QuantitySelector quantity={quantity} min={product.moq} onChange={setQuantity} />
             <button className="secondary-button" onClick={() => addItem(product, quantity)}>

@@ -1,16 +1,20 @@
 export const TrustMarkers = () => (
   <div className="trust-markers">
     <div>
-      <strong>100% Safe Payment</strong>
+      <strong>Secure Checkout</strong>
       <span>Razorpay-secured checkout</span>
     </div>
     <div>
-      <strong>Fast Dispatch</strong>
-      <span>Orders processed quickly for ad traffic</span>
+      <strong>Quality Checked</strong>
+      <span>Curated viral picks screened before dispatch</span>
     </div>
     <div>
-      <strong>COD Support</strong>
-      <span>Confirm with Rs 40 and pay the rest later</span>
+      <strong>Fast Dispatch</strong>
+      <span>Quick confirmation and dispatch flow for mobile orders</span>
+    </div>
+    <div>
+      <strong>COD Available</strong>
+      <span>Pay the COD confirmation fee now and the rest on delivery</span>
     </div>
   </div>
 );

@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { validateCoupon } from "../api/storeApi.js";
 import { QuantitySelector } from "../components/QuantitySelector.jsx";
+import { TrustMarkers } from "../components/TrustMarkers.jsx";
 import { useCart } from "../context/CartContext.jsx";
 import { formatCurrency } from "../utils/currency.js";
 import { useState } from "react";
+import { calculateCodConfirmationFee } from "../utils/pricing.js";
 
 export const CartPage = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ export const CartPage = () => {
 
   const previewDiscount = coupon?.discountAmount || 0;
   const previewTotal = Math.max(0, subtotal - previewDiscount);
+  const codConfirmationFee = calculateCodConfirmationFee(items);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -123,6 +126,13 @@ export const CartPage = () => {
               <span>Coupon discount</span>
               <strong>-{formatCurrency(previewDiscount)}</strong>
             </div>
+            <div className="summary-row">
+              <span>COD Confirmation Fee</span>
+              <strong>{formatCurrency(codConfirmationFee)}</strong>
+            </div>
+            <p className="helper-text">
+              If you choose COD, you will pay {formatCurrency(Math.min(previewTotal, codConfirmationFee))} now to confirm the order.
+            </p>
             <div className="summary-row total">
               <span>Total</span>
               <strong>{formatCurrency(previewTotal)}</strong>
@@ -133,6 +143,9 @@ export const CartPage = () => {
             </button>
           </aside>
         </div>
+      </section>
+      <section className="section-panel">
+        <TrustMarkers />
       </section>
     </div>
   );

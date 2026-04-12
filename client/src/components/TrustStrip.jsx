@@ -1,7 +1,7 @@
 const trustPoints = [
   {
-    title: "Cash on Delivery Available",
-    copy: "Confirm your order quickly and pay after delivery.",
+    title: "COD Available",
+    copy: "Pay the confirmation fee now and the rest on delivery.",
     icon: "cod",
   },
   {
@@ -15,12 +15,12 @@ const trustPoints = [
     icon: "spark",
   },
   {
-    title: "Great for Gifting",
+    title: "Parent-Picked",
     copy: "Gift-ready picks chosen by age and play style.",
     icon: "gift",
   },
   {
-    title: "Easy Checkout",
+    title: "Secure Checkout",
     copy: "Smooth cart flow designed for mobile buyers.",
     icon: "checkout",
   },

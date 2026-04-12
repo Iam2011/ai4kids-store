@@ -3,6 +3,12 @@ import { Product } from "../models/Product.js";
 import { getComboOfferByKey } from "../config/comboOffers.js";
 
 const roundCurrency = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
+const getCodFeePerProduct = () =>
+  Number(process.env.COD_CONFIRMATION_FEE_PER_ITEM || process.env.COD_CONFIRMATION_AMOUNT || 40);
+const getBillableUnitCount = (item) =>
+  item.itemType === "combo"
+    ? Math.max(1, Number(item.bundleItems?.length || 0)) * Number(item.quantity || 1)
+    : Number(item.quantity || 1);
 
 const buildComboItem = (comboOffer, quantity) => {
   const normalizedQuantity = Number(quantity || 1);
@@ -133,9 +139,11 @@ export const calculateOrderPricing = async ({ cartItems, couponCode, paymentMode
     calculateCouponDiscount({ coupon, subtotal, paymentMode })
   );
   const totalAmount = Math.max(0, roundCurrency(subtotal - discountAmount));
-  const codConfirmationAmount = Number(process.env.COD_CONFIRMATION_AMOUNT || 40);
+  const codConfirmationFee = roundCurrency(
+    items.reduce((total, item) => total + getBillableUnitCount(item) * getCodFeePerProduct(), 0)
+  );
   const paymentAmount =
-    paymentMode === "cod_deposit" ? Math.min(totalAmount, codConfirmationAmount) : totalAmount;
+    paymentMode === "cod_deposit" ? Math.min(totalAmount, codConfirmationFee) : totalAmount;
   const depositAmount = paymentMode === "cod_deposit" ? paymentAmount : 0;
   const balanceDue =
     paymentMode === "cod_deposit" ? roundCurrency(Math.max(0, totalAmount - paymentAmount)) : 0;
@@ -149,5 +157,6 @@ export const calculateOrderPricing = async ({ cartItems, couponCode, paymentMode
     paymentAmount,
     depositAmount,
     balanceDue,
+    codConfirmationFee,
   };
 };
