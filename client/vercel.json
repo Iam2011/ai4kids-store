@@ -33,6 +33,10 @@
       "destination": "/index.html"
     },
     {
+      "source": "/shipping-policy",
+      "destination": "/index.html"
+    },
+    {
       "source": "/privacy-policy",
       "destination": "/index.html"
     },

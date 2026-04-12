@@ -255,18 +255,39 @@ export const CheckoutPage = () => {
           <div>
             <span className="eyebrow">Checkout</span>
             <h1>Finish your order with a mobile-first form</h1>
+            <p className="section-copy">
+              Fill in delivery details, choose your payment mode, and review the full amount before confirming.
+            </p>
           </div>
         </div>
 
         <div className="checkout-grid">
           <div className="checkout-form-panel">
             <div className="form-grid">
-              <input className="text-input" name="name" placeholder="Name" value={form.name} onChange={handleChange} required />
-              <input className="text-input" name="mobile" placeholder="Mobile" value={form.mobile} onChange={handleChange} required />
-              <textarea className="text-input textarea" name="address" placeholder="Address" value={form.address} onChange={handleChange} required />
-              <input className="text-input" name="pincode" placeholder="Pincode" value={form.pincode} onChange={handleChange} required />
-              <input className="text-input" name="city" placeholder="City" value={form.city} onChange={handleChange} required />
-              <input className="text-input" name="state" placeholder="State" value={form.state} onChange={handleChange} required />
+              <label className="field-stack">
+                <span>Name</span>
+                <input className="text-input" name="name" placeholder="Enter customer name" value={form.name} onChange={handleChange} required />
+              </label>
+              <label className="field-stack">
+                <span>Mobile</span>
+                <input className="text-input" name="mobile" placeholder="10-digit mobile number" value={form.mobile} onChange={handleChange} required />
+              </label>
+              <label className="field-stack field-stack-wide">
+                <span>Address</span>
+                <textarea className="text-input textarea" name="address" placeholder="House, street, landmark" value={form.address} onChange={handleChange} required />
+              </label>
+              <label className="field-stack">
+                <span>Pincode</span>
+                <input className="text-input" name="pincode" placeholder="6-digit pincode" value={form.pincode} onChange={handleChange} required />
+              </label>
+              <label className="field-stack">
+                <span>City</span>
+                <input className="text-input" name="city" placeholder="City" value={form.city} onChange={handleChange} required />
+              </label>
+              <label className="field-stack">
+                <span>State</span>
+                <input className="text-input" name="state" placeholder="State" value={form.state} onChange={handleChange} required />
+              </label>
             </div>
             {lookupState.loading || lookupState.message ? <p className="helper-text">{lookupState.message}</p> : null}
 
@@ -350,6 +371,17 @@ export const CheckoutPage = () => {
       <section className="section-panel">
         <TrustMarkers />
       </section>
+
+      <div className="mobile-pay-bar">
+        <div>
+          <span>{paymentMode === "cod_deposit" ? "Pay now to confirm COD" : "Pay now"}</span>
+          <strong>{formatCurrency(paymentAmount)}</strong>
+          {paymentMode === "cod_deposit" ? <small>Balance due on delivery: {formatCurrency(balanceDue)}</small> : null}
+        </div>
+        <button className="primary-button" onClick={handlePayment} disabled={submitting}>
+          {submitting ? "Opening..." : paymentAmount <= 0 ? "Place Order" : `Pay ${formatCurrency(paymentAmount)}`}
+        </button>
+      </div>
     </div>
   );
 };

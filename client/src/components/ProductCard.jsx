@@ -86,7 +86,11 @@ export const ProductCard = ({
       </div>
 
       {canAddToCart ? (
-        <button className="primary-button product-card-cta" onClick={() => addItem(product)}>
+        <button
+          type="button"
+          className="primary-button product-card-cta"
+          onClick={() => addItem(product)}
+        >
           {ctaLabel}
         </button>
       ) : (

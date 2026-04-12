@@ -1,28 +1,28 @@
 const trustPoints = [
   {
     title: "COD Available",
-    copy: "Pay the confirmation fee now and the rest on delivery.",
+    copy: "Transparent confirmation fee with the remaining balance paid on delivery.",
     icon: "cod",
   },
   {
-    title: "Fast Order Confirmation",
-    copy: "Rapid call/WhatsApp confirmation keeps drop-offs low.",
+    title: "Secure Payments",
+    copy: "Razorpay-backed payment flow built to feel safe and simple on mobile.",
+    icon: "checkout",
+  },
+  {
+    title: "Fast Dispatch",
+    copy: "Quick confirmation and dispatch updates for mobile-first toy orders.",
     icon: "bolt",
   },
   {
-    title: "Curated Viral Picks",
-    copy: "Only fast-moving toys make it to the homepage.",
+    title: "Support Available",
+    copy: "Clear support and policy access before and after checkout.",
     icon: "spark",
   },
   {
     title: "Parent-Picked",
-    copy: "Gift-ready picks chosen by age and play style.",
+    copy: "Gift-ready picks chosen by age, use case, and checkout ease.",
     icon: "gift",
-  },
-  {
-    title: "Secure Checkout",
-    copy: "Smooth cart flow designed for mobile buyers.",
-    icon: "checkout",
   },
 ];
 

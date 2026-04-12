@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getProducts } from "../api/storeApi.js";
 import { AgeSection } from "../components/AgeSection.jsx";
 import { FeaturedProducts } from "../components/FeaturedProducts.jsx";
@@ -116,6 +116,47 @@ const comboTrustChips = [
   "Cash on Delivery",
   "Fast Confirmation",
   "Limited Stock",
+];
+
+const quickBrowsePills = [
+  { label: "Remote Toys", to: "/products?category=Remote%20Toys" },
+  { label: "Outdoor Ride-ons", to: "/products?category=Outdoor" },
+  { label: "Action Toys", to: "/products?category=Action%20Toys" },
+  { label: "Best Sellers", to: "/products?featured=true" },
+  { label: "Gift Picks", to: "/products?sort=discount" },
+];
+
+const appBenefits = [
+  {
+    title: "App-fast checkout",
+    copy: "Clean steps, fast cart edits, and COD clarity made for phone screens.",
+  },
+  {
+    title: "Curated toy selection",
+    copy: "We surface giftable picks instead of forcing families through marketplace clutter.",
+  },
+  {
+    title: "Trust-first ordering",
+    copy: "Secure payments, easy COD confirmation, and visible policies before checkout.",
+  },
+];
+
+const reviewCards = [
+  {
+    name: "Ritika, Jaipur",
+    title: "Gift combo looked premium",
+    copy: "The scooter combo felt exciting the moment I opened the site on mobile. Checkout was very smooth.",
+  },
+  {
+    name: "Aman, Ahmedabad",
+    title: "Easy COD confirmation",
+    copy: "The COD fee was explained clearly and the order summary stayed transparent till payment.",
+  },
+  {
+    name: "Shreya, Pune",
+    title: "Fast-moving picks, no confusion",
+    copy: "The product cards were clean and quick to compare. Great when you are ordering from your phone.",
+  },
 ];
 
 const normalizeName = (value = "") =>
@@ -268,18 +309,22 @@ export const HomePage = () => {
   };
 
   return (
-    <div className="page-stack">
-      <section className="hero-section combo-hero">
-        <div className="hero-copy combo-hero-copy">
-          <span className="combo-badge">3 Viral Toys Combo</span>
+    <div className="page-stack home-shell">
+      <section className="hero-section home-hero-card">
+        <div className="hero-copy home-hero-copy">
+          <div className="hero-kicker-row">
+            <span className="combo-badge">3 Viral Toys Combo</span>
+            <span className="hero-note-chip">Premium gift combo</span>
+          </div>
+
           <h1>Best Toys for Your Kids</h1>
-          <p>
+          <p className="hero-support-copy">
             Scooter + RC Car + Dart Gun in one exciting combo.
             <br />
             A premium gift combo built to wow kids instantly.
           </p>
 
-          <div className="combo-price-wrap" aria-live="polite">
+          <div className="combo-price-wrap app-price-card" aria-live="polite">
             <div className="combo-price-line">
               <span className="combo-old-price">MRP Rs 6000</span>
             </div>
@@ -287,7 +332,7 @@ export const HomePage = () => {
             <span className="combo-save-chip">Save Rs 2001</span>
           </div>
 
-          <div className="combo-cta-group">
+          <div className="combo-cta-group hero-action-row">
             <button
               type="button"
               className="primary-button combo-order-cta"
@@ -295,7 +340,13 @@ export const HomePage = () => {
             >
               Order Combo Now
             </button>
-            <p className="combo-cod-note">COD Available</p>
+            <button
+              type="button"
+              className="secondary-button hero-secondary-cta"
+              onClick={() => navigate("/products?featured=true")}
+            >
+              Shop Best Sellers
+            </button>
           </div>
 
           <div className="combo-trust-list">
@@ -305,8 +356,11 @@ export const HomePage = () => {
           </div>
         </div>
 
-        <div className="combo-stage" aria-label="Combo toys included">
-          <figure className="combo-product combo-product-scooter">
+        <div className="hero-stage-shell" aria-label="Combo toys included">
+          <span className="hero-stage-glow hero-stage-glow-primary" aria-hidden="true" />
+          <span className="hero-stage-glow hero-stage-glow-secondary" aria-hidden="true" />
+
+          <figure className="hero-art hero-art-scooter">
             <img
               src={comboHeroAssets.scooter}
               alt="Light and music scooter"
@@ -315,7 +369,7 @@ export const HomePage = () => {
             />
           </figure>
 
-          <figure className="combo-product combo-product-gun">
+          <figure className="hero-art hero-art-gun">
             <img
               src={comboHeroAssets.dartGun}
               alt="Super dart gun"
@@ -324,7 +378,7 @@ export const HomePage = () => {
             />
           </figure>
 
-          <figure className="combo-product combo-product-rc">
+          <figure className="hero-art hero-art-rc">
             <img
               src={comboHeroAssets.rcCar}
               alt="RC rock climber car"
@@ -332,12 +386,92 @@ export const HomePage = () => {
               loading="eager"
             />
           </figure>
+
+          <div className="hero-stage-note">
+            <strong>Most picked combo this week</strong>
+            <span>Made for gifting, party returns, and quick checkout.</span>
+          </div>
         </div>
       </section>
 
       <TrustStrip />
-      <AgeSection cards={ageCards} />
+
+      <section className="section-panel browse-pills-panel">
+        <div className="section-head premium-head compact-head">
+          <div>
+            <span className="eyebrow">Quick browse</span>
+            <h2>Shop faster on mobile</h2>
+            <p className="section-copy">
+              Jump straight into the categories parents open first on phone screens.
+            </p>
+          </div>
+        </div>
+        <div className="browse-pill-row">
+          {quickBrowsePills.map((pill) => (
+            <Link key={pill.label} to={pill.to} className="browse-pill">
+              {pill.label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <FeaturedProducts products={featuredProducts} loading={loading} />
+      <AgeSection cards={ageCards} />
+
+      <section className="section-panel why-section">
+        <div className="section-head premium-head compact-head">
+          <div>
+            <span className="eyebrow">Why AI4Kids</span>
+            <h2>Built like a shopping app, not a cluttered marketplace</h2>
+          </div>
+        </div>
+        <div className="why-grid">
+          {appBenefits.map((benefit) => (
+            <article key={benefit.title} className="why-card">
+              <h3>{benefit.title}</h3>
+              <p>{benefit.copy}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-panel reviews-section">
+        <div className="section-head premium-head compact-head">
+          <div>
+            <span className="eyebrow">Loved by shoppers</span>
+            <h2>Proof that the store feels easy to trust on mobile</h2>
+          </div>
+        </div>
+        <div className="review-grid">
+          {reviewCards.map((review) => (
+            <article key={review.name} className="review-card">
+              <span className="review-chip">Verified order experience</span>
+              <h3>{review.title}</h3>
+              <p>{review.copy}</p>
+              <strong>{review.name}</strong>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="section-panel reassurance-panel">
+        <div>
+          <span className="eyebrow">Ready to order?</span>
+          <h2>Clear pricing, transparent COD, and customer-first support</h2>
+          <p>
+            Browse toys, add a combo, and finish checkout with a flow built for mobile-first buying.
+          </p>
+        </div>
+        <div className="hero-cta-row reassurance-actions">
+          <Link className="primary-button" to="/products">
+            Explore All Toys
+          </Link>
+          <Link className="secondary-button" to="/return-refund-policy">
+            View Policies
+          </Link>
+        </div>
+      </section>
+
       {homepageError ? (
         <section className="section-panel">
           <p className="helper-text">{homepageError}</p>

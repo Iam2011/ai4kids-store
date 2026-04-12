@@ -62,6 +62,9 @@ export const CartPage = () => {
           <div>
             <span className="eyebrow">Cart</span>
             <h1>Review your toys before checkout</h1>
+            <p className="section-copy">
+              Check quantities, review pricing, and see the COD confirmation fee clearly before you pay.
+            </p>
           </div>
         </div>
 
@@ -71,6 +74,7 @@ export const CartPage = () => {
               <article key={item.itemKey} className="cart-item">
                 <img src={item.imageUrl} alt={item.name} />
                 <div className="cart-item-copy">
+                  <span className="mini-label">{item.itemType === "combo" ? "Combo Offer" : "In Cart"}</span>
                   <h3>{item.name}</h3>
                   <p>
                     {item.category} | Age {item.ageGroup}
@@ -147,6 +151,17 @@ export const CartPage = () => {
       <section className="section-panel">
         <TrustMarkers />
       </section>
+
+      <div className="mobile-checkout-bar">
+        <div>
+          <span>Total</span>
+          <strong>{formatCurrency(previewTotal)}</strong>
+          <small>COD fee shown before payment</small>
+        </div>
+        <button className="primary-button" onClick={() => navigate("/checkout")}>
+          Checkout
+        </button>
+      </div>
     </div>
   );
 };

@@ -179,6 +179,8 @@ export const AdminDashboardPage = () => {
             <option value="Board Games">Board Games</option>
             <option value="Educational">Educational</option>
             <option value="Outdoor">Outdoor</option>
+            <option value="Action Toys">Action Toys</option>
+            <option value="Kids Toys">Kids Toys</option>
           </select>
           <select className="text-input" name="ageGroup" value={form.ageGroup} onChange={handleChange}>
             <option value="0-2">0-2</option>

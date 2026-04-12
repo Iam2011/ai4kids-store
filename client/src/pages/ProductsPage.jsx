@@ -4,7 +4,14 @@ import { getProducts } from "../api/storeApi.js";
 import { ProductCard } from "../components/ProductCard.jsx";
 
 const ageOptions = ["0-2", "3-5", "6-8", "9+"];
-const categoryOptions = ["Remote Toys", "Board Games", "Educational", "Outdoor"];
+const categoryOptions = [
+  "Remote Toys",
+  "Board Games",
+  "Educational",
+  "Outdoor",
+  "Action Toys",
+  "Kids Toys",
+];
 
 export const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,22 +68,34 @@ export const ProductsPage = () => {
   return (
     <div className="page-stack listing-layout">
       <section className="section-panel listing-hero">
-        <div>
+        <div className="listing-hero-copy">
           <span className="eyebrow">Toy catalog</span>
-          <h1>Find the fastest-converting picks by age or category</h1>
+          <h1>Find the right toy in a few quick taps</h1>
+          <p className="section-copy">
+            Search, sort, and filter with a mobile-friendly browse flow built for faster buying decisions.
+          </p>
         </div>
         <div className="toolbar-grid">
-          <input
-            className="text-input"
-            placeholder="Search toy name"
-            value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                updateFilters({ search: searchInput });
-              }
-            }}
-          />
+          <div className="search-field">
+            <input
+              className="text-input"
+              placeholder="Search toy name"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  updateFilters({ search: searchInput });
+                }
+              }}
+            />
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => updateFilters({ search: searchInput })}
+            >
+              Search
+            </button>
+          </div>
           <select className="text-input" value={ageGroup} onChange={(event) => updateFilters({ ageGroup: event.target.value })}>
             <option value="">All ages</option>
             {ageOptions.map((option) => (
@@ -100,6 +119,16 @@ export const ProductsPage = () => {
             <option value="priceDesc">Price: High to Low</option>
             <option value="latest">Latest</option>
           </select>
+          <button
+            type="button"
+            className="text-button reset-filters-button"
+            onClick={() => {
+              setSearchInput("");
+              setSearchParams(new URLSearchParams());
+            }}
+          >
+            Reset filters
+          </button>
         </div>
       </section>
 

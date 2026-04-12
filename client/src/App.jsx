@@ -13,6 +13,7 @@ import { ProductPage } from "./pages/ProductPage.jsx";
 import { ProductsPage } from "./pages/ProductsPage.jsx";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage.jsx";
 import { ReturnRefundPage } from "./pages/ReturnRefundPage.jsx";
+import { ShippingPolicyPage } from "./pages/ShippingPolicyPage.jsx";
 
 const AdminRoute = ({ children }) => {
   const token = window.localStorage.getItem("ai4kids-admin-token");
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/cod-success/:orderNumber" element={<CodOrderSuccessPage />} />
         <Route path="/payment-failure" element={<PaymentFailurePage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/return-refund-policy" element={<ReturnRefundPage />} />
         <Route path="/admin" element={<AdminLoginPage />} />
