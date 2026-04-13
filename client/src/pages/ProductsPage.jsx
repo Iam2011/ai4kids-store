@@ -3,14 +3,21 @@ import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../api/storeApi.js";
 import { ProductCard } from "../components/ProductCard.jsx";
 
-const ageOptions = ["0-2", "3-5", "6-8", "9+"];
 const categoryOptions = [
   "Remote Toys",
-  "Board Games",
-  "Educational",
-  "Outdoor",
   "Action Toys",
+  "Outdoor",
+  "Educational",
   "Kids Toys",
+  "Board Games",
+];
+
+const sortOptions = [
+  { value: "featured", label: "Featured" },
+  { value: "discount", label: "Best Deals" },
+  { value: "priceAsc", label: "Price Low to High" },
+  { value: "priceDesc", label: "Price High to Low" },
+  { value: "latest", label: "New Arrivals" },
 ];
 
 export const ProductsPage = () => {
@@ -20,7 +27,6 @@ export const ProductsPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
 
-  const ageGroup = searchParams.get("ageGroup") || "";
   const category = searchParams.get("category") || "";
   const sort = searchParams.get("sort") || "featured";
   const featured = searchParams.get("featured") || "";
@@ -31,14 +37,13 @@ export const ProductsPage = () => {
 
       try {
         const data = await getProducts({
-          ageGroup,
           category,
           sort,
           featured,
           search: searchParams.get("search") || "",
           limit: 60,
         });
-        setProducts(data.products);
+        setProducts(data.products || []);
         setErrorMessage("");
       } catch (error) {
         setProducts([]);
@@ -49,7 +54,7 @@ export const ProductsPage = () => {
     };
 
     fetchProducts();
-  }, [ageGroup, category, sort, featured, searchParams]);
+  }, [category, sort, featured, searchParams]);
 
   const updateFilters = (updates) => {
     const next = new URLSearchParams(searchParams);
@@ -66,79 +71,65 @@ export const ProductsPage = () => {
   };
 
   return (
-    <div className="page-stack listing-layout">
-      <section className="section-panel listing-hero">
-        <div className="listing-hero-copy">
+    <div className="page-stack app-listing-page">
+      <section className="section-panel listing-search-card">
+        <div className="listing-header-copy">
           <span className="eyebrow">Toy catalog</span>
-          <h1>Find the right toy in a few quick taps</h1>
+          <h1>Best Sellers and trending picks</h1>
           <p className="section-copy">
-            Search, sort, and filter with a mobile-friendly browse flow built for faster buying decisions.
+            Browse mobile-friendly product cards with clear pricing, reviews, and quick buy actions.
           </p>
         </div>
-        <div className="toolbar-grid">
-          <div className="search-field">
-            <input
-              className="text-input"
-              placeholder="Search toy name"
-              value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  updateFilters({ search: searchInput });
-                }
-              }}
-            />
+
+        <div className="listing-controls">
+          <input
+            className="text-input"
+            placeholder="Search toy name"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                updateFilters({ search: searchInput });
+              }
+            }}
+          />
+
+          <div className="listing-control-row">
             <button
               type="button"
-              className="secondary-button"
+              className="primary-button inline-pill-button"
               onClick={() => updateFilters({ search: searchInput })}
             >
               Search
             </button>
+
+            <select
+              className="text-input compact-select"
+              value={sort}
+              onChange={(event) => updateFilters({ sort: event.target.value })}
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
-          <select className="text-input" value={ageGroup} onChange={(event) => updateFilters({ ageGroup: event.target.value })}>
-            <option value="">All ages</option>
-            {ageOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <select className="text-input" value={category} onChange={(event) => updateFilters({ category: event.target.value })}>
-            <option value="">All categories</option>
-            {categoryOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          <select className="text-input" value={sort} onChange={(event) => updateFilters({ sort: event.target.value })}>
-            <option value="featured">Featured</option>
-            <option value="discount">Highest Discount</option>
-            <option value="priceAsc">Price: Low to High</option>
-            <option value="priceDesc">Price: High to Low</option>
-            <option value="latest">Latest</option>
-          </select>
-          <button
-            type="button"
-            className="text-button reset-filters-button"
-            onClick={() => {
-              setSearchInput("");
-              setSearchParams(new URLSearchParams());
-            }}
-          >
-            Reset filters
-          </button>
         </div>
       </section>
 
-      <div className="chip-row">
-        <button className={`filter-chip ${featured === "true" ? "active" : ""}`} onClick={() => updateFilters({ featured: featured === "true" ? "" : "true" })}>
+      <div className="chip-row listing-chip-row">
+        <button
+          type="button"
+          className={`filter-chip ${featured === "true" ? "active" : ""}`}
+          onClick={() => updateFilters({ featured: featured === "true" ? "" : "true" })}
+        >
           Best Sellers
         </button>
         {categoryOptions.map((option) => (
           <button
             key={option}
+            type="button"
             className={`filter-chip ${category === option ? "active" : ""}`}
             onClick={() => updateFilters({ category: category === option ? "" : option })}
           >
@@ -148,13 +139,21 @@ export const ProductsPage = () => {
       </div>
 
       {loading ? (
-        <div className="empty-state">Loading products...</div>
+        <div className="catalog-card-list">
+          {Array.from({ length: 3 }, (_, index) => (
+            <article key={index} className="product-card showcase-card placeholder-card">
+              <div className="placeholder-image" />
+              <div className="placeholder-line" />
+              <div className="placeholder-line short" />
+            </article>
+          ))}
+        </div>
       ) : errorMessage ? (
         <div className="empty-state">{errorMessage}</div>
       ) : products.length ? (
-        <div className="product-grid">
+        <div className="catalog-card-list">
           {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product._id} product={product} variant="showcase" />
           ))}
         </div>
       ) : (

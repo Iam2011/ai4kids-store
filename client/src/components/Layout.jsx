@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
-import { LiveActivityToast } from "./LiveActivityToast.jsx";
 
-const primaryLinks = [
-  { to: "/", label: "Home" },
+const drawerLinks = [
+  { to: "/", label: "Home", end: true },
   { to: "/products", label: "Shop" },
   { to: "/checkout", label: "Checkout" },
   { to: "/about", label: "About Us" },
@@ -14,82 +13,129 @@ const primaryLinks = [
   { to: "/admin", label: "Admin" },
 ];
 
-const bottomLinks = [
-  { to: "/", label: "Home" },
-  { to: "/products", label: "Shop" },
-  { to: "/cart", label: "Cart" },
+const browseNavLinks = [
+  { to: "/", label: "Home", end: true, icon: "home" },
+  { to: "/products", label: "Categories", icon: "grid" },
+  { to: "/products?featured=true", label: "Offers", icon: "tag" },
+  { to: "/cart", label: "Cart", icon: "cart" },
 ];
+
+const getNavClassName = ({ isActive }, baseClassName = "") =>
+  [baseClassName, isActive ? "active" : ""].filter(Boolean).join(" ");
+
+const MenuIcon = () => (
+  <>
+    <span />
+    <span />
+    <span />
+  </>
+);
+
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M10.5 4a6.5 6.5 0 014.83 10.84l4.41 4.41-1.42 1.42-4.41-4.41A6.5 6.5 0 1110.5 4zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const CartIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M7 5h13l-1.55 5.41A2 2 0 0116.53 12H9.2l-.38 1.5h9.93v2H8a2 2 0 01-1.94-2.49L7.6 7H5V5h2zm1.5 12a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm8 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const BottomIcon = ({ kind }) => {
+  if (kind === "grid") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (kind === "tag") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 10V4h6l10 10-6 6L3 10zm5-4H5v3l8 8 3-3L8 6z" fill="currentColor" />
+      </svg>
+    );
+  }
+
+  if (kind === "cart") {
+    return <CartIcon />;
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 4l8 6v10h-6v-6h-4v6H4V10l8-6z" fill="currentColor" />
+    </svg>
+  );
+};
 
 export const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const isAdminRoute = location.pathname.startsWith("/admin");
-  const isProductDetailRoute = location.pathname.startsWith("/products/");
-  const isTransactionalRoute =
-    isAdminRoute ||
-    isProductDetailRoute ||
-    ["/cart", "/checkout"].includes(location.pathname) ||
-    location.pathname.startsWith("/order-success/") ||
-    location.pathname.startsWith("/cod-success/");
-  const hideLiveActivity = isTransactionalRoute || location.pathname === "/payment-failure";
+  const isBrowseRoute =
+    location.pathname === "/" ||
+    location.pathname === "/products" ||
+    location.pathname.startsWith("/products/");
+  const showBottomNav = !isAdminRoute && ["/", "/products", "/cart"].includes(location.pathname);
+  const showFooter = !isAdminRoute && !["/", "/products"].includes(location.pathname);
 
   useEffect(() => {
     setMobileMenuOpen(false);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   return (
     <div className={`site-shell ${mobileMenuOpen ? "menu-open" : ""}`}>
-      {!isAdminRoute ? (
-        <div className="promo-strip app-announcement">
-          <span>COD available</span>
-          <span>Premium toy picks for gifting</span>
-          <span>Fast mobile checkout</span>
-        </div>
-      ) : null}
-
       <header className="site-header app-header">
         <div className="header-surface">
-          <Link to="/" className="brand-lockup app-brand" aria-label="AI4Kids home">
-            <span className="brand-mark" aria-hidden="true">
-              <span />
-            </span>
-            <div className="brand-copy">
-              <p className="brand-name">AI4Kids</p>
-              <p className="brand-tagline">Smart fun for children</p>
-            </div>
+          <button
+            type="button"
+            className={`mobile-menu-toggle ${mobileMenuOpen ? "active" : ""}`}
+            onClick={() => setMobileMenuOpen((current) => !current)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <MenuIcon />
+          </button>
+
+          <Link to="/" className="brand-wordmark" aria-label="AI4Kids home">
+            <span>AI4</span>
+            <span>Kids</span>
           </Link>
 
           <div className="header-actions">
             {!isAdminRoute ? (
               <button
                 type="button"
-                className="search-trigger"
+                className="header-icon-button"
                 onClick={() => navigate("/products")}
+                aria-label="Search products"
               >
-                Search
+                <SearchIcon />
               </button>
             ) : null}
 
             {!isAdminRoute ? (
-              <NavLink to="/cart" className="cart-pill">
-                Cart
-                <span>{itemCount}</span>
+              <NavLink
+                to="/cart"
+                className={(state) => getNavClassName(state, "header-cart-button")}
+                aria-label="Open cart"
+              >
+                <CartIcon />
+                {itemCount ? <span className="cart-badge">{itemCount}</span> : null}
               </NavLink>
             ) : null}
-
-            <button
-              type="button"
-              className={`mobile-menu-toggle ${mobileMenuOpen ? "active" : ""}`}
-              onClick={() => setMobileMenuOpen((current) => !current)}
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              <span />
-              <span />
-              <span />
-            </button>
           </div>
         </div>
 
@@ -118,8 +164,13 @@ export const Layout = ({ children }) => {
           </div>
 
           <div className="drawer-links">
-            {primaryLinks.map((link) => (
-              <NavLink key={link.to} to={link.to}>
+            {drawerLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.end}
+                className={(state) => getNavClassName(state)}
+              >
                 {link.label}
               </NavLink>
             ))}
@@ -127,64 +178,47 @@ export const Layout = ({ children }) => {
 
           <div className="drawer-support-card">
             <strong>Need help with an order?</strong>
-            <p>Use our support mail for payment, delivery, or combo order questions.</p>
+            <p>Support for combo orders, delivery updates, or payment help.</p>
             <a href="mailto:support@ai4kids.in">support@ai4kids.in</a>
           </div>
         </nav>
       </header>
 
-      <main className="site-main">{children}</main>
+      <main className={`site-main ${isBrowseRoute ? "browse-main" : ""}`}>{children}</main>
 
-      {!isAdminRoute ? (
+      {showFooter ? (
         <footer className="site-footer">
           <div className="footer-brand-block">
-            <h3>AI4Kids Toy Store</h3>
-            <p>
-              Mobile-first toy shopping for parents, gifting buyers, and fast-moving combo offers.
-            </p>
+            <strong className="footer-wordmark">AI4Kids</strong>
+            <p>Curated toy shopping with combo offers, COD support, and mobile-first ordering.</p>
           </div>
           <div className="footer-grid">
             <div>
               <h4>Shop</h4>
-              <p>
-                <Link to="/products?featured=true">Best Sellers</Link>
-              </p>
-              <p>
-                <Link to="/products?ageGroup=3-5">Ages 3-5</Link>
-              </p>
-              <p>
-                <Link to="/products?ageGroup=6-8">Ages 6-8</Link>
-              </p>
-            </div>
-            <div>
-              <h4>Trust</h4>
-              <p>Secure Razorpay checkout</p>
-              <p>COD with transparent fee</p>
-              <p>Fast dispatch support</p>
+              <p><Link to="/products?featured=true">Best Sellers</Link></p>
+              <p><Link to="/products?category=Remote%20Toys">Cars</Link></p>
+              <p><Link to="/products?category=Outdoor">Scooters</Link></p>
             </div>
             <div>
               <h4>Policies</h4>
-              <p>
-                <Link to="/about">About Us</Link>
-              </p>
-              <p>
-                <Link to="/shipping-policy">Shipping Policy</Link>
-              </p>
-              <p>
-                <Link to="/privacy-policy">Privacy Policy</Link>
-              </p>
-              <p>
-                <Link to="/return-refund-policy">Return & Refund Policy</Link>
-              </p>
+              <p><Link to="/about">About Us</Link></p>
+              <p><Link to="/privacy-policy">Privacy Policy</Link></p>
+              <p><Link to="/return-refund-policy">Return & Refund</Link></p>
             </div>
           </div>
         </footer>
       ) : null}
 
-      {!isTransactionalRoute ? (
+      {showBottomNav ? (
         <div className="mobile-bottom-nav" aria-label="Primary mobile navigation">
-          {bottomLinks.map((link) => (
-            <NavLink key={link.to} to={link.to} className="bottom-nav-link">
+          {browseNavLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              className={(state) => getNavClassName(state, "bottom-nav-link")}
+            >
+              <BottomIcon kind={link.icon} />
               <span>{link.label}</span>
             </NavLink>
           ))}
@@ -192,13 +226,13 @@ export const Layout = ({ children }) => {
             type="button"
             className="bottom-nav-link bottom-nav-action"
             onClick={() => setMobileMenuOpen((current) => !current)}
+            aria-label="Open more menu links"
           >
-            <span>Menu</span>
+            <span className="menu-dots" aria-hidden="true" />
+            <span>More</span>
           </button>
         </div>
       ) : null}
-
-      {!hideLiveActivity ? <LiveActivityToast /> : null}
     </div>
   );
 };

@@ -1,0 +1,84 @@
+:root {
+  color-scheme: light;
+  --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Poppins", var(--font-sans);
+
+  --color-page: #fff5f7;
+  --color-surface: rgba(255, 255, 255, 0.82);
+  --color-surface-strong: rgba(255, 255, 255, 0.94);
+  --color-surface-muted: rgba(255, 247, 250, 0.88);
+  --color-border: rgba(181, 134, 177, 0.18);
+  --color-border-strong: rgba(117, 107, 194, 0.25);
+  --color-text: #2f2b4f;
+  --color-text-soft: #6d6888;
+  --color-heading: #2e2a6f;
+  --color-primary: #ff5f86;
+  --color-primary-strong: #ff7d36;
+  --color-secondary: #6257e5;
+  --color-accent: #26b0ff;
+  --color-success: #1f9364;
+  --color-warning: #ff9b3e;
+  --color-danger: #e24f69;
+  --color-chip: rgba(255, 255, 255, 0.66);
+  --color-chip-active: linear-gradient(135deg, rgba(255, 153, 180, 0.95), rgba(255, 142, 79, 0.92));
+  --color-panel-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 243, 247, 0.86));
+  --color-hero-gradient:
+    radial-gradient(circle at 18% 18%, rgba(255, 210, 145, 0.85), transparent 28%),
+    radial-gradient(circle at 82% 24%, rgba(116, 137, 255, 0.44), transparent 24%),
+    linear-gradient(160deg, #5d49d4 0%, #8d5ce2 28%, #ff82a6 58%, #ffd2a5 100%);
+  --color-hero-surface:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+
+  --shadow-soft: 0 18px 44px rgba(95, 69, 153, 0.12);
+  --shadow-card: 0 14px 28px rgba(78, 46, 135, 0.1);
+  --shadow-floating: 0 22px 42px rgba(77, 57, 142, 0.18);
+  --shadow-button: 0 12px 24px rgba(255, 103, 123, 0.24);
+  --shadow-outline: 0 0 0 3px rgba(109, 97, 234, 0.16);
+
+  --radius-xs: 10px;
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 40px;
+  --space-10: 48px;
+
+  --site-max-width: 1200px;
+  --content-max-width: 720px;
+  --safe-bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
+  --header-offset: calc(env(safe-area-inset-top, 0px) + 14px);
+
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 38px;
+
+  --transition-fast: 160ms ease;
+  --transition-base: 240ms ease;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --safe-bottom: 32px;
+    --text-base: 16px;
+    --text-md: 17px;
+    --text-lg: 20px;
+    --text-xl: 26px;
+    --text-2xl: 34px;
+    --text-3xl: 52px;
+  }
+}
