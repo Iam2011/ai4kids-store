@@ -110,8 +110,7 @@ export const Layout = ({ children }) => {
           </button>
 
           <Link to="/" className="brand-wordmark" aria-label="AI4Kids home">
-            <span>AI4</span>
-            <span>Kids</span>
+            <img src="/logo.png" alt="AI4Kids" className="brand-logo-image" />
           </Link>
 
           <div className="header-actions">

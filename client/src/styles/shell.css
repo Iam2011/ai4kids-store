@@ -28,26 +28,15 @@
 .brand-wordmark {
   justify-self: center;
   display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-  font-family: var(--font-display);
-  font-size: 1.7rem;
-  font-weight: 900;
-  letter-spacing: -0.05em;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
 }
 
-.brand-wordmark span:first-child {
-  background: linear-gradient(135deg, #ff7fa9, #7f8fff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.brand-wordmark span:last-child {
-  background: linear-gradient(135deg, #ffbe54, #ff6a57);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.brand-logo-image {
+  width: 98px;
+  height: auto;
+  object-fit: contain;
 }
 
 .mobile-menu-toggle,

@@ -143,6 +143,60 @@ export const ProductCard = ({
     );
   }
 
+  if (variant === "home") {
+    return (
+      <article className="product-card home-showcase-card">
+        <div className="home-card-media-wrap">
+          <span className={`showcase-top-badge ${topBadgeTone}`}>{showcaseBadgeLabel}</span>
+          <span className="home-sale-pill">{discountPercent}% OFF</span>
+          <Link to={detailPath} className="product-image-link">
+            <ProductImage
+              src={product.imageUrl}
+              alt={displayName}
+              wrapperClassName="home-card-image-shell"
+            />
+          </Link>
+        </div>
+
+        <div className="home-card-copy">
+          <Link to={detailPath} className="home-card-title">
+            {displayName}
+          </Link>
+          <p className="home-card-copy-line">{displayCopy || displayCategory}</p>
+
+          <div className="home-card-price-row">
+            <strong>{formatCurrency(product.price)}</strong>
+            <span>{formatCurrency(originalPrice)}</span>
+          </div>
+
+          <div className="home-card-rating-row">
+            <RatingStars />
+            <small>({reviewCount})</small>
+          </div>
+
+          <div className="home-card-actions">
+            {canAddToCart ? (
+              <button
+                type="button"
+                className="mini-card-button secondary"
+                onClick={() => addItem(product)}
+              >
+                Add to Cart
+              </button>
+            ) : (
+              <Link className="mini-card-button secondary" to={detailPath}>
+                Explore
+              </Link>
+            )}
+            <button type="button" className="mini-card-button" onClick={handleBuyNow}>
+              Buy Now
+            </button>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className="product-card showcase-card">
       <div className="showcase-media-wrap">

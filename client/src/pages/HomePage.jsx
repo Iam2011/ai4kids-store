@@ -6,41 +6,67 @@ import { TrustStrip } from "../components/TrustStrip.jsx";
 import { useCart } from "../context/CartContext.jsx";
 import { homepageCategories } from "../constants/storefrontCategories.js";
 import { viralToysCombo } from "../constants/comboOffer.js";
-import {
-  buildProductBenefit,
-  getHeroSupportCopy,
-  selectBestSellerProducts,
-  selectNewArrivalProducts,
-  selectTrendingProducts,
-} from "../utils/catalogMerchandising.js";
+import { buildProductBenefit } from "../utils/catalogMerchandising.js";
 
-const reviewCards = [
-  {
-    name: "Neha S.",
-    title: "Verified Buyer",
-    copy: "Amazing toy picks and a premium shopping flow. The new catalog feels richer and much easier to browse.",
-  },
+const homepageShowcaseNames = [
+  "T22 SCOOTER LIGHT MUSIC SENSOR",
+  "TB 5141 ROCK CAR BIG TOY BOI",
+  "GSH818-36 BUBBLE GUN CHARGEABLE",
+  "3012 THUNDER STRIKE",
+  "GY 2090-14 GOYO STUNT CAR",
+  "2915 THUNDER STRIKE GUN",
+  "611 SCOOTER",
+  "S52P 4K SCREEN DRONE",
+  "668-25 PRINCESS HOUSE 156 PCS",
+  "CH1328 MAGNETIC MIND CRAFT 169 PCS",
 ];
+
+const normalizeName = (value) => String(value || "").trim().toLowerCase();
+
+const resolveShowcaseProduct = (products, targetName) => {
+  const normalizedTarget = normalizeName(targetName);
+  const exactMatch = products.find((product) => normalizeName(product.name) === normalizedTarget);
+
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  const containsMatch = products.find((product) =>
+    normalizeName(product.name).includes(normalizedTarget)
+  );
+
+  return containsMatch || products[0] || null;
+};
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const { addCombo } = useCart();
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [newArrivalProducts, setNewArrivalProducts] = useState([]);
+  const [showcaseProducts, setShowcaseProducts] = useState([]);
   const [homepageError, setHomepageError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadHomepageProducts = async () => {
       try {
-        const [featuredResponse, latestResponse] = await Promise.all([
-          getProducts({ limit: 72, sort: "featured" }),
-          getProducts({ limit: 24, sort: "latest" }),
-        ]);
+        const productResponses = await Promise.all(
+          homepageShowcaseNames.map((name) =>
+            getProducts({
+              search: name,
+              limit: 8,
+            })
+          )
+        );
 
-        setFeaturedProducts(featuredResponse.products || []);
-        setNewArrivalProducts(latestResponse.products || []);
-        setHomepageError("");
+        const curatedProducts = productResponses
+          .map((response, index) =>
+            resolveShowcaseProduct(response.products || [], homepageShowcaseNames[index])
+          )
+          .filter(Boolean);
+
+        setShowcaseProducts(curatedProducts);
+        setHomepageError(
+          curatedProducts.length ? "" : "Unable to load homepage showcase toys right now."
+        );
       } catch (error) {
         setHomepageError(error.response?.data?.message || "Unable to refresh homepage toys.");
       } finally {
@@ -51,19 +77,8 @@ export const HomePage = () => {
     loadHomepageProducts();
   }, []);
 
-  const bestSellerProducts = useMemo(
-    () => selectBestSellerProducts(featuredProducts, 3),
-    [featuredProducts]
-  );
-  const newArrivalRail = useMemo(
-    () => selectNewArrivalProducts(newArrivalProducts, 4),
-    [newArrivalProducts]
-  );
-  const trendingProducts = useMemo(
-    () => selectTrendingProducts(featuredProducts, 4),
-    [featuredProducts]
-  );
-  const heroSupport = useMemo(() => getHeroSupportCopy(featuredProducts), [featuredProducts]);
+  const bestSellerProducts = useMemo(() => showcaseProducts.slice(0, 5), [showcaseProducts]);
+  const newArrivalProducts = useMemo(() => showcaseProducts.slice(5, 10), [showcaseProducts]);
 
   const handleComboCheckout = () => {
     addCombo(viralToysCombo);
@@ -75,18 +90,11 @@ export const HomePage = () => {
       <section className="hero-reference-card">
         <button type="button" className="hero-image-button" onClick={handleComboCheckout}>
           <img
-            src="/assets/ui/hero-banner.png"
+            src="/assets/ui/hero-mobile-reference.png"
             alt="AI4Kids combo hero banner"
             className="hero-reference-image"
           />
         </button>
-
-        {heroSupport.highlight ? (
-          <div className="hero-support-strip">
-            <span className="mini-label">Catalog highlight</span>
-            <p>{heroSupport.highlight}</p>
-          </div>
-        ) : null}
       </section>
 
       <TrustStrip />
@@ -100,10 +108,9 @@ export const HomePage = () => {
         <div className="category-showcase-grid">
           {homepageCategories.map((category) => (
             <Link key={category.label} to={category.to} className="category-showcase-card">
-              <span
-                className={`category-sprite category-sprite-${category.sprite}`}
-                aria-hidden="true"
-              />
+              <span className="category-icon-shell" aria-hidden="true">
+                <img src={category.icon} alt="" className="category-icon-image" />
+              </span>
               <strong>{category.label}</strong>
             </Link>
           ))}
@@ -113,12 +120,13 @@ export const HomePage = () => {
       <section className="section-panel home-rail-card">
         <div className="rail-header">
           <h2>Best Sellers</h2>
+          <Link to="/products?featured=true">View All</Link>
         </div>
 
         {loading ? (
-          <div className="mini-rail">
+          <div className="home-product-rail">
             {Array.from({ length: 3 }, (_, index) => (
-              <article key={index} className="product-card mini-card placeholder-card">
+              <article key={index} className="product-card home-showcase-card placeholder-card">
                 <div className="placeholder-image" />
                 <div className="placeholder-line" />
                 <div className="placeholder-line short" />
@@ -126,26 +134,21 @@ export const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="mini-rail">
+          <div className="home-product-rail">
             {bestSellerProducts.map((product) => (
               <ProductCard
-                key={product._id}
+                key={product._id || product.slug || product.name}
                 product={{
                   ...product,
                   shortDescription: buildProductBenefit(product),
                 }}
-                variant="mini"
+                variant="home"
               />
             ))}
           </div>
         )}
 
         <p className="rail-footnote">COD Fee: Rs 40 per Product</p>
-        <div className="carousel-dots" aria-hidden="true">
-          <span className="active" />
-          <span />
-          <span />
-        </div>
       </section>
 
       <section className="section-panel home-rail-card">
@@ -154,72 +157,36 @@ export const HomePage = () => {
           <Link to="/products?sort=latest">View All</Link>
         </div>
 
-        <div className="mini-rail arrivals-rail">
-          {(loading ? [] : newArrivalRail).map((product) => (
+        <div className="home-product-rail">
+          {(loading ? [] : newArrivalProducts).map((product) => (
             <ProductCard
-              key={product._id}
+              key={product._id || product.slug || product.name}
               product={{
                 ...product,
                 shortDescription: buildProductBenefit(product),
               }}
-              variant="mini"
-            />
-          ))}
-        </div>
-
-        <div className="carousel-dots" aria-hidden="true">
-          <span className="active" />
-          <span />
-          <span />
-          <span />
-        </div>
-      </section>
-
-      <section className="section-panel home-rail-card">
-        <div className="rail-header">
-          <h2>Trending Picks</h2>
-          <Link to="/products?sort=discount">Top Deals</Link>
-        </div>
-
-        <div className="mini-rail arrivals-rail">
-          {(loading ? [] : trendingProducts).map((product) => (
-            <ProductCard
-              key={product._id}
-              product={{
-                ...product,
-                shortDescription: buildProductBenefit(product),
-              }}
-              variant="mini"
+              variant="home"
             />
           ))}
         </div>
       </section>
 
-      <section className="section-panel why-card-panel">
-        <div className="rail-header">
-          <h2>Why Shop With Us?</h2>
+      <section className="section-panel home-brand-banner">
+        <div className="home-brand-banner-logo">
+          <img src="/logo.png" alt="AI4Kids" />
         </div>
 
-        <div className="review-grid">
-          {reviewCards.map((review) => (
-            <article key={review.name} className="buyer-review-card">
-              <div className="buyer-avatar" aria-hidden="true" />
-              <div className="buyer-review-copy">
-                <strong>{review.name}</strong>
-                <span className="review-stars">
-                  <span className="rating-stars" aria-hidden="true">
-                    <span>&#9733;</span>
-                    <span>&#9733;</span>
-                    <span>&#9733;</span>
-                    <span>&#9733;</span>
-                    <span>&#9733;</span>
-                  </span>
-                  {review.title}
-                </span>
-                <p>{review.copy}</p>
-              </div>
-            </article>
-          ))}
+        <div className="home-brand-banner-copy">
+          <strong>Creative Learning Toys</strong>
+          <p>
+            Screen-free smart play, curated toy discovery, and child-friendly mobile shopping for
+            families across India.
+          </p>
+          <ul className="home-brand-points">
+            <li>Creative Learning Toys</li>
+            <li>Screen-Free Smart Play</li>
+            <li>Safe & Child-Friendly</li>
+          </ul>
         </div>
       </section>
 
