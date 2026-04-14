@@ -1,4 +1,5 @@
 import { getProducts } from "@/lib/api/products";
+import { listingCopy } from "@/lib/constants/copy";
 import { ProductsClientPage } from "./products-client-page";
 
 export default async function ProductsPage({
@@ -25,7 +26,7 @@ export default async function ProductsPage({
   return (
     <ProductsClientPage
       initialProducts={response?.products || []}
-      initialError={response ? "" : "Couldn't load products right now. Please try again."}
+      initialError={response ? "" : listingCopy.error}
     />
   );
 }

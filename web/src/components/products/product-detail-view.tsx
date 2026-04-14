@@ -11,6 +11,7 @@ import { ProductGrid } from "@/components/products/product-grid";
 import { QuantityControl } from "@/components/cart/quantity-control";
 import { TrustMarkers } from "@/components/trust/trust-markers";
 import { buildProductBenefit } from "@/lib/utils/catalog-merchandising";
+import { formatProductName } from "@/lib/utils/normalize-product-text";
 import { trackStoreEvent } from "@/lib/analytics/track";
 import type { Product } from "@/types/product";
 
@@ -24,6 +25,7 @@ export function ProductDetailView({
   const router = useRouter();
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(product.moq);
+  const displayName = formatProductName(product.name);
   const gallery = product.gallery?.length ? product.gallery : [product.imageUrl];
   const [selectedImage, setSelectedImage] = useState(gallery[0] || product.imageUrl);
 
@@ -55,7 +57,7 @@ export function ProductDetailView({
     <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
       <section className="rounded-[30px] bg-white/95 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.15)]">
         <div className="relative aspect-square overflow-hidden rounded-[24px] bg-gradient-to-br from-[#fff8ef] to-[#f4f2ff]">
-          <Image src={selectedImage} alt={product.name} fill sizes="(max-width: 1024px) 100vw, 640px" className="object-contain p-5" />
+          <Image src={selectedImage} alt={displayName} fill sizes="(max-width: 1024px) 100vw, 640px" className="object-contain p-5" />
         </div>
         <div className="mt-4 grid grid-cols-4 gap-2">
           {gallery.map((image) => (
@@ -65,7 +67,7 @@ export function ProductDetailView({
               onClick={() => setSelectedImage(image)}
               className={`relative aspect-square overflow-hidden rounded-[18px] border ${selectedImage === image ? "border-[#8e78ff]" : "border-[#ebe2fb]"}`}
             >
-              <Image src={image} alt={product.name} fill sizes="96px" className="object-contain p-2" />
+              <Image src={image} alt={displayName} fill sizes="96px" className="object-contain p-2" />
             </button>
           ))}
         </div>
@@ -73,7 +75,7 @@ export function ProductDetailView({
 
       <section className="rounded-[30px] bg-white/95 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.15)]">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9a89b6]">{product.category}</p>
-        <h1 className="mt-2 text-3xl font-black leading-tight tracking-tight text-[#2f2557]">{product.name}</h1>
+        <h1 className="mt-2 text-3xl font-black leading-tight tracking-tight text-[#2f2557]">{displayName}</h1>
         <p className="mt-3 text-sm leading-7 text-[#6d6790]">{product.description}</p>
 
         <div className="mt-4">

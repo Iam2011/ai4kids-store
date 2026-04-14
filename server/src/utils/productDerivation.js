@@ -1,5 +1,14 @@
 const CATALOG_SOURCE = "ai4kids_website_xlsx";
 
+const titleCorrections = {
+  dargon: "Dragon",
+  monstar: "Monster",
+  boi: "Boy",
+};
+
+const preserveUppercaseTokens = new Set(["rc", "uno", "diy", "led", "usb", "gps", "4k", "3d"]);
+const minorWords = new Set(["and", "or", "for", "with", "of", "the", "to", "in", "on"]);
+
 const normalizedCategoryMap = [
   {
     label: "Remote Control Toys",
@@ -7,11 +16,14 @@ const normalizedCategoryMap = [
       "remote",
       "rc",
       "control",
+      "car",
       "drone",
       "helicopter",
       "plane",
       "stunt car",
       "truck",
+      "drift",
+      "monster",
       "rock car",
       "off road",
       "tesla",
@@ -34,6 +46,7 @@ const normalizedCategoryMap = [
       "jelly gun",
       "smoke gun",
       "laser gun",
+      "bullet",
       "soft bullet",
       "gatling",
       "police gun",
@@ -49,6 +62,7 @@ const normalizedCategoryMap = [
       "science",
       "lab",
       "puzzle",
+      "blocks",
       "magnetic",
       "mind craft",
       "mini printer",
@@ -60,7 +74,9 @@ const normalizedCategoryMap = [
   {
     label: "Games & Indoor Toys",
     matchers: [
+      "game",
       "board game",
+      "board",
       "card game",
       "video game",
       "tv game",
@@ -77,15 +93,15 @@ const normalizedCategoryMap = [
   },
   {
     label: "Dolls & Soft Toys",
-    matchers: ["doll", "doll house", "musical doll", "rotating doll", "animal toy", "soft toy", "plush"],
+    matchers: ["doll", "barbie", "doll house", "musical doll", "rotating doll", "animal toy", "soft toy", "plush"],
   },
   {
     label: "Role Play & Kitchen Toys",
-    matchers: ["kitchen", "role play", "doctor", "household", "beauty", "tea set", "cash register"],
+    matchers: ["kitchen", "cooking", "role play", "doctor", "household", "beauty", "tea set", "cash register"],
   },
   {
     label: "Outdoor & Sports Toys",
-    matchers: ["scooter", "tricycle", "skates", "badminton", "football", "sports", "ride", "outdoor"],
+    matchers: ["scooter", "tricycle", "skates", "badminton", "football", "cricket", "sports", "ride", "outdoor"],
   },
   {
     label: "Baby & Small Toys",
@@ -129,7 +145,49 @@ const parseNumber = (value, fallback = 0) => {
 
 const unique = (values) => Array.from(new Set(values.filter(Boolean)));
 
-const normalizeCategory = (rawCategory = "", name = "") => {
+const capitalize = (value) => (value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value);
+
+const normalizeTitleWord = (word, index) => {
+  const match = String(word || "").match(/^([^A-Za-z0-9]*)([A-Za-z0-9&+-]+)([^A-Za-z0-9]*)$/);
+  if (!match) return word;
+
+  const [, prefix, core, suffix] = match;
+  const lowerCore = core.toLowerCase();
+  const upperCore = core.toUpperCase();
+  let next = core;
+
+  if (titleCorrections[lowerCore]) {
+    next = titleCorrections[lowerCore];
+  } else if (preserveUppercaseTokens.has(lowerCore)) {
+    next = upperCore;
+  } else if (/[0-9]/.test(core) || (/^[A-Z0-9-]+$/.test(core) && core.length <= 8)) {
+    next = upperCore;
+  } else if (core.includes("&")) {
+    next = core
+      .split("&")
+      .map((part) => {
+        const lowerPart = part.toLowerCase();
+        return titleCorrections[lowerPart] || capitalize(lowerPart);
+      })
+      .join("&");
+  } else if (index > 0 && minorWords.has(lowerCore)) {
+    next = lowerCore;
+  } else {
+    next = capitalize(lowerCore);
+  }
+
+  return `${prefix}${next}${suffix}`;
+};
+
+export const normalizeProductTitle = (value = "") =>
+  String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word, index) => normalizeTitleWord(word, index))
+    .join(" ");
+
+export const normalizeCategoryValue = (rawCategory = "", name = "") => {
   const haystack = `${rawCategory} ${name}`.toLowerCase();
   const match = normalizedCategoryMap.find(({ matchers }) =>
     matchers.some((matcher) => haystack.includes(matcher))
@@ -137,6 +195,9 @@ const normalizeCategory = (rawCategory = "", name = "") => {
 
   return match?.label || "Baby & Small Toys";
 };
+
+export const getCategoryMatchers = (label = "") =>
+  normalizedCategoryMap.find((entry) => entry.label === label)?.matchers || [];
 
 const deriveAgeGroup = ({ name = "", rawCategory = "", price = 0, normalizedCategory = "" }) => {
   const haystack = `${name} ${rawCategory} ${normalizedCategory}`.toLowerCase();
@@ -202,13 +263,14 @@ export const getNormalizedStorefrontCategories = () =>
   normalizedCategoryMap.map((entry) => entry.label);
 
 export const transformCatalogRow = (row, index, catalogSource = getCatalogSource()) => {
-  const name = String(row.name || "").trim();
+  const rawName = String(row.name || "").trim();
+  const name = normalizeProductTitle(rawName);
   const rawCategory = String(row.category || "").trim();
   const price = parseNumber(row.sale_price);
   const discountPercent = Math.max(0, Math.min(90, parseNumber(row.discount_percent)));
   const rating = Math.max(0, Math.min(5, parseNumber(row.rating, 4.5)));
   const reviewCount = Math.max(0, parseNumber(row.review_count, 0));
-  const normalizedCategory = normalizeCategory(rawCategory, name);
+  const normalizedCategory = normalizeCategoryValue(rawCategory, name);
   const ageGroup = deriveAgeGroup({
     name,
     rawCategory,
@@ -252,7 +314,7 @@ export const transformCatalogRow = (row, index, catalogSource = getCatalogSource
     badge: deriveBadge({ discountPercent, featured, limitedStock }),
     featured,
     tags: buildTags({
-      name,
+      name: `${rawName} ${name}`.trim(),
       rawCategory,
       normalizedCategory,
       ageGroup,
@@ -262,5 +324,20 @@ export const transformCatalogRow = (row, index, catalogSource = getCatalogSource
     reviewCount,
     catalogSource,
     isActive: true,
+  };
+};
+
+export const normalizeProductRecord = (product = {}) => {
+  const normalizedName = normalizeProductTitle(product.name || "");
+  const normalizedCategory = normalizeCategoryValue(
+    product.rawCategory || product.category || "",
+    normalizedName || product.name || ""
+  );
+
+  return {
+    ...product,
+    name: normalizedName || product.name || "",
+    category: normalizedCategory,
+    subCategory: product.subCategory || product.rawCategory || normalizedCategory,
   };
 };

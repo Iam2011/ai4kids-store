@@ -6,6 +6,7 @@ import { PageContainer } from "@/components/shared/page-container";
 import { RetryState } from "@/components/shared/retry-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { trackStoreEvent } from "@/lib/analytics/track";
+import { listingCopy } from "@/lib/constants/copy";
 import type { Product } from "@/types/product";
 import { useRouter } from "next/navigation";
 
@@ -37,7 +38,7 @@ export function ProductsClientPage({
       ) : initialProducts.length ? (
         <ProductGrid products={initialProducts} />
       ) : (
-        <EmptyState title="No toys found" text="No toys match these filters yet." />
+        <EmptyState title="No toys found" text={listingCopy.empty} />
       )}
     </PageContainer>
   );

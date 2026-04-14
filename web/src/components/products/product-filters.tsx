@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { storefrontCategories } from "@/lib/constants/categories";
+import { listingCopy } from "@/lib/constants/copy";
 import { Button } from "@/components/shared/button";
 import { trackStoreEvent } from "@/lib/analytics/track";
 
@@ -42,10 +43,10 @@ export function ProductFilters({
 
   return (
     <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9a89b6]">Toy catalog</p>
-      <h1 className="mt-1 text-3xl font-black tracking-tight text-[#40346f]">Explore toys by category</h1>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9a89b6]">{listingCopy.eyebrow}</p>
+      <h1 className="mt-1 text-3xl font-black tracking-tight text-[#40346f]">{listingCopy.title}</h1>
       <p className="mt-2 text-sm leading-6 text-[#6d6790]">
-        Find the right toy faster with search, smart filters, and top picks.
+        {listingCopy.body}
       </p>
 
       <div className="mt-4 flex flex-col gap-3">
@@ -114,7 +115,7 @@ export function ProductFilters({
         ))}
       </div>
 
-      {isPending ? <p className="mt-3 text-sm text-[#8b7fa8]">Refreshing the catalog...</p> : null}
+      {isPending ? <p className="mt-3 text-sm text-[#8b7fa8]">{listingCopy.refreshing}</p> : null}
     </section>
   );
 }

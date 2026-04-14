@@ -11,7 +11,11 @@ import { buildCsv, buildExcelXmlWorkbook } from "../utils/excelExport.js";
 import { parseCatalogCsv } from "../utils/csvCatalogParser.js";
 import { slugify } from "../utils/slugify.js";
 import { parseCatalogWorkbook } from "../utils/xlsxCatalogParser.js";
-import { transformCatalogRow } from "../utils/productDerivation.js";
+import {
+  normalizeCategoryValue,
+  normalizeProductTitle,
+  transformCatalogRow,
+} from "../utils/productDerivation.js";
 
 const confirmedOrderStatuses = ["confirmed", "processing", "shipped", "delivered"];
 
@@ -38,7 +42,7 @@ const toBoolean = (value, defaultValue = false) => {
 };
 
 const normalizeProductPayload = (payload) => {
-  const name = String(payload.name || "").trim();
+  const name = normalizeProductTitle(payload.name || "");
   const sku = String(payload.sku || "").trim();
   const price = Number(payload.price);
   const originalPrice = Number(payload.originalPrice);
@@ -46,6 +50,7 @@ const normalizeProductPayload = (payload) => {
   const rating = Number(payload.rating || 4.5);
   const reviewCount = Number(payload.reviewCount || 0);
   const rawCategory = String(payload.rawCategory || payload.category || "").trim();
+  const category = normalizeCategoryValue(rawCategory, name);
   const features = Array.isArray(payload.features)
     ? payload.features.filter(Boolean)
     : String(payload.features || "")
@@ -70,9 +75,9 @@ const normalizeProductPayload = (payload) => {
     videoUrl: String(payload.videoUrl || "").trim(),
     description: String(payload.description || "").trim(),
     shortDescription: String(payload.shortDescription || "").trim(),
-    category: String(payload.category || "").trim(),
+    category,
     rawCategory,
-    subCategory: String(payload.subCategory || rawCategory).trim(),
+    subCategory: String(payload.subCategory || rawCategory || category).trim(),
     ageGroup: payload.ageGroup,
     moq: Number(payload.moq || 1),
     stockCount: Number(payload.stockCount || 0),

@@ -6,6 +6,7 @@ import { AboutBlock } from "@/components/trust/about-block";
 import { PageContainer } from "@/components/shared/page-container";
 import { SectionHeader } from "@/components/shared/section-header";
 import { getProducts } from "@/lib/api/products";
+import { formatPrice } from "@/lib/utils/format-price";
 import type { Product } from "@/types/product";
 
 const homepageShowcaseNames = [
@@ -47,7 +48,9 @@ export default async function HomePage() {
   );
 
   const showcaseProducts = productResponses
-    .map((response, index) => resolveShowcaseProduct(response.products || [], homepageShowcaseNames[index]))
+    .map((response, index) =>
+      resolveShowcaseProduct(response.products || [], homepageShowcaseNames[index])
+    )
     .filter(Boolean) as Product[];
 
   const bestSellerProducts = showcaseProducts.slice(0, 4);
@@ -62,7 +65,9 @@ export default async function HomePage() {
       <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
         <SectionHeader title="Best Sellers" actionHref="/products?featured=true" />
         <ProductGrid products={bestSellerProducts} variant="home" />
-        <p className="mt-4 text-center text-sm text-[#8b7fa8]">COD Fee: ₹40 per Product</p>
+        <p className="mt-4 text-center text-sm text-[#8b7fa8]">
+          COD Fee: {formatPrice(40)} per product
+        </p>
       </section>
 
       <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">

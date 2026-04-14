@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/shared/button";
 import { formatPrice } from "@/lib/utils/format-price";
+import { formatProductName } from "@/lib/utils/normalize-product-text";
 import type { CartItem } from "@/types/cart";
 import type { PaymentMode } from "@/types/checkout";
 import { PaymentOptionSelector } from "./payment-option-selector";
@@ -70,7 +71,7 @@ export function CheckoutSummary({
             className="flex items-center justify-between gap-3 text-sm text-[#6d6790]"
           >
             <span className="line-clamp-1">
-              {item.name} × {item.quantity}
+              {formatProductName(item.name)} x {item.quantity}
             </span>
             <strong className="text-[#372b63]">{formatPrice(item.price * item.quantity)}</strong>
           </div>

@@ -15,7 +15,9 @@ const getRankScore = (product: Product) => {
   const featuredBoost = product.featured ? 35 : 0;
   const limitedPenalty = product.limitedStock ? -5 : 0;
 
-  return featuredBoost + discountPercent * 4 + rating * 18 + clamp(reviewCount, 0, 500) + limitedPenalty;
+  return (
+    featuredBoost + discountPercent * 4 + rating * 18 + clamp(reviewCount, 0, 500) + limitedPenalty
+  );
 };
 
 const getVisualScore = (product: Product) => {
@@ -42,7 +44,7 @@ export const buildProductBenefit = (product: Product) => {
   if (product.shortDescription) return product.shortDescription;
 
   if (Array.isArray(product.features) && product.features.length) {
-    return product.features.slice(0, 3).join(" • ");
+    return product.features.slice(0, 3).join(" | ");
   }
 
   const name = String(product.name || "").toLowerCase();
