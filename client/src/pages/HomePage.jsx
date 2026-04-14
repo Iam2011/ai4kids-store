@@ -77,8 +77,8 @@ export const HomePage = () => {
     loadHomepageProducts();
   }, []);
 
-  const bestSellerProducts = useMemo(() => showcaseProducts.slice(0, 5), [showcaseProducts]);
-  const newArrivalProducts = useMemo(() => showcaseProducts.slice(5, 10), [showcaseProducts]);
+  const bestSellerProducts = useMemo(() => showcaseProducts.slice(0, 4), [showcaseProducts]);
+  const newArrivalProducts = useMemo(() => showcaseProducts.slice(4, 10), [showcaseProducts]);
 
   const handleComboCheckout = () => {
     addCombo(viralToysCombo);
@@ -93,6 +93,9 @@ export const HomePage = () => {
             src="/assets/ui/hero-mobile-reference.png"
             alt="AI4Kids combo hero banner"
             className="hero-reference-image"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
         </button>
       </section>
@@ -124,8 +127,8 @@ export const HomePage = () => {
         </div>
 
         {loading ? (
-          <div className="home-product-rail">
-            {Array.from({ length: 3 }, (_, index) => (
+          <div className="home-product-grid" aria-label="Loading best seller toys">
+            {Array.from({ length: 4 }, (_, index) => (
               <article key={index} className="product-card home-showcase-card placeholder-card">
                 <div className="placeholder-image" />
                 <div className="placeholder-line" />
@@ -134,7 +137,7 @@ export const HomePage = () => {
             ))}
           </div>
         ) : (
-          <div className="home-product-rail">
+          <div className="home-product-grid">
             {bestSellerProducts.map((product) => (
               <ProductCard
                 key={product._id || product.slug || product.name}
@@ -157,18 +160,30 @@ export const HomePage = () => {
           <Link to="/products?sort=latest">View All</Link>
         </div>
 
-        <div className="home-product-rail">
-          {(loading ? [] : newArrivalProducts).map((product) => (
-            <ProductCard
-              key={product._id || product.slug || product.name}
-              product={{
-                ...product,
-                shortDescription: buildProductBenefit(product),
-              }}
-              variant="home"
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="home-product-grid" aria-label="Loading new arrival toys">
+            {Array.from({ length: 6 }, (_, index) => (
+              <article key={index} className="product-card home-showcase-card placeholder-card">
+                <div className="placeholder-image" />
+                <div className="placeholder-line" />
+                <div className="placeholder-line short" />
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="home-product-grid">
+            {newArrivalProducts.map((product) => (
+              <ProductCard
+                key={product._id || product.slug || product.name}
+                product={{
+                  ...product,
+                  shortDescription: buildProductBenefit(product),
+                }}
+                variant="home"
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="section-panel home-brand-banner">

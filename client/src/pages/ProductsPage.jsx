@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../api/storeApi.js";
 import { ProductCard } from "../components/ProductCard.jsx";
@@ -17,37 +17,54 @@ export const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [searchInput, setSearchInput] = useState(searchParams.get("search") || "");
+  const initialLoadDoneRef = useRef(false);
 
   const category = searchParams.get("category") || "";
   const sort = searchParams.get("sort") || "featured";
   const featured = searchParams.get("featured") || "";
+  const search = searchParams.get("search") || "";
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    setSearchInput(search);
+  }, [search]);
+
+  const fetchProducts = async () => {
+    const isInitialLoad = !initialLoadDoneRef.current;
+
+    if (isInitialLoad) {
       setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
-      try {
-        const data = await getProducts({
-          category,
-          sort,
-          featured,
-          search: searchParams.get("search") || "",
-          limit: 60,
-        });
-        setProducts(data.products || []);
-        setErrorMessage("");
-      } catch (error) {
-        setProducts([]);
-        setErrorMessage(error.response?.data?.message || "Unable to load products right now.");
-      } finally {
-        setLoading(false);
-      }
-    };
+    setErrorMessage("");
 
+    try {
+      const data = await getProducts({
+        category,
+        sort,
+        featured,
+        search,
+        limit: 60,
+      });
+      setProducts(data.products || []);
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Couldn’t load toys right now. Please try again.";
+      setErrorMessage(message);
+    } finally {
+      initialLoadDoneRef.current = true;
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProducts();
-  }, [category, sort, featured, searchParams]);
+  }, [category, sort, featured, search]);
 
   const updateFilters = (updates) => {
     const next = new URLSearchParams(searchParams);
@@ -68,16 +85,16 @@ export const ProductsPage = () => {
       <section className="section-panel listing-search-card">
         <div className="listing-header-copy">
           <span className="eyebrow">Toy catalog</span>
-          <h1>Browse by final AI4Kids categories</h1>
+          <h1>Explore toys by category</h1>
           <p className="section-copy">
-            Browse the fresh workbook-backed catalog with verified pricing, review counts, and category filters.
+            Find the right toy faster with search, smart filters, and best-seller picks.
           </p>
         </div>
 
         <div className="listing-controls">
           <input
             className="text-input"
-            placeholder="Search toy name"
+            placeholder="Search toys"
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             onKeyDown={(event) => {
@@ -131,9 +148,11 @@ export const ProductsPage = () => {
         ))}
       </div>
 
+      {refreshing && !loading ? <p className="helper-text">We’re refreshing the catalog…</p> : null}
+
       {loading ? (
         <div className="catalog-card-list">
-          {Array.from({ length: 3 }, (_, index) => (
+          {Array.from({ length: 4 }, (_, index) => (
             <article key={index} className="product-card showcase-card placeholder-card">
               <div className="placeholder-image" />
               <div className="placeholder-line" />
@@ -141,23 +160,39 @@ export const ProductsPage = () => {
             </article>
           ))}
         </div>
-      ) : errorMessage ? (
-        <div className="empty-state">{errorMessage}</div>
-      ) : products.length ? (
-        <div className="catalog-card-list">
-          {products.map((product) => (
-            <ProductCard
-              key={product._id}
-              product={{
-                ...product,
-                shortDescription: buildProductBenefit(product),
-              }}
-              variant="showcase"
-            />
-          ))}
+      ) : errorMessage && !products.length ? (
+        <div className="empty-state">
+          <p>{errorMessage}</p>
+          <button type="button" className="primary-button" onClick={fetchProducts}>
+            Retry
+          </button>
         </div>
       ) : (
-        <div className="empty-state">No products match these filters yet.</div>
+        <div className="catalog-card-list">
+          {errorMessage ? (
+            <div className="empty-state">
+              <p>{errorMessage}</p>
+              <button type="button" className="secondary-button" onClick={fetchProducts}>
+                Retry
+              </button>
+            </div>
+          ) : null}
+
+          {products.length ? (
+            products.map((product) => (
+              <ProductCard
+                key={product._id}
+                product={{
+                  ...product,
+                  shortDescription: buildProductBenefit(product),
+                }}
+                variant="showcase"
+              />
+            ))
+          ) : (
+            <div className="empty-state">No toys match these filters yet.</div>
+          )}
+        </div>
       )}
     </div>
   );

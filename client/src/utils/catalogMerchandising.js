@@ -12,7 +12,7 @@ const getRankScore = (product) => {
   const featuredBoost = product.featured ? 35 : 0;
   const limitedPenalty = product.limitedStock ? -5 : 0;
 
-  return featuredBoost + discountPercent * 4 + rating * 18 + clamp(reviewCount, 0, 500);
+  return featuredBoost + discountPercent * 4 + rating * 18 + clamp(reviewCount, 0, 500) + limitedPenalty;
 };
 
 const getVisualScore = (product) => {
@@ -50,9 +50,41 @@ export const getHeroSupportCopy = (products) => {
 
 export const buildProductBenefit = (product) => {
   if (product.shortDescription) return product.shortDescription;
+
   if (Array.isArray(product.features) && product.features.length) {
     return product.features.slice(0, 3).join(" • ");
   }
 
-  return `${product.category || "Kids"} favorite with strong gifting appeal.`;
+  const name = String(product.name || "").toLowerCase();
+  const category = String(product.category || "");
+
+  if (name.includes("drone")) return "Flying fun for outdoor playtime.";
+  if (name.includes("scooter")) return "A fun ride-on pick kids love.";
+  if (name.includes("magnetic") || name.includes("mind craft") || name.includes("mindcraft")) {
+    return "Hands-on STEM play for creative learning.";
+  }
+  if (name.includes("princess") || name.includes("doll house") || name.includes("dollhouse")) {
+    return "Imaginative role-play fun for kids.";
+  }
+  if (name.includes("gun") || name.includes("blaster") || name.includes("thunder strike")) {
+    return "Action-packed playtime blaster fun.";
+  }
+  if (
+    name.includes("rc") ||
+    name.includes("remote") ||
+    name.includes("stunt") ||
+    name.includes("rock car")
+  ) {
+    return "Remote-control fun for indoor and outdoor play.";
+  }
+
+  if (category === "Remote Control Toys") return "Remote-control fun kids love.";
+  if (category === "Gun & Blasters") return "Action play made for gifting.";
+  if (category === "Educational & Learning Toys") return "Smart play for growing minds.";
+  if (category === "Games & Indoor Toys") return "Fast-paced fun for family time.";
+  if (category === "Dolls & Soft Toys") return "Cute companions for imaginative play.";
+  if (category === "Role Play & Kitchen Toys") return "Role-play sets for creative fun.";
+  if (category === "Outdoor & Sports Toys") return "Active play made for outdoors.";
+
+  return "A fun gift pick kids love.";
 };

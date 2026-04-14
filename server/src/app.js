@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import "./config/env.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import locationRoutes from "./routes/locationRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -11,6 +12,7 @@ import productRoutes from "./routes/productRoutes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 export const app = express();
+app.set("trust proxy", true);
 
 app.use(
   cors({
@@ -31,6 +33,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/products", productRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/coupons", couponRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/location", locationRoutes);

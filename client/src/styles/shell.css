@@ -8,15 +8,16 @@
 .header-surface {
   width: min(100%, 470px);
   margin: 0 auto;
-  min-height: 58px;
+  min-height: 54px;
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: var(--space-3);
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 6px 18px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.78);
   box-shadow: 0 16px 32px rgba(111, 82, 168, 0.12);
   backdrop-filter: blur(18px);
 }
@@ -26,15 +27,18 @@
 }
 
 .brand-wordmark {
-  justify-self: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 112px;
+  z-index: 1;
 }
 
 .brand-logo-image {
-  width: 98px;
+  width: 88px;
   height: auto;
   object-fit: contain;
 }
@@ -46,15 +50,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
 }
 
 .mobile-menu-toggle,
 .header-icon-button,
 .header-cart-button {
-  background: rgba(255, 255, 255, 0.76);
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   color: var(--color-heading);
 }
 
@@ -65,7 +72,7 @@
 
 .mobile-menu-toggle span {
   display: block;
-  width: 17px;
+  width: 16px;
   height: 2px;
   border-radius: 999px;
   background: currentColor;
@@ -88,7 +95,9 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
 }
 
 .header-icon-button svg,
@@ -262,14 +271,15 @@
 }
 
 .bottom-nav-link {
-  min-height: 52px;
+  min-height: 50px;
   display: grid;
   place-items: center;
-  gap: 4px;
+  gap: 3px;
   border-radius: 18px;
   color: var(--color-text-soft);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+  line-height: 1.1;
 }
 
 .bottom-nav-link.active,

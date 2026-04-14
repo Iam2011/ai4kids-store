@@ -1,9 +1,19 @@
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Admin } from "../models/Admin.js";
 import { Order } from "../models/Order.js";
 import { Product } from "../models/Product.js";
+import { VisitEvent } from "../models/VisitEvent.js";
+import { buildCsv, buildExcelXmlWorkbook } from "../utils/excelExport.js";
+import { parseCatalogCsv } from "../utils/csvCatalogParser.js";
 import { slugify } from "../utils/slugify.js";
+import { parseCatalogWorkbook } from "../utils/xlsxCatalogParser.js";
+import { transformCatalogRow } from "../utils/productDerivation.js";
+
+const confirmedOrderStatuses = ["confirmed", "processing", "shipped", "delivered"];
 
 const signAdminToken = (admin) =>
   jwt.sign(
@@ -82,6 +92,90 @@ const normalizeProductPayload = (payload) => {
   };
 };
 
+const buildOrderExportRows = (orders) =>
+  orders.map((order) => ({
+    mongoOrderId: String(order._id),
+    orderNumber: order.orderNumber,
+    createdAt: new Date(order.createdAt).toLocaleString("en-IN"),
+    orderStatus: order.orderStatus,
+    paymentStatus: order.paymentStatus,
+    paymentMode: order.paymentMode,
+    customerName: order.customer?.name || "",
+    customerMobile: order.customer?.mobile || "",
+    customerAddress: order.customer?.address || "",
+    customerCity: order.customer?.city || "",
+    customerState: order.customer?.state || "",
+    customerPincode: order.customer?.pincode || "",
+    subtotal: order.subtotal || 0,
+    discountAmount: order.discountAmount || 0,
+    totalAmount: order.totalAmount || 0,
+    codConfirmationFee: order.codConfirmationFee || 0,
+    paidNow: order.paymentAmount || 0,
+    balanceDue: order.balanceDue || 0,
+    itemSummary: (order.items || [])
+      .map((item) =>
+        item.itemType === "combo"
+          ? `${item.name} x${item.quantity} [${(item.bundleItems || [])
+              .map((bundleItem) => bundleItem.name)
+              .join(" + ")}]`
+          : `${item.name} x${item.quantity}`
+      )
+      .join(" | "),
+  }));
+
+const parseCatalogUploadRows = async (buffer, filename) => {
+  const lowerName = String(filename || "").toLowerCase();
+
+  if (lowerName.endsWith(".csv")) {
+    return parseCatalogCsv(buffer);
+  }
+
+  if (lowerName.endsWith(".xlsx")) {
+    const tempPath = path.join(os.tmpdir(), `ai4kids-upload-${Date.now()}.xlsx`);
+    await fs.writeFile(tempPath, buffer);
+
+    try {
+      return await parseCatalogWorkbook(tempPath);
+    } finally {
+      await fs.unlink(tempPath).catch(() => {});
+    }
+  }
+
+  throw new Error("Only .xlsx and .csv files are supported.");
+};
+
+const buildImportCatalogSource = (filename) =>
+  `admin_upload:${slugify(path.basename(filename, path.extname(filename)) || "catalog")}:${Date.now()}`;
+
+const ensureUniqueSlug = (desiredSlug, usedSlugs, currentSlug = "") => {
+  const baseSlug = slugify(desiredSlug || "product");
+
+  if (currentSlug && currentSlug === baseSlug) {
+    usedSlugs.add(currentSlug);
+    return currentSlug;
+  }
+
+  let nextSlug = baseSlug;
+  let counter = 2;
+
+  while (usedSlugs.has(nextSlug) && nextSlug !== currentSlug) {
+    nextSlug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+
+  usedSlugs.add(nextSlug);
+  return nextSlug;
+};
+
+const buildDeviceType = (userAgent = "") => {
+  const normalized = String(userAgent || "").toLowerCase();
+
+  if (/(ipad|tablet)/.test(normalized)) return "tablet";
+  if (/(mobile|android|iphone)/.test(normalized)) return "mobile";
+  if (!normalized) return "unknown";
+  return "desktop";
+};
+
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -154,7 +248,199 @@ export const updateAdminProduct = async (req, res) => {
   res.json({ product });
 };
 
+export const importAdminProducts = async (req, res) => {
+  const filename = String(req.headers["x-upload-filename"] || "").trim();
+
+  if (!filename) {
+    return res.status(400).json({ message: "Upload filename is required." });
+  }
+
+  if (!Buffer.isBuffer(req.body) || !req.body.length) {
+    return res.status(400).json({ message: "Upload file is empty." });
+  }
+
+  const rows = await parseCatalogUploadRows(req.body, filename);
+  const existingProducts = await Product.find({}, { sku: 1, slug: 1 }).lean();
+  const existingBySku = new Map(existingProducts.map((product) => [product.sku, product]));
+  const usedSlugs = new Set(existingProducts.map((product) => product.slug).filter(Boolean));
+  const catalogSource = buildImportCatalogSource(filename);
+  const operations = [];
+  const errors = [];
+  let created = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  rows.forEach((row, index) => {
+    const name = String(row.name || "").trim();
+    const sku = String(row.sku || "").trim();
+    const imageUrl = String(row.main_image || row.image1 || row.imageUrl || "").trim();
+    const salePrice = String(row.sale_price || row.price || "").trim();
+
+    if (!name || !sku || !imageUrl || !salePrice) {
+      skipped += 1;
+      errors.push({
+        row: index + 2,
+        message: "Missing required name, SKU, image, or sale price.",
+      });
+      return;
+    }
+
+    const transformed = transformCatalogRow(
+      {
+        ...row,
+        sale_price: salePrice,
+        main_image: imageUrl,
+      },
+      index,
+      catalogSource
+    );
+    const existing = existingBySku.get(transformed.sku);
+    const nextSlug = ensureUniqueSlug(
+      transformed.slug || transformed.name,
+      usedSlugs,
+      existing?.slug || ""
+    );
+    const payload = {
+      ...transformed,
+      slug: nextSlug,
+      catalogSource,
+    };
+
+    if (existing) {
+      updated += 1;
+      operations.push({
+        updateOne: {
+          filter: { sku: transformed.sku },
+          update: { $set: payload },
+          upsert: false,
+        },
+      });
+    } else {
+      created += 1;
+      operations.push({
+        insertOne: {
+          document: payload,
+        },
+      });
+    }
+  });
+
+  if (operations.length) {
+    await Product.bulkWrite(operations, { ordered: false });
+  }
+
+  res.json({
+    summary: {
+      filename,
+      created,
+      updated,
+      skipped,
+      failed: errors.length,
+      totalRows: rows.length,
+    },
+    errors: errors.slice(0, 20),
+  });
+};
+
 export const getAdminOrders = async (req, res) => {
   const orders = await Order.find({}).sort({ createdAt: -1 }).lean();
   res.json({ orders });
+};
+
+export const exportAdminOrdersCsv = async (req, res) => {
+  const orders = await Order.find({
+    orderStatus: { $in: confirmedOrderStatuses },
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+  const csv = buildCsv(buildOrderExportRows(orders));
+
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", 'attachment; filename="ai4kids-confirmed-orders.csv"');
+  res.send(csv);
+};
+
+export const exportAdminOrdersExcel = async (req, res) => {
+  const orders = await Order.find({
+    orderStatus: { $in: confirmedOrderStatuses },
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+  const workbook = buildExcelXmlWorkbook(buildOrderExportRows(orders), "Confirmed Orders");
+
+  res.setHeader("Content-Type", "application/vnd.ms-excel; charset=utf-8");
+  res.setHeader("Content-Disposition", 'attachment; filename="ai4kids-confirmed-orders.xls"');
+  res.send(workbook);
+};
+
+export const getAdminVisitAnalytics = async (req, res) => {
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const [summary] = await VisitEvent.aggregate([
+    { $match: { createdAt: { $gte: since } } },
+    {
+      $facet: {
+        totals: [
+          {
+            $group: {
+              _id: null,
+              pageViews: { $sum: 1 },
+              sessionIds: { $addToSet: "$sessionId" },
+            },
+          },
+        ],
+        topCities: [
+          {
+            $group: {
+              _id: { $ifNull: ["$city", "Unknown"] },
+              sessionIds: { $addToSet: "$sessionId" },
+              pageViews: { $sum: 1 },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              city: "$_id",
+              uniqueVisitors: { $size: "$sessionIds" },
+              pageViews: 1,
+            },
+          },
+          { $sort: { uniqueVisitors: -1, pageViews: -1 } },
+          { $limit: 8 },
+        ],
+        topPages: [
+          { $group: { _id: "$path", views: { $sum: 1 } } },
+          { $sort: { views: -1 } },
+          { $limit: 8 },
+          { $project: { _id: 0, path: "$_id", views: 1 } },
+        ],
+      },
+    },
+  ]);
+
+  const recentVisits = await VisitEvent.find({ createdAt: { $gte: since } })
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .lean();
+
+  res.json({
+    metrics: {
+      pageViews: summary?.totals?.[0]?.pageViews || 0,
+      uniqueVisitors: summary?.totals?.[0]?.sessionIds?.length || 0,
+      trackingWindow: "Last 7 days",
+    },
+    topCities: summary?.topCities || [],
+    topPages: summary?.topPages || [],
+    recentVisits: recentVisits.map((visit) => ({
+      id: String(visit._id),
+      sessionId: visit.sessionId,
+      path: visit.path,
+      referrer: visit.referrer,
+      city: visit.city,
+      state: visit.state,
+      country: visit.country,
+      deviceType: visit.deviceType || buildDeviceType(visit.userAgent),
+      userAgent: visit.userAgent,
+      createdAt: visit.createdAt,
+    })),
+  });
 };

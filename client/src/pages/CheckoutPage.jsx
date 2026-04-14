@@ -254,9 +254,9 @@ export const CheckoutPage = () => {
         <div className="section-head">
           <div>
             <span className="eyebrow">Checkout</span>
-            <h1>Finish your order with a mobile-first form</h1>
+            <h1>Finish your order</h1>
             <p className="section-copy">
-              Fill in delivery details, choose your payment mode, and review the full amount before confirming.
+              Enter delivery details, review your total, and place the order securely.
             </p>
           </div>
         </div>
@@ -290,25 +290,6 @@ export const CheckoutPage = () => {
               </label>
             </div>
             {lookupState.loading || lookupState.message ? <p className="helper-text">{lookupState.message}</p> : null}
-
-            <div className="payment-choice-grid">
-              <button
-                type="button"
-                className={`payment-choice ${paymentMode === "full_payment" ? "active" : ""}`}
-                onClick={() => setPaymentMode("full_payment")}
-              >
-                <strong>Full Payment</strong>
-                <span>Pay the complete amount via Razorpay and confirm instantly.</span>
-              </button>
-              <button
-                type="button"
-                className={`payment-choice ${paymentMode === "cod_deposit" ? "active" : ""}`}
-                onClick={() => setPaymentMode("cod_deposit")}
-              >
-                <strong>Cash on Delivery</strong>
-                <span>Pay the per-product confirmation fee now and the rest on delivery.</span>
-              </button>
-            </div>
           </div>
 
           <aside className="summary-card sticky-card">
@@ -346,7 +327,7 @@ export const CheckoutPage = () => {
             ) : null}
             {paymentMode === "cod_deposit" ? (
               <p className="helper-text">
-                COD confirmation is charged at Rs 40 per product in the cart, including bundle items.
+                COD confirmation: ₹40 per item in your cart (bundles included).
               </p>
             ) : null}
             <div className="checkout-line-items">
@@ -358,6 +339,24 @@ export const CheckoutPage = () => {
               ))}
             </div>
             {errorMessage ? <p className="helper-text error-text">{errorMessage}</p> : null}
+            <div className="checkout-paymode-grid" aria-label="Select payment option">
+              <button
+                type="button"
+                className={`checkout-paymode-card ${paymentMode === "cod_deposit" ? "active" : ""}`}
+                onClick={() => setPaymentMode("cod_deposit")}
+              >
+                <strong>Cash on Delivery</strong>
+                <span>₹40 per item confirmation</span>
+              </button>
+              <button
+                type="button"
+                className={`checkout-paymode-card ${paymentMode === "full_payment" ? "active" : ""}`}
+                onClick={() => setPaymentMode("full_payment")}
+              >
+                <strong>Pay Now</strong>
+                <span>Pay full amount securely</span>
+              </button>
+            </div>
             <button className="primary-button large" onClick={handlePayment} disabled={submitting}>
               {submitting
                 ? "Opening checkout..."
@@ -373,14 +372,41 @@ export const CheckoutPage = () => {
       </section>
 
       <div className="mobile-pay-bar">
-        <div>
-          <span>{paymentMode === "cod_deposit" ? "Pay now to confirm COD" : "Pay now"}</span>
-          <strong>{formatCurrency(paymentAmount)}</strong>
-          {paymentMode === "cod_deposit" ? <small>Balance due on delivery: {formatCurrency(balanceDue)}</small> : null}
+        <div className="paymode-segment" aria-label="Select payment option">
+          <button
+            type="button"
+            className={`paymode-button ${paymentMode === "cod_deposit" ? "active" : ""}`}
+            onClick={() => setPaymentMode("cod_deposit")}
+          >
+            COD
+            <span>₹40 per item</span>
+          </button>
+          <button
+            type="button"
+            className={`paymode-button ${paymentMode === "full_payment" ? "active" : ""}`}
+            onClick={() => setPaymentMode("full_payment")}
+          >
+            Pay Now
+            <span>Secure</span>
+          </button>
         </div>
-        <button className="primary-button" onClick={handlePayment} disabled={submitting}>
-          {submitting ? "Opening..." : paymentAmount <= 0 ? "Place Order" : `Pay ${formatCurrency(paymentAmount)}`}
-        </button>
+
+        <div className="paybar-row">
+          <div>
+            <span>{paymentMode === "cod_deposit" ? "Pay now to confirm COD" : "Pay now"}</span>
+            <strong>{formatCurrency(paymentAmount)}</strong>
+            {paymentMode === "cod_deposit" ? (
+              <small>Balance due on delivery: {formatCurrency(balanceDue)}</small>
+            ) : null}
+          </div>
+          <button className="primary-button" onClick={handlePayment} disabled={submitting}>
+            {submitting
+              ? "Opening..."
+              : paymentAmount <= 0
+                ? "Place Order"
+                : `Pay ${formatCurrency(paymentAmount)}`}
+          </button>
+        </div>
       </div>
     </div>
   );

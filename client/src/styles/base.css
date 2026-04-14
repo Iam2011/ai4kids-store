@@ -72,7 +72,7 @@ textarea {
 .site-main {
   width: min(100%, 470px);
   margin: 0 auto;
-  padding: calc(var(--header-offset) + 72px) var(--space-4) var(--safe-bottom);
+  padding: calc(var(--header-offset) + 66px) var(--space-4) var(--safe-bottom);
 }
 
 .page-stack {

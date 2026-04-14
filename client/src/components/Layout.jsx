@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
+import { sendVisitEvent } from "../utils/visitTracking.js";
 
 const drawerLinks = [
   { to: "/", label: "Home", end: true },
@@ -10,7 +11,6 @@ const drawerLinks = [
   { to: "/shipping-policy", label: "Shipping Policy" },
   { to: "/privacy-policy", label: "Privacy Policy" },
   { to: "/return-refund-policy", label: "Return & Refund" },
-  { to: "/admin", label: "Admin" },
 ];
 
 const browseNavLinks = [
@@ -70,6 +70,14 @@ const BottomIcon = ({ kind }) => {
     return <CartIcon />;
   }
 
+  if (kind === "admin") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2l7 4v5c0 5.3-3.1 9.4-7 11-3.9-1.6-7-5.7-7-11V6l7-4zm0 2.3L7 7v4c0 4.2 2.3 7.5 5 8.8 2.7-1.3 5-4.6 5-8.8V7l-5-2.7zM9.5 11h5v2h-5v-2zm0 3h5v2h-5v-2z" fill="currentColor" />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 4l8 6v10h-6v-6h-4v6H4V10l8-6z" fill="currentColor" />
@@ -82,6 +90,9 @@ export const Layout = ({ children }) => {
   const navigate = useNavigate();
   const { itemCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [adminToken, setAdminToken] = useState(() =>
+    window.localStorage.getItem("ai4kids-admin-token")
+  );
 
   const isAdminRoute = location.pathname.startsWith("/admin");
   const isBrowseRoute =
@@ -90,10 +101,41 @@ export const Layout = ({ children }) => {
     location.pathname.startsWith("/products/");
   const showBottomNav = !isAdminRoute && ["/", "/products", "/cart"].includes(location.pathname);
   const showFooter = !isAdminRoute && !["/", "/products"].includes(location.pathname);
+  const bottomNavLinks = adminToken
+    ? [...browseNavLinks, { to: "/admin/dashboard", label: "Admin", icon: "admin" }]
+    : browseNavLinks;
 
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    const syncAdminToken = () => {
+      setAdminToken(window.localStorage.getItem("ai4kids-admin-token"));
+    };
+
+    window.addEventListener("storage", syncAdminToken);
+    syncAdminToken();
+
+    return () => window.removeEventListener("storage", syncAdminToken);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (isAdminRoute) {
+      return;
+    }
+
+    const visitPath = `${location.pathname}${location.search}`;
+    const previousPath =
+      window.sessionStorage.getItem("ai4kids-last-route") || document.referrer || "";
+
+    sendVisitEvent({
+      path: visitPath,
+      referrer: previousPath,
+    });
+
+    window.sessionStorage.setItem("ai4kids-last-route", visitPath);
+  }, [isAdminRoute, location.pathname, location.search]);
 
   return (
     <div className={`site-shell ${mobileMenuOpen ? "menu-open" : ""}`}>
@@ -210,7 +252,7 @@ export const Layout = ({ children }) => {
 
       {showBottomNav ? (
         <div className="mobile-bottom-nav" aria-label="Primary mobile navigation">
-          {browseNavLinks.map((link) => (
+          {bottomNavLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -221,15 +263,17 @@ export const Layout = ({ children }) => {
               <span>{link.label}</span>
             </NavLink>
           ))}
-          <button
-            type="button"
-            className="bottom-nav-link bottom-nav-action"
-            onClick={() => setMobileMenuOpen((current) => !current)}
-            aria-label="Open more menu links"
-          >
-            <span className="menu-dots" aria-hidden="true" />
-            <span>More</span>
-          </button>
+          {!adminToken ? (
+            <button
+              type="button"
+              className="bottom-nav-link bottom-nav-action"
+              onClick={() => setMobileMenuOpen((current) => !current)}
+              aria-label="Open more menu links"
+            >
+              <span className="menu-dots" aria-hidden="true" />
+              <span>More</span>
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>
