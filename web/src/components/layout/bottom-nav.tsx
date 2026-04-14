@@ -1,0 +1,85 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { bottomNavItems } from "@/lib/constants/navigation";
+import { cn } from "@/lib/utils/cn";
+
+function NavGlyph({ label }: { label: string }) {
+  if (label === "Categories") {
+    return (
+      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+        <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" />
+      </svg>
+    );
+  }
+
+  if (label === "Offers") {
+    return (
+      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+        <path d="M3 10V4h6l10 10-6 6L3 10zm5-4H5v3l8 8 3-3L8 6z" />
+      </svg>
+    );
+  }
+
+  if (label === "Cart") {
+    return (
+      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+        <path d="M7 5h13l-1.55 5.41A2 2 0 0116.53 12H9.2l-.38 1.5h9.93v2H8a2 2 0 01-1.94-2.49L7.6 7H5V5h2zm1.5 12a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm8 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5z" />
+      </svg>
+    );
+  }
+
+  if (label === "About") {
+    return (
+      <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
+      <path d="M12 4l8 6v10h-6v-6h-4v6H4V10l8-6z" />
+    </svg>
+  );
+}
+
+export function BottomNav() {
+  const pathname = usePathname();
+  const showBottomNav =
+    pathname === "/" ||
+    pathname === "/products" ||
+    pathname.startsWith("/products/") ||
+    pathname === "/cart" ||
+    pathname === "/about";
+
+  if (!showBottomNav) return null;
+
+  return (
+    <nav className="fixed inset-x-0 bottom-3 z-40 px-4 pb-[max(env(safe-area-inset-bottom),0px)] sm:px-6">
+      <div className="mx-auto flex max-w-[380px] items-center justify-between rounded-[28px] bg-white/95 px-3 py-2 shadow-[0_26px_60px_rgba(60,40,110,0.22)] backdrop-blur">
+        {bottomNavItems.map((item) => {
+          const active =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname === item.match || pathname.startsWith(item.match);
+
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className={cn(
+                "flex min-w-[68px] flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-2 py-2 text-[11px] font-semibold text-[#7c749c]",
+                active && "bg-[#f4efff] text-[#6c58f6]"
+              )}
+            >
+              <NavGlyph label={item.label} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
