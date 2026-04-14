@@ -6,6 +6,7 @@ import { QuantitySelector } from "../components/QuantitySelector.jsx";
 import { TrustMarkers } from "../components/TrustMarkers.jsx";
 import { useCart } from "../context/CartContext.jsx";
 import { formatCurrency } from "../utils/currency.js";
+import { buildProductBenefit } from "../utils/catalogMerchandising.js";
 
 export const ProductPage = () => {
   const { slug } = useParams();
@@ -48,6 +49,7 @@ export const ProductPage = () => {
 
   const { product, relatedProducts } = data;
   const gallery = product.gallery?.length ? product.gallery : [product.imageUrl];
+  const featureList = Array.isArray(product.features) && product.features.length ? product.features : [];
 
   const handleBuyNow = () => {
     addItem(product, quantity);
@@ -80,6 +82,13 @@ export const ProductPage = () => {
           <h1>{product.name}</h1>
           <p className="detail-copy">{product.description}</p>
 
+          <div className="product-proof-stack">
+            <span className="mini-label">Shopper confidence</span>
+            <p className="helper-text">
+              Rated {Number(product.rating || 4.5).toFixed(1)} by {product.reviewCount || 0} buyers.
+            </p>
+          </div>
+
           <div className="detail-price-box">
             <div>
               <strong>{formatCurrency(product.price)}</strong>
@@ -103,6 +112,17 @@ export const ProductPage = () => {
             </div>
           </div>
 
+          {featureList.length ? (
+            <div className="detail-highlights">
+              {featureList.slice(0, 3).map((feature) => (
+                <div key={feature}>
+                  <span>Feature</span>
+                  <strong>{feature}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           <div className="stock-banner">
             <strong>{product.limitedStock ? "Limited Stock" : "Sale Ending Soon"}</strong>
             <span>{product.stockCount} units currently available for this batch</span>
@@ -110,7 +130,9 @@ export const ProductPage = () => {
 
           <div className="product-proof-stack">
             <span className="mini-label">Trending now</span>
-            <p className="helper-text">Viewed by shoppers looking for gifting and fast-moving picks this week.</p>
+            <p className="helper-text">
+              {buildProductBenefit(product)}
+            </p>
           </div>
 
           <div className="detail-actions">
@@ -148,7 +170,13 @@ export const ProductPage = () => {
           </div>
           <div className="product-grid">
             {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct._id} product={relatedProduct} />
+              <ProductCard
+                key={relatedProduct._id}
+                product={{
+                  ...relatedProduct,
+                  shortDescription: buildProductBenefit(relatedProduct),
+                }}
+              />
             ))}
           </div>
         </section>

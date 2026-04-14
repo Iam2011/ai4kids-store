@@ -4,12 +4,24 @@ import { formatCurrency } from "../utils/currency.js";
 import { ProductImage } from "./ProductImage.jsx";
 
 const buildFeatureList = (product) => {
+  if (Array.isArray(product.features) && product.features.length) {
+    return product.features.slice(0, 3);
+  }
+
   if (product.category === "Outdoor") {
     return ["Stable Ride", "Strong Build", "Light & Music"];
   }
 
-  if (product.category === "Action Toys") {
+  if (product.category === "Outdoor & Sports Toys") {
+    return ["Outdoor Play", "Strong Build", "Active Fun"];
+  }
+
+  if (product.category === "Gun & Blasters") {
     return ["Action Play", "Durable", "Rechargeable"];
+  }
+
+  if (product.category === "Educational & Learning Toys") {
+    return ["Smart Play", "Creative", "Skill Building"];
   }
 
   return ["High Speed", "Shockproof", "Rechargeable"];
@@ -41,11 +53,11 @@ const FeatureIcon = ({ index }) => {
 
 const RatingStars = () => (
   <span className="rating-stars" aria-hidden="true">
-    <span>★</span>
-    <span>★</span>
-    <span>★</span>
-    <span>★</span>
-    <span className="muted">★</span>
+    <span>&#9733;</span>
+    <span>&#9733;</span>
+    <span>&#9733;</span>
+    <span>&#9733;</span>
+    <span className="muted">&#9733;</span>
   </span>
 );
 
@@ -74,7 +86,10 @@ export const ProductCard = ({
     Math.max(10, Math.round(((originalPrice - Number(product.price || 0)) / originalPrice) * 100));
   const detailPath = product.slug ? `/products/${product.slug}` : "/products";
   const canAddToCart = Boolean(product._id);
-  const badgeLabel = badgeOverride || product.badge || "NEW";
+  const badgeLabel =
+    badgeOverride ||
+    product.badge ||
+    (discountPercent >= 25 ? `${discountPercent}% OFF` : "NEW");
   const showcaseBadgeLabel =
     badgeOverride ||
     (product.featured || product.badge === "Viral" ? "BEST SELLER" : "NEW");
@@ -134,7 +149,11 @@ export const ProductCard = ({
         <span className={`showcase-top-badge ${topBadgeTone}`}>{showcaseBadgeLabel}</span>
         <span className="showcase-discount-badge">{discountPercent}% OFF</span>
         <Link to={detailPath} className="product-image-link">
-          <ProductImage src={product.imageUrl} alt={displayName} wrapperClassName="showcase-image-shell" />
+          <ProductImage
+            src={product.imageUrl}
+            alt={displayName}
+            wrapperClassName="showcase-image-shell"
+          />
         </Link>
       </div>
 

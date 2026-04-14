@@ -30,14 +30,26 @@ const toBoolean = (value, defaultValue = false) => {
 const normalizeProductPayload = (payload) => {
   const name = String(payload.name || "").trim();
   const sku = String(payload.sku || "").trim();
+  const price = Number(payload.price);
+  const originalPrice = Number(payload.originalPrice);
+  const discountPercent = Number(payload.discountPercent);
+  const rating = Number(payload.rating || 4.5);
+  const reviewCount = Number(payload.reviewCount || 0);
+  const rawCategory = String(payload.rawCategory || payload.category || "").trim();
+  const features = Array.isArray(payload.features)
+    ? payload.features.filter(Boolean)
+    : String(payload.features || "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean);
 
   return {
     sku,
     name,
     slug: String(payload.slug || slugify(name)).trim(),
-    price: Number(payload.price),
-    originalPrice: Number(payload.originalPrice),
-    discountPercent: Number(payload.discountPercent),
+    price,
+    originalPrice: Number.isFinite(originalPrice) && originalPrice >= price ? originalPrice : price,
+    discountPercent,
     imageUrl: String(payload.imageUrl || "").trim(),
     gallery: Array.isArray(payload.gallery)
       ? payload.gallery.filter(Boolean)
@@ -48,20 +60,24 @@ const normalizeProductPayload = (payload) => {
     videoUrl: String(payload.videoUrl || "").trim(),
     description: String(payload.description || "").trim(),
     shortDescription: String(payload.shortDescription || "").trim(),
-    category: payload.category,
-    subCategory: String(payload.subCategory || "").trim(),
+    category: String(payload.category || "").trim(),
+    rawCategory,
+    subCategory: String(payload.subCategory || rawCategory).trim(),
     ageGroup: payload.ageGroup,
     moq: Number(payload.moq || 1),
     stockCount: Number(payload.stockCount || 0),
     limitedStock: toBoolean(payload.limitedStock, false),
     badge: String(payload.badge || "").trim(),
     featured: toBoolean(payload.featured, false),
+    features,
     tags: Array.isArray(payload.tags)
       ? payload.tags.filter(Boolean)
       : String(payload.tags || "")
           .split(",")
           .map((tag) => tag.trim())
           .filter(Boolean),
+    rating,
+    reviewCount,
     isActive: toBoolean(payload.isActive, true),
   };
 };

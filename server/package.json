@@ -19,7 +19,8 @@
     "mongodb-memory-server": "^11.0.1",
     "mongoose": "^8.18.0",
     "morgan": "^1.10.0",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "yauzl": "^3.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

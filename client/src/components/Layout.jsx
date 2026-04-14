@@ -196,8 +196,8 @@ export const Layout = ({ children }) => {
             <div>
               <h4>Shop</h4>
               <p><Link to="/products?featured=true">Best Sellers</Link></p>
-              <p><Link to="/products?category=Remote%20Toys">Cars</Link></p>
-              <p><Link to="/products?category=Outdoor">Scooters</Link></p>
+              <p><Link to="/products?category=Remote%20Control%20Toys">Cars / RC</Link></p>
+              <p><Link to="/products?category=Outdoor%20%26%20Sports%20Toys">Outdoor</Link></p>
             </div>
             <div>
               <h4>Policies</h4>

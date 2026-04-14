@@ -2,15 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getProducts } from "../api/storeApi.js";
 import { ProductCard } from "../components/ProductCard.jsx";
-
-const categoryOptions = [
-  "Remote Toys",
-  "Action Toys",
-  "Outdoor",
-  "Educational",
-  "Kids Toys",
-  "Board Games",
-];
+import { storefrontCategories } from "../constants/storefrontCategories.js";
+import { buildProductBenefit } from "../utils/catalogMerchandising.js";
 
 const sortOptions = [
   { value: "featured", label: "Featured" },
@@ -75,9 +68,9 @@ export const ProductsPage = () => {
       <section className="section-panel listing-search-card">
         <div className="listing-header-copy">
           <span className="eyebrow">Toy catalog</span>
-          <h1>Best Sellers and trending picks</h1>
+          <h1>Browse by final AI4Kids categories</h1>
           <p className="section-copy">
-            Browse mobile-friendly product cards with clear pricing, reviews, and quick buy actions.
+            Browse the fresh workbook-backed catalog with verified pricing, review counts, and category filters.
           </p>
         </div>
 
@@ -126,7 +119,7 @@ export const ProductsPage = () => {
         >
           Best Sellers
         </button>
-        {categoryOptions.map((option) => (
+        {storefrontCategories.map((option) => (
           <button
             key={option}
             type="button"
@@ -153,7 +146,14 @@ export const ProductsPage = () => {
       ) : products.length ? (
         <div className="catalog-card-list">
           {products.map((product) => (
-            <ProductCard key={product._id} product={product} variant="showcase" />
+            <ProductCard
+              key={product._id}
+              product={{
+                ...product,
+                shortDescription: buildProductBenefit(product),
+              }}
+              variant="showcase"
+            />
           ))}
         </div>
       ) : (

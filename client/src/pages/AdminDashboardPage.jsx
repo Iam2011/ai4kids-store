@@ -7,6 +7,7 @@ import {
   getAdminSummary,
   updateAdminProduct,
 } from "../api/storeApi.js";
+import { storefrontCategories } from "../constants/storefrontCategories.js";
 import { formatCurrency } from "../utils/currency.js";
 
 const emptyProduct = {
@@ -21,7 +22,8 @@ const emptyProduct = {
   videoUrl: "",
   description: "",
   shortDescription: "",
-  category: "Educational",
+  category: "Educational & Learning Toys",
+  rawCategory: "",
   subCategory: "",
   ageGroup: "3-5",
   moq: 1,
@@ -29,6 +31,9 @@ const emptyProduct = {
   limitedStock: false,
   badge: "",
   featured: false,
+  features: "",
+  rating: 4.5,
+  reviewCount: 0,
   tags: "",
   isActive: true,
 };
@@ -81,6 +86,7 @@ export const AdminDashboardPage = () => {
     setForm({
       ...product,
       gallery: (product.gallery || []).join(", "),
+      features: (product.features || []).join(", "),
       tags: (product.tags || []).join(", "),
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -91,6 +97,10 @@ export const AdminDashboardPage = () => {
     const payload = {
       ...form,
       gallery: String(form.gallery || "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
+      features: String(form.features || "")
         .split(",")
         .map((entry) => entry.trim())
         .filter(Boolean),
@@ -173,14 +183,14 @@ export const AdminDashboardPage = () => {
           <input className="text-input" name="price" placeholder="Price" type="number" value={form.price} onChange={handleChange} />
           <input className="text-input" name="originalPrice" placeholder="Original price" type="number" value={form.originalPrice} onChange={handleChange} />
           <input className="text-input" name="discountPercent" placeholder="Discount %" type="number" value={form.discountPercent} onChange={handleChange} />
+          <input className="text-input" name="rawCategory" placeholder="Raw category" value={form.rawCategory} onChange={handleChange} />
           <input className="text-input" name="subCategory" placeholder="Sub-category" value={form.subCategory} onChange={handleChange} />
           <select className="text-input" name="category" value={form.category} onChange={handleChange}>
-            <option value="Remote Toys">Remote Toys</option>
-            <option value="Board Games">Board Games</option>
-            <option value="Educational">Educational</option>
-            <option value="Outdoor">Outdoor</option>
-            <option value="Action Toys">Action Toys</option>
-            <option value="Kids Toys">Kids Toys</option>
+            {storefrontCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
           </select>
           <select className="text-input" name="ageGroup" value={form.ageGroup} onChange={handleChange}>
             <option value="0-2">0-2</option>
@@ -190,9 +200,12 @@ export const AdminDashboardPage = () => {
           </select>
           <input className="text-input" name="moq" placeholder="MOQ" type="number" value={form.moq} onChange={handleChange} />
           <input className="text-input" name="stockCount" placeholder="Stock" type="number" value={form.stockCount} onChange={handleChange} />
+          <input className="text-input" name="rating" placeholder="Rating" type="number" step="0.1" value={form.rating} onChange={handleChange} />
+          <input className="text-input" name="reviewCount" placeholder="Review count" type="number" value={form.reviewCount} onChange={handleChange} />
           <input className="text-input" name="badge" placeholder="Badge" value={form.badge} onChange={handleChange} />
           <input className="text-input" name="shortDescription" placeholder="Short description" value={form.shortDescription} onChange={handleChange} />
           <textarea className="text-input textarea admin-wide" name="description" placeholder="Description" value={form.description} onChange={handleChange} />
+          <input className="text-input admin-wide" name="features" placeholder="Features, comma separated" value={form.features} onChange={handleChange} />
           <input className="text-input admin-wide" name="tags" placeholder="Tags, comma separated" value={form.tags} onChange={handleChange} />
           <label className="check-row">
             <input type="checkbox" name="featured" checked={form.featured} onChange={handleChange} />

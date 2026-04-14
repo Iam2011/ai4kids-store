@@ -7,20 +7,11 @@
   gap: var(--space-4);
 }
 
-.search-panel,
-.home-tabs-panel,
 .home-rail-card,
 .why-card-panel,
 .listing-search-card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 244, 248, 0.92));
 }
-
-.search-panel {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.home-filter-row,
 .listing-control-row {
   display: flex;
   gap: 10px;
@@ -28,6 +19,8 @@
 }
 
 .hero-reference-card {
+  display: grid;
+  gap: 10px;
   border-radius: 28px;
   overflow: hidden;
   box-shadow: 0 24px 46px rgba(105, 81, 163, 0.14);
@@ -45,24 +38,68 @@
   display: block;
 }
 
-.home-tabs-panel {
+.hero-support-strip {
   display: grid;
+  gap: 6px;
+  padding: 0 18px 18px;
+}
+
+.hero-support-strip p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: var(--text-sm);
+}
+
+.category-showcase-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.category-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
-.home-tabs-row {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
+.category-showcase-card {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 8px 12px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 242, 255, 0.94));
+  border: 1px solid rgba(227, 220, 243, 0.92);
+  box-shadow: 0 14px 28px rgba(112, 88, 165, 0.1);
+  text-align: center;
 }
 
-.home-tabs-row::-webkit-scrollbar {
-  display: none;
+.category-showcase-card strong {
+  color: var(--color-heading);
+  font-size: 12px;
+  line-height: 1.2;
 }
 
-.app-chip-row {
-  flex-wrap: nowrap;
+.category-sprite {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background-image: url("/assets/ui/category-sprite-reference.png");
+  background-repeat: no-repeat;
+  background-size: 400% 200%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 10px 22px rgba(255, 165, 110, 0.18);
 }
+
+.category-sprite-cars { background-position: 0% 0%; }
+.category-sprite-guns { background-position: 33.33% 0%; }
+.category-sprite-learning { background-position: 66.66% 0%; }
+.category-sprite-games { background-position: 100% 0%; }
+.category-sprite-dolls { background-position: 0% 100%; }
+.category-sprite-kitchen { background-position: 33.33% 100%; }
+.category-sprite-sports { background-position: 66.66% 100%; }
+.category-sprite-more { background-position: 100% 100%; }
 
 .home-rail-card {
   display: grid;
@@ -353,8 +390,6 @@
 
 @media (min-width: 768px) {
   .hero-reference-card,
-  .search-panel,
-  .home-tabs-panel,
   .home-rail-card,
   .why-card-panel,
   .listing-search-card {
@@ -372,6 +407,10 @@
 
   .catalog-card-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .category-showcase-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 
   .product-detail-panel,

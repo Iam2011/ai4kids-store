@@ -123,7 +123,7 @@
 }
 
 .category-dropdown-pill::after {
-  content: "▾";
+  content: "\25BE";
   margin-left: 8px;
   font-size: 11px;
 }
