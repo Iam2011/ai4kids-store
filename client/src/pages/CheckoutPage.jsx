@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createPaymentOrder,
@@ -11,6 +11,7 @@ import { useCart } from "../context/CartContext.jsx";
 import { formatCurrency } from "../utils/currency.js";
 import { loadRazorpayScript } from "../utils/payment.js";
 import { calculateCodConfirmationFee } from "../utils/pricing.js";
+import { getAnalyticsSnapshotForOrder, trackStoreEvent } from "../utils/visitTracking.js";
 
 const initialForm = {
   name: "",
@@ -22,7 +23,8 @@ const initialForm = {
 };
 
 const generateCheckoutToken = () =>
-  globalThis.crypto?.randomUUID?.() || `checkout_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  globalThis.crypto?.randomUUID?.() ||
+  `checkout_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 
 const validateCheckoutForm = (form) => {
   if (String(form.name || "").trim().length < 2) {
@@ -58,6 +60,8 @@ export const CheckoutPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [lastLookupPincode, setLastLookupPincode] = useState("");
   const [checkoutToken, setCheckoutToken] = useState(generateCheckoutToken);
+  const checkoutTrackedRef = useRef(false);
+  const paymentSelectionTrackedRef = useRef(false);
 
   const couponAllowedForMode = coupon
     ? paymentMode === "cod_deposit"
@@ -100,6 +104,29 @@ export const CheckoutPage = () => {
     fetchPincode();
   }, [form.pincode, lastLookupPincode]);
 
+  useEffect(() => {
+    if (!items.length || checkoutTrackedRef.current) {
+      return;
+    }
+
+    checkoutTrackedRef.current = true;
+    trackStoreEvent({
+      eventType: "checkout_started",
+    }).catch(() => {});
+  }, [items.length]);
+
+  useEffect(() => {
+    if (!items.length || paymentSelectionTrackedRef.current) {
+      return;
+    }
+
+    paymentSelectionTrackedRef.current = true;
+    trackStoreEvent({
+      eventType: "payment_option_selected",
+      paymentOption: paymentMode === "cod_deposit" ? "Cash on Delivery" : "Pay Now",
+    }).catch(() => {});
+  }, [items.length, paymentMode]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({
@@ -112,6 +139,14 @@ export const CheckoutPage = () => {
         setLastLookupPincode("");
       }
     }
+  };
+
+  const selectPaymentMode = (nextMode) => {
+    setPaymentMode(nextMode);
+    trackStoreEvent({
+      eventType: "payment_option_selected",
+      paymentOption: nextMode === "cod_deposit" ? "Cash on Delivery" : "Pay Now",
+    }).catch(() => {});
   };
 
   const handlePayment = async () => {
@@ -141,6 +176,7 @@ export const CheckoutPage = () => {
         couponCode: effectiveCouponCode,
         paymentMode,
         checkoutToken,
+        analyticsSnapshot: getAnalyticsSnapshotForOrder(),
       });
 
       if (order.paymentGateway === "mock") {
@@ -327,7 +363,7 @@ export const CheckoutPage = () => {
             ) : null}
             {paymentMode === "cod_deposit" ? (
               <p className="helper-text">
-                COD confirmation: ₹40 per item in your cart (bundles included).
+                COD confirmation: Rs 40 per item in your cart (bundles included).
               </p>
             ) : null}
             <div className="checkout-line-items">
@@ -343,15 +379,15 @@ export const CheckoutPage = () => {
               <button
                 type="button"
                 className={`checkout-paymode-card ${paymentMode === "cod_deposit" ? "active" : ""}`}
-                onClick={() => setPaymentMode("cod_deposit")}
+                onClick={() => selectPaymentMode("cod_deposit")}
               >
                 <strong>Cash on Delivery</strong>
-                <span>₹40 per item confirmation</span>
+                <span>Rs 40 per item confirmation</span>
               </button>
               <button
                 type="button"
                 className={`checkout-paymode-card ${paymentMode === "full_payment" ? "active" : ""}`}
-                onClick={() => setPaymentMode("full_payment")}
+                onClick={() => selectPaymentMode("full_payment")}
               >
                 <strong>Pay Now</strong>
                 <span>Pay full amount securely</span>
@@ -376,15 +412,15 @@ export const CheckoutPage = () => {
           <button
             type="button"
             className={`paymode-button ${paymentMode === "cod_deposit" ? "active" : ""}`}
-            onClick={() => setPaymentMode("cod_deposit")}
+            onClick={() => selectPaymentMode("cod_deposit")}
           >
             COD
-            <span>₹40 per item</span>
+            <span>Rs 40 per item</span>
           </button>
           <button
             type="button"
             className={`paymode-button ${paymentMode === "full_payment" ? "active" : ""}`}
-            onClick={() => setPaymentMode("full_payment")}
+            onClick={() => selectPaymentMode("full_payment")}
           >
             Pay Now
             <span>Secure</span>

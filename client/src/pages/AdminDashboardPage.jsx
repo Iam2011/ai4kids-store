@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createAdminProduct,
@@ -43,6 +43,32 @@ const emptyProduct = {
   isActive: true,
 };
 
+const analyticsInitialState = {
+  filters: { range: "7d", startDate: "", endDate: "", label: "Last 7 Days" },
+  overview: null,
+  trafficSources: [],
+  conversionFunnel: [],
+  productPerformance: {
+    mostViewed: [],
+    mostClicked: [],
+    mostAddedToCart: [],
+    highestConverting: [],
+  },
+  categoryPerformance: [],
+  campaignPerformance: [],
+  geoInsight: { rows: [], note: "" },
+  topLandingPages: [],
+  recentVisitorJourneys: [],
+  technicalDebug: [],
+};
+
+const dateFilterOptions = [
+  { value: "today", label: "Today" },
+  { value: "7d", label: "Last 7 Days" },
+  { value: "30d", label: "Last 30 Days" },
+  { value: "custom", label: "Custom Range" },
+];
+
 const downloadBlobFile = ({ blob, filename }) => {
   const url = window.URL.createObjectURL(blob);
   const anchor = document.createElement("a");
@@ -54,16 +80,50 @@ const downloadBlobFile = ({ blob, filename }) => {
   window.URL.revokeObjectURL(url);
 };
 
-const formatVisitLocation = (visit) =>
-  [visit.city, visit.state, visit.country].filter(Boolean).join(", ") || "Unknown";
+const TableCard = ({ title, subtitle = "", emptyText, children, actions = null }) => (
+  <section className="section-panel analytics-card">
+    <div className="section-head">
+      <div>
+        <h3>{title}</h3>
+        {subtitle ? <p className="section-copy">{subtitle}</p> : null}
+      </div>
+      {actions}
+    </div>
+    {children || <p className="helper-text">{emptyText}</p>}
+  </section>
+);
 
-const formatTopCitySummary = (analytics) => {
-  const topCity = analytics.topCities?.[0];
-  if (!topCity) {
-    return "Start browsing the storefront to capture city-level visitor activity.";
+const AnalyticsTable = ({ columns, rows, renderRow, emptyText = "No data yet." }) => {
+  if (!rows.length) {
+    return <p className="helper-text">{emptyText}</p>;
   }
 
-  return `${topCity.uniqueVisitors} visitors browsed from ${topCity.city}.`;
+  return (
+    <div className="analytics-table">
+      <div className="analytics-table-head">
+        {columns.map((column) => (
+          <span key={column}>{column}</span>
+        ))}
+      </div>
+      <div className="analytics-table-body">
+        {rows.map((row, index) => (
+          <div
+            key={
+              row.id ||
+              row.sourceLabel ||
+              row.productName ||
+              row.categoryLabel ||
+              row.campaignLabel ||
+              `${index}`
+            }
+            className="analytics-table-row"
+          >
+            {renderRow(row)}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export const AdminDashboardPage = () => {
@@ -72,29 +132,36 @@ export const AdminDashboardPage = () => {
   const [summary, setSummary] = useState(null);
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
-  const [analytics, setAnalytics] = useState({
-    metrics: null,
-    topCities: [],
-    topPages: [],
-    recentVisits: [],
-  });
+  const [analytics, setAnalytics] = useState(analyticsInitialState);
+  const [analyticsRange, setAnalyticsRange] = useState("7d");
+  const [customRange, setCustomRange] = useState({ startDate: "", endDate: "" });
   const [form, setForm] = useState(emptyProduct);
   const [editingId, setEditingId] = useState("");
   const [notice, setNotice] = useState("");
   const [uploadFile, setUploadFile] = useState(null);
   const [importSummary, setImportSummary] = useState(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState("");
   const [exportingFormat, setExportingFormat] = useState("");
   const [importingCatalog, setImportingCatalog] = useState(false);
 
-  const loadDashboard = async () => {
+  const analyticsParams = useMemo(
+    () => ({
+      range: analyticsRange,
+      startDate: analyticsRange === "custom" ? customRange.startDate : "",
+      endDate: analyticsRange === "custom" ? customRange.endDate : "",
+    }),
+    [analyticsRange, customRange.endDate, customRange.startDate]
+  );
+
+  const loadAdminBasics = async () => {
     try {
       setDashboardLoading(true);
-      const [summaryData, ordersData, productsData, analyticsData] = await Promise.all([
+      const [summaryData, ordersData, productsData] = await Promise.all([
         getAdminSummary(token),
         getAdminOrders(token),
         getAdminProducts(token),
-        getAdminVisitAnalytics(token),
       ]);
 
       setSummary(summaryData.metrics);
@@ -102,7 +169,6 @@ export const AdminDashboardPage = () => {
         ordersData.orders.filter((order) => confirmedOrderStatuses.has(order.orderStatus))
       );
       setProducts(productsData.products);
-      setAnalytics(analyticsData);
     } catch (error) {
       if (error.response?.status === 401) {
         window.localStorage.removeItem("ai4kids-admin-token");
@@ -115,9 +181,31 @@ export const AdminDashboardPage = () => {
     }
   };
 
+  const loadAnalytics = async () => {
+    try {
+      setAnalyticsLoading(true);
+      setAnalyticsError("");
+      const analyticsData = await getAdminVisitAnalytics(token, analyticsParams);
+      setAnalytics(analyticsData);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        window.localStorage.removeItem("ai4kids-admin-token");
+        navigate("/admin", { replace: true });
+        return;
+      }
+      setAnalyticsError(error.response?.data?.message || "Unable to load analytics right now.");
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    loadDashboard();
+    loadAdminBasics();
   }, []);
+
+  useEffect(() => {
+    loadAnalytics();
+  }, [analyticsParams.range, analyticsParams.startDate, analyticsParams.endDate]);
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
@@ -167,7 +255,7 @@ export const AdminDashboardPage = () => {
 
       setForm(emptyProduct);
       setEditingId("");
-      await loadDashboard();
+      await loadAdminBasics();
     } catch (error) {
       setNotice(error.response?.data?.message || "Unable to save product.");
     }
@@ -191,7 +279,7 @@ export const AdminDashboardPage = () => {
         `Catalog imported: ${nextImportSummary.created} created, ${nextImportSummary.updated} updated, ${nextImportSummary.skipped} skipped.`
       );
       setUploadFile(null);
-      await loadDashboard();
+      await loadAdminBasics();
     } catch (error) {
       setNotice(error.response?.data?.message || "Unable to import catalog.");
     } finally {
@@ -223,7 +311,10 @@ export const AdminDashboardPage = () => {
         <div className="section-head">
           <div>
             <span className="eyebrow">Admin</span>
-            <h1>Dashboard</h1>
+            <h1>Decision Dashboard</h1>
+            <p className="section-copy">
+              Understand traffic quality, product intent, campaign performance, and where shoppers drop before they buy.
+            </p>
           </div>
           <button className="secondary-button" onClick={handleLogout}>
             Logout
@@ -250,6 +341,386 @@ export const AdminDashboardPage = () => {
         </div>
       </section>
 
+      <section className="section-panel analytics-filter-panel">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">Analytics window</span>
+            <h2>{analytics.filters?.label || "Last 7 Days"}</h2>
+          </div>
+          {analyticsLoading ? <span className="helper-text">Refreshing analytics...</span> : null}
+        </div>
+
+        <div className="chip-row">
+          {dateFilterOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={`filter-chip ${analyticsRange === option.value ? "active" : ""}`}
+              onClick={() => setAnalyticsRange(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+        {analyticsRange === "custom" ? (
+          <div className="analytics-date-grid">
+            <label className="field-stack">
+              <span>Start date</span>
+              <input
+                className="text-input"
+                type="date"
+                value={customRange.startDate}
+                onChange={(event) =>
+                  setCustomRange((current) => ({ ...current, startDate: event.target.value }))
+                }
+              />
+            </label>
+            <label className="field-stack">
+              <span>End date</span>
+              <input
+                className="text-input"
+                type="date"
+                value={customRange.endDate}
+                onChange={(event) =>
+                  setCustomRange((current) => ({ ...current, endDate: event.target.value }))
+                }
+              />
+            </label>
+          </div>
+        ) : null}
+      </section>
+
+      {analyticsError ? (
+        <section className="section-panel">
+          <div className="empty-state">
+            <p>{analyticsError}</p>
+            <button type="button" className="primary-button" onClick={loadAnalytics}>
+              Retry Analytics
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="section-panel">
+        <div className="section-head">
+          <div>
+            <span className="eyebrow">Traffic Overview</span>
+            <h2>What traffic came and what converted</h2>
+          </div>
+        </div>
+        <div className="metric-grid analytics-overview-grid">
+          {analyticsLoading ? (
+            Array.from({ length: 8 }, (_, index) => (
+              <div key={index} className="metric-card analytics-skeleton-card" />
+            ))
+          ) : (
+            <>
+              <div className="metric-card">
+                <span>Visitors</span>
+                <strong>{analytics.overview?.visitors || 0}</strong>
+              </div>
+              <div className="metric-card">
+                <span>Sessions</span>
+                <strong>{analytics.overview?.sessions || 0}</strong>
+              </div>
+              <div className="metric-card">
+                <span>Page Views</span>
+                <strong>{analytics.overview?.pageViews || 0}</strong>
+              </div>
+              <div className="metric-card">
+                <span>Orders</span>
+                <strong>{analytics.overview?.orders || 0}</strong>
+              </div>
+              <div className="metric-card">
+                <span>Conversion Rate</span>
+                <strong>{analytics.overview?.conversionRate || 0}%</strong>
+              </div>
+              <div className="metric-card">
+                <span>Revenue</span>
+                <strong>{formatCurrency(analytics.overview?.revenue || 0)}</strong>
+              </div>
+              <div className="metric-card">
+                <span>Hero Clicks</span>
+                <strong>{analytics.overview?.heroClicks || 0}</strong>
+              </div>
+              <div className="metric-card">
+                <span>Search Usage</span>
+                <strong>{analytics.overview?.searchUsage || 0}</strong>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      <TableCard
+        title="Traffic Sources"
+        subtitle="See which channels bring visits, checkout starts, orders, and revenue."
+      >
+        {analyticsLoading ? (
+          <div className="analytics-skeleton-table" />
+        ) : (
+          <AnalyticsTable
+            columns={["Source", "Visits", "Page Views", "Checkout", "Orders", "Conv.", "Revenue"]}
+            rows={analytics.trafficSources}
+            emptyText="No traffic sources recorded yet."
+            renderRow={(row) => (
+              <>
+                <span>{row.sourceLabel}</span>
+                <span>{row.visits}</span>
+                <span>{row.pageViews}</span>
+                <span>{row.checkoutStarted}</span>
+                <span>{row.orders}</span>
+                <span>{row.conversionRate}%</span>
+                <span>{formatCurrency(row.revenue)}</span>
+              </>
+            )}
+          />
+        )}
+      </TableCard>
+
+      <div className="admin-analytics-grid">
+        <TableCard
+          title="Conversion Funnel"
+          subtitle="See where shoppers move forward and where they drop."
+        >
+          {analyticsLoading ? (
+            <div className="analytics-skeleton-table" />
+          ) : (
+            <AnalyticsTable
+              columns={["Stage", "Count", "Drop-off"]}
+              rows={analytics.conversionFunnel}
+              emptyText="Funnel data will appear after traffic and checkout activity."
+              renderRow={(row) => (
+                <>
+                  <span>{row.label}</span>
+                  <span>{row.count}</span>
+                  <span>{row.dropOffRate}%</span>
+                </>
+              )}
+            />
+          )}
+        </TableCard>
+
+        <TableCard
+          title="Top Landing Pages"
+          subtitle="Understand which first-touch pages bring sessions in."
+        >
+          {analyticsLoading ? (
+            <div className="analytics-skeleton-table" />
+          ) : (
+            <AnalyticsTable
+              columns={["Landing Label", "Visits"]}
+              rows={analytics.topLandingPages}
+              emptyText="Landing page data will appear once visitors enter the storefront."
+              renderRow={(row) => (
+                <>
+                  <span>{row.label}</span>
+                  <span>{row.visits}</span>
+                </>
+              )}
+            />
+          )}
+        </TableCard>
+      </div>
+
+      <div className="admin-analytics-grid">
+        <TableCard title="Product Performance" subtitle="Find which products draw attention and convert.">
+          {analyticsLoading ? (
+            <div className="analytics-tab-stack">
+              <div className="analytics-skeleton-table" />
+            </div>
+          ) : (
+            <div className="analytics-tab-stack">
+              <div>
+                <h4>Most Viewed</h4>
+                <AnalyticsTable
+                  columns={["Product", "Views", "Conv."]}
+                  rows={analytics.productPerformance?.mostViewed || []}
+                  emptyText="No product view data yet."
+                  renderRow={(row) => (
+                    <>
+                      <span>{row.productName}</span>
+                      <span>{row.views}</span>
+                      <span>{row.conversionRate}%</span>
+                    </>
+                  )}
+                />
+              </div>
+              <div>
+                <h4>Most Clicked</h4>
+                <AnalyticsTable
+                  columns={["Product", "Clicks"]}
+                  rows={analytics.productPerformance?.mostClicked || []}
+                  emptyText="No product click data yet."
+                  renderRow={(row) => (
+                    <>
+                      <span>{row.productName}</span>
+                      <span>{row.clicks}</span>
+                    </>
+                  )}
+                />
+              </div>
+              <div>
+                <h4>Most Added to Cart</h4>
+                <AnalyticsTable
+                  columns={["Product", "Add to Cart", "Conv."]}
+                  rows={analytics.productPerformance?.mostAddedToCart || []}
+                  emptyText="No add-to-cart data yet."
+                  renderRow={(row) => (
+                    <>
+                      <span>{row.productName}</span>
+                      <span>{row.addToCart}</span>
+                      <span>{row.conversionRate}%</span>
+                    </>
+                  )}
+                />
+              </div>
+              <div>
+                <h4>Highest Converting</h4>
+                <AnalyticsTable
+                  columns={["Product", "Orders", "Conv."]}
+                  rows={analytics.productPerformance?.highestConverting || []}
+                  emptyText="No conversion data yet."
+                  renderRow={(row) => (
+                    <>
+                      <span>{row.productName}</span>
+                      <span>{row.orders}</span>
+                      <span>{row.conversionRate}%</span>
+                    </>
+                  )}
+                />
+              </div>
+            </div>
+          )}
+        </TableCard>
+
+        <TableCard title="Category Performance" subtitle="See which categories attract clicks and convert into orders.">
+          {analyticsLoading ? (
+            <div className="analytics-skeleton-table" />
+          ) : (
+            <AnalyticsTable
+              columns={["Category", "Clicks", "Orders", "Conv."]}
+              rows={analytics.categoryPerformance}
+              emptyText="No category click data yet."
+              renderRow={(row) => (
+                <>
+                  <span>{row.categoryLabel}</span>
+                  <span>{row.clicks}</span>
+                  <span>{row.orders}</span>
+                  <span>{row.conversionRate}%</span>
+                </>
+              )}
+            />
+          )}
+        </TableCard>
+      </div>
+
+      <div className="admin-analytics-grid">
+        <TableCard title="Campaign Performance" subtitle="Identify which campaigns create sessions, orders, and revenue.">
+          {analyticsLoading ? (
+            <div className="analytics-skeleton-table" />
+          ) : (
+            <AnalyticsTable
+              columns={["Campaign", "Source", "Sessions", "Orders", "Conv.", "Revenue"]}
+              rows={analytics.campaignPerformance}
+              emptyText="No campaign-tagged traffic yet."
+              renderRow={(row) => (
+                <>
+                  <span>{row.campaignLabel}</span>
+                  <span>{row.sourceLabel}</span>
+                  <span>{row.sessions}</span>
+                  <span>{row.orders}</span>
+                  <span>{row.conversionRate}%</span>
+                  <span>{formatCurrency(row.revenue)}</span>
+                </>
+              )}
+            />
+          )}
+        </TableCard>
+
+        <TableCard title="Geo Insight" subtitle="Know where interested visitors are browsing from.">
+          {analyticsLoading ? (
+            <div className="analytics-skeleton-table" />
+          ) : (
+            <>
+              {analytics.geoInsight?.note ? (
+                <p className="helper-text">{analytics.geoInsight.note}</p>
+              ) : null}
+              <AnalyticsTable
+                columns={["Location", "Sessions"]}
+                rows={analytics.geoInsight?.rows || []}
+                emptyText="No geo data captured yet."
+                renderRow={(row) => (
+                  <>
+                    <span>{row.label}</span>
+                    <span>{row.sessions}</span>
+                  </>
+                )}
+              />
+            </>
+          )}
+        </TableCard>
+      </div>
+
+      <TableCard
+        title="Recent Visitor Journeys"
+        subtitle="Review real session paths to understand interest and drop-off behavior."
+      >
+        {analyticsLoading ? (
+          <div className="analytics-skeleton-table" />
+        ) : analytics.recentVisitorJourneys.length ? (
+          <div className="journey-list">
+            {analytics.recentVisitorJourneys.map((journey) => (
+              <details key={journey.sessionId} className="journey-card">
+                <summary>
+                  <div>
+                    <strong>{journey.sourceLabel}</strong>
+                    <p>{journey.location}</p>
+                  </div>
+                  <span>{new Date(journey.endedAt).toLocaleString("en-IN")}</span>
+                </summary>
+                <p className="journey-path">{journey.steps.join(" -> ") || "No journey steps recorded yet."}</p>
+                <p className="helper-text">
+                  Landing: {journey.landingLabel} | Page views: {journey.pageViews}
+                </p>
+              </details>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">No recent visitor journeys captured yet.</p>
+        )}
+      </TableCard>
+
+      <TableCard title="Technical Debug" subtitle="Raw attribution details for troubleshooting campaigns and links.">
+        {analyticsLoading ? (
+          <div className="analytics-skeleton-table" />
+        ) : analytics.technicalDebug.length ? (
+          <div className="journey-list">
+            {analytics.technicalDebug.map((item) => (
+              <details key={`${item.sessionId}-debug`} className="journey-card">
+                <summary>
+                  <div>
+                    <strong>{item.sourceLabel}</strong>
+                    <p>{item.landingLabel}</p>
+                  </div>
+                  <span>{item.sessionId}</span>
+                </summary>
+                <div className="debug-grid">
+                  <p><strong>Landing path:</strong> {item.landingPath || "N/A"}</p>
+                  <p><strong>Raw referrer:</strong> {item.rawReferrer || "Direct"}</p>
+                  <p><strong>UTM source:</strong> {item.rawUTM?.source || "N/A"}</p>
+                  <p><strong>UTM medium:</strong> {item.rawUTM?.medium || "N/A"}</p>
+                  <p><strong>UTM campaign:</strong> {item.rawUTM?.campaign || "N/A"}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        ) : (
+          <p className="helper-text">Debug attribution details will appear after tracked sessions begin.</p>
+        )}
+      </TableCard>
+
       <section className="section-panel">
         <div className="section-head">
           <div>
@@ -260,8 +731,7 @@ export const AdminDashboardPage = () => {
 
         <div className="admin-upload-panel">
           <p className="section-copy">
-            Upload a CSV or Excel catalog to create new SKUs and update existing ones in one pass.
-            Live product cache is cleared automatically after import.
+            Upload a CSV or Excel catalog to create new SKUs and update existing ones in one pass. Live product cache is cleared automatically after import.
           </p>
           <input
             className="text-input"
@@ -483,94 +953,6 @@ export const AdminDashboardPage = () => {
               </div>
             </div>
           ))}
-        </div>
-      </section>
-
-      <section className="section-panel">
-        <div className="section-head">
-          <div>
-            <span className="eyebrow">Traffic analytics</span>
-            <h2>Recent visit activity</h2>
-            <p className="section-copy">{analytics.metrics?.trackingWindow || "Last 7 days"}</p>
-          </div>
-        </div>
-
-        <div className="metric-grid">
-          <div className="metric-card">
-            <span>Unique visitors</span>
-            <strong>{analytics.metrics?.uniqueVisitors || 0}</strong>
-          </div>
-          <div className="metric-card">
-            <span>Page views</span>
-            <strong>{analytics.metrics?.pageViews || 0}</strong>
-          </div>
-        </div>
-
-        <div className="admin-analytics-summary">
-          <strong>City insight</strong>
-          <p>{formatTopCitySummary(analytics)}</p>
-        </div>
-
-        <div className="admin-analytics-grid">
-          <div className="admin-table">
-            <h3>Top cities</h3>
-            {analytics.topCities.length ? (
-              analytics.topCities.map((city) => (
-                <div key={city.city} className="admin-row">
-                  <div>
-                    <strong>{city.city}</strong>
-                    <p>{city.uniqueVisitors} visitors</p>
-                  </div>
-                  <div>
-                    <span>{city.pageViews} views</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="helper-text">No city analytics captured yet.</p>
-            )}
-          </div>
-
-          <div className="admin-table">
-            <h3>Top pages</h3>
-            {analytics.topPages.length ? (
-              analytics.topPages.map((page) => (
-                <div key={page.path} className="admin-row">
-                  <div>
-                    <strong>{page.path}</strong>
-                  </div>
-                  <div>
-                    <span>{page.views} views</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="helper-text">Top pages will appear once visitors browse the storefront.</p>
-            )}
-          </div>
-        </div>
-
-        <div className="admin-table">
-          <h3>Recent surfing feed</h3>
-          {analytics.recentVisits.length ? (
-            analytics.recentVisits.map((visit) => (
-              <div key={visit.id} className="admin-row large">
-                <div>
-                  <strong>{visit.path}</strong>
-                  <p>{formatVisitLocation(visit)}</p>
-                  <p>Session: {visit.sessionId}</p>
-                </div>
-                <div>
-                  <span>{visit.deviceType}</span>
-                  <p>{new Date(visit.createdAt).toLocaleString("en-IN")}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="helper-text">
-              No surfing activity captured yet. Visit the storefront to start logging anonymous sessions.
-            </p>
-          )}
         </div>
       </section>
     </div>

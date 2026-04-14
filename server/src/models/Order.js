@@ -90,6 +90,28 @@ const orderSchema = new mongoose.Schema(
     razorpaySignature: { type: String, default: "", trim: true },
     paymentGateway: { type: String, enum: ["razorpay", "mock"], default: "razorpay" },
     source: { type: String, default: "instagram_ads", trim: true },
+    analyticsSnapshot: {
+      type: new mongoose.Schema(
+        {
+          sessionId: { type: String, default: "", trim: true },
+          sourceLabel: { type: String, default: "Direct", trim: true },
+          sourceType: { type: String, default: "Direct", trim: true },
+          campaignLabel: { type: String, default: "Direct", trim: true },
+          rawReferrer: { type: String, default: "", trim: true },
+          rawUTM: {
+            source: { type: String, default: "", trim: true },
+            medium: { type: String, default: "", trim: true },
+            campaign: { type: String, default: "", trim: true },
+            content: { type: String, default: "", trim: true },
+            term: { type: String, default: "", trim: true },
+          },
+          landingPath: { type: String, default: "", trim: true },
+          landingPageLabel: { type: String, default: "", trim: true },
+        },
+        { _id: false }
+      ),
+      default: () => ({}),
+    },
     checkoutToken: {
       type: String,
       default: undefined,

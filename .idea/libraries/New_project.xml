@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="New project">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ai4kids-mobile-preview-screenshots.zip!/" />
+      <root url="jar://$PROJECT_DIR$/ai4kids-mobile-preview-v3-screenshots.zip!/" />
+      <root url="jar://$PROJECT_DIR$/ai4kids-mobile-preview-v2.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

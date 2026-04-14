@@ -7,6 +7,7 @@ import { useCart } from "../context/CartContext.jsx";
 import { homepageCategories } from "../constants/storefrontCategories.js";
 import { viralToysCombo } from "../constants/comboOffer.js";
 import { buildProductBenefit } from "../utils/catalogMerchandising.js";
+import { trackStoreEvent } from "../utils/visitTracking.js";
 
 const homepageShowcaseNames = [
   "T22 SCOOTER LIGHT MUSIC SENSOR",
@@ -81,6 +82,12 @@ export const HomePage = () => {
   const newArrivalProducts = useMemo(() => showcaseProducts.slice(4, 10), [showcaseProducts]);
 
   const handleComboCheckout = () => {
+    trackStoreEvent({
+      eventType: "hero_click",
+      category: {
+        categoryLabel: "Combo Offer",
+      },
+    }).catch(() => {});
     addCombo(viralToysCombo);
     navigate("/checkout");
   };
@@ -110,7 +117,19 @@ export const HomePage = () => {
 
         <div className="category-showcase-grid">
           {homepageCategories.map((category) => (
-            <Link key={category.label} to={category.to} className="category-showcase-card">
+            <Link
+              key={category.label}
+              to={category.to}
+              className="category-showcase-card"
+              onClick={() => {
+                trackStoreEvent({
+                  eventType: "category_click",
+                  category: {
+                    categoryLabel: category.label,
+                  },
+                }).catch(() => {});
+              }}
+            >
               <span className="category-icon-shell" aria-hidden="true">
                 <img src={category.icon} alt="" className="category-icon-image" />
               </span>

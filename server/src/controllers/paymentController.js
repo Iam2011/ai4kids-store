@@ -30,10 +30,27 @@ const sanitizeCustomer = (customer = {}) => ({
   state: String(customer.state || "").trim(),
 });
 
+const sanitizeAnalyticsSnapshot = (snapshot = {}) => ({
+  sessionId: String(snapshot.sessionId || "").trim(),
+  sourceLabel: String(snapshot.sourceLabel || "Direct").trim() || "Direct",
+  sourceType: String(snapshot.sourceType || "Direct").trim() || "Direct",
+  campaignLabel: String(snapshot.campaignLabel || "Direct").trim() || "Direct",
+  rawReferrer: String(snapshot.rawReferrer || "").trim(),
+  rawUTM: {
+    source: String(snapshot.rawUTM?.source || "").trim(),
+    medium: String(snapshot.rawUTM?.medium || "").trim(),
+    campaign: String(snapshot.rawUTM?.campaign || "").trim(),
+    content: String(snapshot.rawUTM?.content || "").trim(),
+    term: String(snapshot.rawUTM?.term || "").trim(),
+  },
+  landingPath: String(snapshot.landingPath || "").trim(),
+  landingPageLabel: String(snapshot.landingPageLabel || "").trim(),
+});
+
 const buildOrderPayload = (order) => ({
   orderId: order._id,
   orderNumber: order.orderNumber,
-  paymentGateway: order.paymentGateway,
+    paymentGateway: order.paymentGateway,
   keyId: process.env.RAZORPAY_KEY_ID || "mock_key",
   razorpayOrderId: order.razorpayOrderId,
   amount: order.paymentAmount,
@@ -54,9 +71,11 @@ export const createPaymentOrder = async (req, res) => {
     notes = "",
     source = "instagram_ads",
     checkoutToken = "",
+    analyticsSnapshot = {},
   } = req.body;
   const sanitizedCustomer = sanitizeCustomer(customer);
   const normalizedCheckoutToken = String(checkoutToken || "").trim();
+  const normalizedAnalyticsSnapshot = sanitizeAnalyticsSnapshot(analyticsSnapshot);
 
   if (
     !sanitizedCustomer.name ||
@@ -140,6 +159,7 @@ export const createPaymentOrder = async (req, res) => {
     razorpayOrderId: gatewayOrderId,
     paymentGateway,
     source,
+    analyticsSnapshot: normalizedAnalyticsSnapshot,
     notes: String(notes || "").trim(),
     checkoutToken: normalizedCheckoutToken,
     whatsappStatus: "pending",

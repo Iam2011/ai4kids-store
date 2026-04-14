@@ -1,7 +1,27 @@
 import { apiClient } from "./apiClient";
 
 const productsCache = new Map();
+const productDetailCache = new Map();
 const PRODUCTS_CACHE_TTL_MS = 60_000;
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const withRetry = async (requestFn, attempts = 2) => {
+  let lastError;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) {
+        await wait(250 * (attempt + 1));
+      }
+    }
+  }
+
+  throw lastError;
+};
 
 const buildCacheKey = (params) => {
   const entries = Object.entries(params || {})
@@ -20,17 +40,26 @@ export const getProducts = async (params = {}) => {
     return cached.data;
   }
 
-  const { data } = await apiClient.get("/products", { params });
+  const { data } = await withRetry(() => apiClient.get("/products", { params }));
   productsCache.set(cacheKey, { at: now, data });
   return data;
 };
 
 export const clearProductsCache = () => {
   productsCache.clear();
+  productDetailCache.clear();
 };
 
 export const getProduct = async (slug) => {
-  const { data } = await apiClient.get(`/products/${slug}`);
+  const now = Date.now();
+  const cached = productDetailCache.get(slug);
+
+  if (cached && now - cached.at < PRODUCTS_CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const { data } = await withRetry(() => apiClient.get(`/products/${slug}`));
+  productDetailCache.set(slug, { at: now, data });
   return data;
 };
 
@@ -136,8 +165,11 @@ export const downloadAdminOrdersExport = async (token, format = "csv") => {
   };
 };
 
-export const getAdminVisitAnalytics = async (token) => {
-  const { data } = await apiClient.get("/admin/analytics/visits", withAdminAuth(token));
+export const getAdminVisitAnalytics = async (token, params = {}) => {
+  const { data } = await apiClient.get("/admin/analytics/visits", {
+    ...withAdminAuth(token),
+    params,
+  });
   return data;
 };
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getOrder } from "../api/storeApi.js";
 import { formatCurrency } from "../utils/currency.js";
+import { trackOrderPlacedOnce } from "../utils/visitTracking.js";
 
 export const OrderSuccessPage = () => {
   const { orderNumber } = useParams();
@@ -14,6 +15,11 @@ export const OrderSuccessPage = () => {
         const response = await getOrder(orderNumber);
         setOrder(response.order);
         setErrorMessage("");
+        trackOrderPlacedOnce({
+          orderNumber,
+          orderValue: response.order.totalAmount,
+          paymentOption: response.order.paymentMode,
+        });
       } catch (error) {
         setOrder(null);
         setErrorMessage(error.response?.data?.message || "We could not load the full order summary.");

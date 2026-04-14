@@ -4,6 +4,7 @@ import { getProducts } from "../api/storeApi.js";
 import { ProductCard } from "../components/ProductCard.jsx";
 import { storefrontCategories } from "../constants/storefrontCategories.js";
 import { buildProductBenefit } from "../utils/catalogMerchandising.js";
+import { trackStoreEvent } from "../utils/visitTracking.js";
 
 const sortOptions = [
   { value: "featured", label: "Featured" },
@@ -53,7 +54,7 @@ export const ProductsPage = () => {
       setProducts(data.products || []);
     } catch (error) {
       const message =
-        error.response?.data?.message || "Couldn’t load toys right now. Please try again.";
+        error.response?.data?.message || "Couldn't load toys right now. Please try again.";
       setErrorMessage(message);
     } finally {
       initialLoadDoneRef.current = true;
@@ -80,6 +81,17 @@ export const ProductsPage = () => {
     setSearchParams(next);
   };
 
+  const handleSearchSubmit = () => {
+    updateFilters({ search: searchInput });
+
+    if (String(searchInput || "").trim()) {
+      trackStoreEvent({
+        eventType: "search_submit",
+        searchTerm: searchInput.trim(),
+      }).catch(() => {});
+    }
+  };
+
   return (
     <div className="page-stack app-listing-page">
       <section className="section-panel listing-search-card">
@@ -99,7 +111,7 @@ export const ProductsPage = () => {
             onChange={(event) => setSearchInput(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter") {
-                updateFilters({ search: searchInput });
+                handleSearchSubmit();
               }
             }}
           />
@@ -108,7 +120,7 @@ export const ProductsPage = () => {
             <button
               type="button"
               className="primary-button inline-pill-button"
-              onClick={() => updateFilters({ search: searchInput })}
+              onClick={handleSearchSubmit}
             >
               Search
             </button>
@@ -141,14 +153,26 @@ export const ProductsPage = () => {
             key={option}
             type="button"
             className={`filter-chip ${category === option ? "active" : ""}`}
-            onClick={() => updateFilters({ category: category === option ? "" : option })}
+            onClick={() => {
+              const nextCategory = category === option ? "" : option;
+              updateFilters({ category: nextCategory });
+
+              if (nextCategory) {
+                trackStoreEvent({
+                  eventType: "category_click",
+                  category: {
+                    categoryLabel: nextCategory,
+                  },
+                }).catch(() => {});
+              }
+            }}
           >
             {option}
           </button>
         ))}
       </div>
 
-      {refreshing && !loading ? <p className="helper-text">We’re refreshing the catalog…</p> : null}
+      {refreshing && !loading ? <p className="helper-text">We're refreshing the catalog...</p> : null}
 
       {loading ? (
         <div className="catalog-card-list">

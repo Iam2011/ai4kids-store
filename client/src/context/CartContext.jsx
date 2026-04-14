@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
+import { trackStoreEvent } from "../utils/visitTracking.js";
 
 const CART_STORAGE_KEY = "ai4kids-cart";
 
@@ -122,6 +123,15 @@ export const CartProvider = ({ children }) => {
   const itemCount = state.items.reduce((total, item) => total + item.quantity, 0);
 
   const addItem = (product, quantity = product.moq || 1) => {
+    trackStoreEvent({
+      eventType: "add_to_cart",
+      product: {
+        productId: product._id,
+        productName: product.name,
+        category: product.category,
+      },
+    }).catch(() => {});
+
     dispatch({
       type: "ADD_ITEM",
       payload: {
@@ -145,6 +155,15 @@ export const CartProvider = ({ children }) => {
   };
 
   const addCombo = (combo, quantity = combo.moq || 1) => {
+    trackStoreEvent({
+      eventType: "add_to_cart",
+      product: {
+        productId: combo.key,
+        productName: combo.name,
+        category: combo.category,
+      },
+    }).catch(() => {});
+
     dispatch({
       type: "ADD_ITEM",
       payload: {

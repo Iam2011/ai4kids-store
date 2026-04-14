@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext.jsx";
 import { formatCurrency } from "../utils/currency.js";
+import { trackStoreEvent } from "../utils/visitTracking.js";
 import { ProductImage } from "./ProductImage.jsx";
 
 const buildFeatureList = (product) => {
@@ -102,6 +103,14 @@ export const ProductCard = ({
     (badgeLabel === "Best Seller" || badgeLabel === "BEST SELLER" ? "red" : "orange");
 
   const handleBuyNow = () => {
+    trackStoreEvent({
+      eventType: "buy_now_click",
+      product: {
+        productId: product._id,
+        productName: displayName,
+        category: product.category,
+      },
+    }).catch(() => {});
     if (!canAddToCart) {
       navigate(detailPath);
       return;
@@ -110,16 +119,27 @@ export const ProductCard = ({
     navigate("/checkout");
   };
 
+  const handleProductClick = () => {
+    trackStoreEvent({
+      eventType: "product_click",
+      product: {
+        productId: product._id,
+        productName: displayName,
+        category: product.category,
+      },
+    }).catch(() => {});
+  };
+
   if (variant === "mini") {
     return (
       <article className="product-card mini-card">
         <span className="mini-top-badge">{miniDisplayBadge}</span>
         <span className="mini-sale-badge">{discountPercent}%</span>
-        <Link to={detailPath} className="product-image-link">
+        <Link to={detailPath} className="product-image-link" onClick={handleProductClick}>
           <ProductImage src={product.imageUrl} alt={displayName} />
         </Link>
         <div className="mini-card-body">
-          <Link to={detailPath} className="mini-card-title">
+          <Link to={detailPath} className="mini-card-title" onClick={handleProductClick}>
             {displayName}
           </Link>
           <div className="mini-rating-row">
@@ -149,7 +169,7 @@ export const ProductCard = ({
         <div className="home-card-media-wrap">
           <span className={`showcase-top-badge ${topBadgeTone}`}>{showcaseBadgeLabel}</span>
           <span className="home-sale-pill">{discountPercent}% OFF</span>
-          <Link to={detailPath} className="product-image-link">
+          <Link to={detailPath} className="product-image-link" onClick={handleProductClick}>
             <ProductImage
               src={product.imageUrl}
               alt={displayName}
@@ -159,7 +179,7 @@ export const ProductCard = ({
         </div>
 
         <div className="home-card-copy">
-          <Link to={detailPath} className="home-card-title">
+          <Link to={detailPath} className="home-card-title" onClick={handleProductClick}>
             {displayName}
           </Link>
           <p className="home-card-copy-line">{displayCopy || displayCategory}</p>
@@ -202,7 +222,7 @@ export const ProductCard = ({
       <div className="showcase-media-wrap">
         <span className={`showcase-top-badge ${topBadgeTone}`}>{showcaseBadgeLabel}</span>
         <span className="showcase-discount-badge">{discountPercent}% OFF</span>
-        <Link to={detailPath} className="product-image-link">
+        <Link to={detailPath} className="product-image-link" onClick={handleProductClick}>
           <ProductImage
             src={product.imageUrl}
             alt={displayName}
@@ -212,7 +232,7 @@ export const ProductCard = ({
       </div>
 
       <div className="showcase-copy">
-        <Link to={detailPath} className="showcase-title">
+        <Link to={detailPath} className="showcase-title" onClick={handleProductClick}>
           {displayName}
         </Link>
         <p className="showcase-copy-line">

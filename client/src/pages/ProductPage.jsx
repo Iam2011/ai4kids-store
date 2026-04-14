@@ -7,6 +7,7 @@ import { TrustMarkers } from "../components/TrustMarkers.jsx";
 import { useCart } from "../context/CartContext.jsx";
 import { formatCurrency } from "../utils/currency.js";
 import { buildProductBenefit } from "../utils/catalogMerchandising.js";
+import { trackStoreEvent } from "../utils/visitTracking.js";
 
 export const ProductPage = () => {
   const { slug } = useParams();
@@ -28,6 +29,14 @@ export const ProductPage = () => {
         setSelectedMedia(response.product.gallery?.[0] || response.product.imageUrl);
         setQuantity(response.product.moq);
         setErrorMessage("");
+        trackStoreEvent({
+          eventType: "product_view",
+          product: {
+            productId: response.product._id,
+            productName: response.product.name,
+            category: response.product.category,
+          },
+        }).catch(() => {});
       } catch (error) {
         setData(null);
         setErrorMessage(error.response?.data?.message || "Unable to load this product.");
@@ -52,6 +61,14 @@ export const ProductPage = () => {
   const featureList = Array.isArray(product.features) && product.features.length ? product.features : [];
 
   const handleBuyNow = () => {
+    trackStoreEvent({
+      eventType: "buy_now_click",
+      product: {
+        productId: product._id,
+        productName: product.name,
+        category: product.category,
+      },
+    }).catch(() => {});
     addItem(product, quantity);
     navigate("/checkout");
   };

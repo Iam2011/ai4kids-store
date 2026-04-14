@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import { Admin } from "../models/Admin.js";
 import { Order } from "../models/Order.js";
 import { Product } from "../models/Product.js";
-import { VisitEvent } from "../models/VisitEvent.js";
+import { buildAnalyticsReport } from "../services/analyticsReportService.js";
 import { buildCsv, buildExcelXmlWorkbook } from "../utils/excelExport.js";
 import { parseCatalogCsv } from "../utils/csvCatalogParser.js";
 import { slugify } from "../utils/slugify.js";
@@ -374,73 +374,11 @@ export const exportAdminOrdersExcel = async (req, res) => {
 };
 
 export const getAdminVisitAnalytics = async (req, res) => {
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const [summary] = await VisitEvent.aggregate([
-    { $match: { createdAt: { $gte: since } } },
-    {
-      $facet: {
-        totals: [
-          {
-            $group: {
-              _id: null,
-              pageViews: { $sum: 1 },
-              sessionIds: { $addToSet: "$sessionId" },
-            },
-          },
-        ],
-        topCities: [
-          {
-            $group: {
-              _id: { $ifNull: ["$city", "Unknown"] },
-              sessionIds: { $addToSet: "$sessionId" },
-              pageViews: { $sum: 1 },
-            },
-          },
-          {
-            $project: {
-              _id: 0,
-              city: "$_id",
-              uniqueVisitors: { $size: "$sessionIds" },
-              pageViews: 1,
-            },
-          },
-          { $sort: { uniqueVisitors: -1, pageViews: -1 } },
-          { $limit: 8 },
-        ],
-        topPages: [
-          { $group: { _id: "$path", views: { $sum: 1 } } },
-          { $sort: { views: -1 } },
-          { $limit: 8 },
-          { $project: { _id: 0, path: "$_id", views: 1 } },
-        ],
-      },
-    },
-  ]);
-
-  const recentVisits = await VisitEvent.find({ createdAt: { $gte: since } })
-    .sort({ createdAt: -1 })
-    .limit(20)
-    .lean();
-
-  res.json({
-    metrics: {
-      pageViews: summary?.totals?.[0]?.pageViews || 0,
-      uniqueVisitors: summary?.totals?.[0]?.sessionIds?.length || 0,
-      trackingWindow: "Last 7 days",
-    },
-    topCities: summary?.topCities || [],
-    topPages: summary?.topPages || [],
-    recentVisits: recentVisits.map((visit) => ({
-      id: String(visit._id),
-      sessionId: visit.sessionId,
-      path: visit.path,
-      referrer: visit.referrer,
-      city: visit.city,
-      state: visit.state,
-      country: visit.country,
-      deviceType: visit.deviceType || buildDeviceType(visit.userAgent),
-      userAgent: visit.userAgent,
-      createdAt: visit.createdAt,
-    })),
+  const report = await buildAnalyticsReport({
+    range: req.query.range,
+    startDate: req.query.startDate,
+    endDate: req.query.endDate,
   });
+
+  res.json(report);
 };
