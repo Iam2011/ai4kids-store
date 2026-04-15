@@ -57,12 +57,12 @@ export default async function HomePage() {
   const newArrivalProducts = showcaseProducts.slice(4, 10);
 
   return (
-    <PageContainer>
+    <PageContainer className="max-w-[404px] gap-4 px-4 pb-32 pt-4 sm:max-w-3xl lg:max-w-6xl">
       <HeroBanner />
       <BenefitsGrid />
       <CategoryGrid />
 
-      <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
+      <section className="rounded-[30px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(255,246,252,0.94))] p-5 shadow-[0_24px_54px_rgba(185,153,224,0.16)]">
         <SectionHeader title="Best Sellers" actionHref="/products?featured=true" />
         <ProductGrid products={bestSellerProducts} variant="home" />
         <p className="mt-4 text-center text-sm text-[#8b7fa8]">
@@ -70,7 +70,7 @@ export default async function HomePage() {
         </p>
       </section>
 
-      <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
+      <section className="rounded-[30px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(255,246,252,0.94))] p-5 shadow-[0_24px_54px_rgba(185,153,224,0.16)]">
         <SectionHeader title="New Arrivals" actionHref="/products?sort=latest" />
         <ProductGrid products={newArrivalProducts} variant="home" />
       </section>

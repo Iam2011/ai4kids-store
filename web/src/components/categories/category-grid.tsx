@@ -4,19 +4,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { homepageCategories } from "@/lib/constants/categories";
 import { trackStoreEvent } from "@/lib/analytics/track";
-import { SectionHeader } from "@/components/shared/section-header";
+
+const viewAllHref = "/products";
 
 export function CategoryGrid() {
   return (
-    <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
-      <SectionHeader title="Shop by Category" actionHref="/products" />
-      <div className="grid grid-cols-4 gap-3">
+    <section className="relative overflow-hidden rounded-[28px] border border-white/80 bg-white/84 shadow-[0_20px_48px_rgba(193,165,231,0.24)]">
+      <Image
+        src="/assets/ui/home/category-section-reference-crop.png"
+        alt="Shop by Category"
+        width={1280}
+        height={760}
+        sizes="(max-width: 768px) 100vw, 720px"
+        className="h-auto w-full"
+      />
+
+      <Link
+        href={viewAllHref}
+        aria-label="View all categories"
+        className="absolute right-[4.8%] top-[4.3%] h-[12%] w-[19%] rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f6dff]"
+      />
+
+      <div className="absolute inset-x-[6.3%] bottom-[8.2%] top-[18.2%] grid grid-cols-4 gap-x-[2.4%] gap-y-[4.2%]">
         {homepageCategories.map((category) => (
           <Link
             key={category.label}
             href={category.href}
             aria-label={category.label}
-            className="flex min-h-[112px] items-center justify-center rounded-[16px] border border-[#efe8fb] bg-white p-3 text-center shadow-[0_12px_26px_rgba(143,116,180,0.08)]"
+            className="rounded-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8f6dff]"
             onClick={() => {
               void trackStoreEvent({
                 eventType: "category_click",
@@ -25,17 +40,7 @@ export function CategoryGrid() {
                 },
               }).catch(() => {});
             }}
-          >
-            <div className="relative flex h-full w-full items-center justify-center">
-              <Image
-                src={category.icon}
-                alt={category.label}
-                width={96}
-                height={128}
-                className="h-auto max-h-[92px] w-full max-w-[88px] object-contain"
-              />
-            </div>
-          </Link>
+          />
         ))}
       </div>
     </section>

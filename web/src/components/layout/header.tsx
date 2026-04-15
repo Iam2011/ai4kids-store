@@ -27,12 +27,12 @@ export function Header() {
   return (
     <>
       <header className="sticky top-0 z-40 px-4 pt-4 sm:px-6">
-        <div className="relative mx-auto flex h-[70px] w-full max-w-[460px] items-center rounded-[28px] bg-white/95 px-4 shadow-[0_20px_48px_rgba(148,123,191,0.18)] backdrop-blur sm:max-w-3xl lg:max-w-6xl">
+        <div className="relative mx-auto flex h-[66px] w-full max-w-[460px] items-center rounded-[28px] border border-white/80 bg-white/95 px-4 shadow-[0_18px_44px_rgba(192,160,232,0.28)] backdrop-blur sm:max-w-3xl lg:max-w-6xl">
           <button
             type="button"
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-[#5a4f84]"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#faf6ff] text-[#5d5087] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]"
           >
             <span className="flex flex-col gap-1">
               <span className="h-0.5 w-5 rounded-full bg-current" />
@@ -48,17 +48,17 @@ export function Header() {
               width={128}
               height={40}
               priority
-              className="h-auto w-[112px] sm:w-[132px]"
+              className="h-auto w-[122px] sm:w-[136px]"
             />
           </Link>
 
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center rounded-full border border-[#ede5fb] bg-[#fcf9ff] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
             {!isCheckoutRoute ? (
               <button
                 type="button"
                 onClick={() => router.push("/products")}
                 aria-label="Search products"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-[#5a4f84]"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-[#5a4f84]"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
                   <path d="M10.5 4a6.5 6.5 0 014.83 10.84l4.41 4.41-1.42 1.42-4.41-4.41A6.5 6.5 0 1110.5 4zm0 2a4.5 4.5 0 100 9 4.5 4.5 0 000-9z" />
@@ -66,16 +66,18 @@ export function Header() {
               </button>
             ) : null}
 
+            {!isCheckoutRoute ? <span className="h-6 w-px bg-[#eee6fb]" /> : null}
+
             <Link
               href="/cart"
               aria-label="Open cart"
-              className="relative flex h-11 w-11 items-center justify-center rounded-full text-[#5a4f84]"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[#5a4f84]"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current" aria-hidden="true">
                 <path d="M7 5h13l-1.55 5.41A2 2 0 0116.53 12H9.2l-.38 1.5h9.93v2H8a2 2 0 01-1.94-2.49L7.6 7H5V5h2zm1.5 12a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5zm8 0a1.75 1.75 0 110 3.5 1.75 1.75 0 010-3.5z" />
               </svg>
               {itemCount ? (
-                <span className="absolute right-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#ff6f81] px-1 text-[10px] font-bold text-white">
+                <span className="absolute -right-1.5 -top-1.5 flex h-6 min-w-6 items-center justify-center rounded-full bg-[#ff6f95] px-1 text-[10px] font-bold text-white shadow-[0_8px_16px_rgba(255,111,149,0.32)]">
                   {itemCount}
                 </span>
               ) : null}

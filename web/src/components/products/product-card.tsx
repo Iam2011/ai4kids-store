@@ -40,6 +40,7 @@ export function ProductCard({
   const canAddToCart = Boolean(product._id);
   const badge = product.featured ? "Best Seller" : product.badge || "New";
   const features = buildFeatureList(product);
+  const isHome = variant === "home";
 
   const trackProductClick = () => {
     void trackStoreEvent({
@@ -72,16 +73,36 @@ export function ProductCard({
   };
 
   return (
-    <article className="flex h-full flex-col rounded-[24px] bg-white p-3 shadow-[0_18px_44px_rgba(148,123,191,0.12)]">
-      <div className="relative mb-3 overflow-hidden rounded-[20px] bg-gradient-to-br from-[#fff8ef] to-[#f3f2ff]">
-        <div className="absolute left-2 top-2 z-10">
-          <Badge tone={product.featured ? "accent" : "warm"} className="shadow-[0_8px_18px_rgba(239,92,130,0.18)]">
+    <article
+      className={[
+        "flex h-full flex-col overflow-hidden",
+        isHome
+          ? "rounded-[28px] border border-white/90 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,246,252,0.96))] p-2.5 shadow-[0_18px_40px_rgba(187,153,224,0.2)]"
+          : "rounded-[24px] bg-white p-3 shadow-[0_18px_44px_rgba(148,123,191,0.12)]",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "relative overflow-hidden",
+          isHome
+            ? "mb-2.5 rounded-[22px] border border-white/80 bg-[radial-gradient(circle_at_top,#fffdfd_5%,#fff4fb_52%,#f4f1ff_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)]"
+            : "mb-3 rounded-[20px] bg-gradient-to-br from-[#fff8ef] to-[#f3f2ff]",
+        ].join(" ")}
+      >
+        <div className={isHome ? "absolute left-2 top-2 z-10" : "absolute left-2 top-2 z-10"}>
+          <Badge
+            tone={product.featured ? "accent" : "warm"}
+            className={isHome ? "bg-[#f7c3e4] text-[#8d4274] shadow-none" : "shadow-[0_8px_18px_rgba(239,92,130,0.18)]"}
+          >
             {badge}
           </Badge>
         </div>
         {product.discountPercent ? (
           <div className="absolute right-2 top-2 z-10">
-            <Badge tone="soft" className="shadow-[0_8px_18px_rgba(123,86,217,0.16)]">
+            <Badge
+              tone="soft"
+              className={isHome ? "bg-[#e2d8ff] text-[#7857d2] shadow-none" : "shadow-[0_8px_18px_rgba(123,86,217,0.16)]"}
+            >
               {product.discountPercent}% OFF
             </Badge>
           </div>
@@ -89,30 +110,49 @@ export function ProductCard({
         <Link
           href={`/products/${product.slug}`}
           onClick={trackProductClick}
-          className="relative block aspect-square"
+          className={isHome ? "relative block aspect-[0.98/1]" : "relative block aspect-square"}
         >
           <Image
             src={product.imageUrl}
             alt={displayName}
             fill
             sizes="(max-width: 768px) 50vw, 260px"
-            className="object-contain p-5 pt-12"
+            className={isHome ? "object-contain p-4 pt-11" : "object-contain p-5 pt-12"}
           />
         </Link>
       </div>
 
-      <div className="flex flex-1 flex-col">
+      <div className={isHome ? "flex flex-1 flex-col px-1 pb-1" : "flex flex-1 flex-col"}>
         <Link
           href={`/products/${product.slug}`}
           onClick={trackProductClick}
-          className="line-clamp-2 min-h-10 text-base font-black leading-5 text-[#2f2557]"
+          className={[
+            "line-clamp-2 font-black text-[#2f2557]",
+            isHome ? "min-h-[2.8rem] text-[1.02rem] leading-[1.35rem]" : "min-h-10 text-base leading-5",
+          ].join(" ")}
         >
           {displayName}
         </Link>
 
-        <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#776f97]">{benefit}</p>
+        <p className={isHome ? "mt-1.5 line-clamp-1 text-[11px] font-medium text-[#8d83aa]" : "mt-2 line-clamp-2 text-xs leading-5 text-[#776f97]"}>
+          {benefit}
+        </p>
 
-        {variant === "default" ? (
+        {isHome ? (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {features.slice(0, 2).map((feature, index) => (
+              <span
+                key={feature}
+                className={[
+                  "rounded-full px-2.5 py-1 text-[10px] font-semibold",
+                  index === 0 ? "bg-[#f1e6ff] text-[#7357ac]" : "bg-[#fff0d9] text-[#9f7a33]",
+                ].join(" ")}
+              >
+                {feature}
+              </span>
+            ))}
+          </div>
+        ) : variant === "default" ? (
           <div className="mt-3 flex flex-wrap gap-1">
             {features.map((feature) => (
               <span
@@ -125,7 +165,7 @@ export function ProductCard({
           </div>
         ) : null}
 
-        <div className="mt-3">
+        <div className={isHome ? "mt-3" : "mt-3"}>
           <PriceBlock
             price={product.price}
             originalPrice={product.originalPrice}
@@ -133,21 +173,21 @@ export function ProductCard({
           />
         </div>
 
-        <div className="mt-2 flex items-center gap-1 text-xs text-[#7b749a]">
+        <div className={isHome ? "mt-1.5 flex items-center gap-1 text-[11px] text-[#7b749a]" : "mt-2 flex items-center gap-1 text-xs text-[#7b749a]"}>
           <Stars />
           <span>{Number(product.rating || 4.5).toFixed(1)}</span>
           <span>({reviewCount})</span>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className={isHome ? "mt-3 grid grid-cols-2 gap-2" : "mt-4 grid grid-cols-2 gap-2"}>
           <Button
             variant="secondary"
-            className="px-2 text-xs"
+            className={isHome ? "min-h-10 px-2 text-[11px]" : "px-2 text-xs"}
             onClick={() => (canAddToCart ? addItem(product) : router.push(`/products/${product.slug}`))}
           >
             {canAddToCart ? "Add to Cart" : "Explore"}
           </Button>
-          <Button className="px-2 text-xs" onClick={handleBuyNow}>
+          <Button className={isHome ? "min-h-10 px-2 text-[11px]" : "px-2 text-xs"} onClick={handleBuyNow}>
             Buy Now
           </Button>
         </div>
