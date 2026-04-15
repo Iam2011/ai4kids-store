@@ -14,9 +14,26 @@ import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 export const app = express();
 app.set("trust proxy", true);
 
+const allowedOrigins = new Set(
+  [
+    "http://localhost:5173",
+    "https://ai4kids.in",
+    "https://www.ai4kids.in",
+    process.env.CLIENT_URL,
+  ]
+    .map((origin) => String(origin || "").trim())
+    .filter(Boolean)
+);
+
 app.use(
   cors({
-    origin: [process.env.CLIENT_URL, "http://localhost:5173"].filter(Boolean),
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS origin is not allowed."));
+    },
     credentials: true,
   })
 );

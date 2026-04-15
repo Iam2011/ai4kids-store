@@ -171,12 +171,16 @@ export const createPaymentOrder = async (req, res) => {
 export const verifyPayment = async (req, res) => {
   const { orderId, razorpay_order_id, razorpay_payment_id, razorpay_signature, isMock } = req.body;
   const order = await Order.findById(orderId);
+  const isZeroAdvanceCod = order?.paymentMode === "cod_deposit" && Number(order?.paymentAmount || 0) <= 0;
 
   if (!order) {
     return res.status(404).json({ message: "Order not found." });
   }
 
-  if (["paid", "deposit_paid"].includes(order.paymentStatus)) {
+  if (
+    ["paid", "deposit_paid"].includes(order.paymentStatus) ||
+    (isZeroAdvanceCod && order.orderStatus === "confirmed")
+  ) {
     return res.json({
       success: true,
       orderNumber: order.orderNumber,
@@ -203,7 +207,11 @@ export const verifyPayment = async (req, res) => {
   order.razorpayOrderId = razorpay_order_id || order.razorpayOrderId;
   order.razorpayPaymentId = razorpay_payment_id || `mock_payment_${crypto.randomUUID()}`;
   order.razorpaySignature = razorpay_signature || "mock_signature";
-  order.paymentStatus = order.paymentMode === "cod_deposit" ? "deposit_paid" : "paid";
+  order.paymentStatus = isZeroAdvanceCod
+    ? "created"
+    : order.paymentMode === "cod_deposit"
+      ? "deposit_paid"
+      : "paid";
   order.orderStatus = "confirmed";
 
   try {

@@ -1,5 +1,29 @@
 const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ai4kids-api.onrender.com/api";
 
+export class ApiError extends Error {
+  status: number;
+  code?: string;
+  details?: unknown;
+
+  constructor({
+    message,
+    status,
+    code,
+    details,
+  }: {
+    message: string;
+    status: number;
+    code?: string;
+    details?: unknown;
+  }) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
 type RequestOptions = RequestInit & {
   params?: Record<string, string | number | boolean | undefined>;
   revalidate?: number;
@@ -34,8 +58,17 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   if (!response.ok) {
     const payload = await response
       .json()
-      .catch(() => ({ message: "Request failed." })) as { message?: string };
-    throw new Error(payload.message || "Request failed.");
+      .catch(() => ({ message: "Request failed." })) as {
+      message?: string;
+      code?: string;
+      details?: unknown;
+    };
+    throw new ApiError({
+      message: payload.message || "Request failed.",
+      status: response.status,
+      code: payload.code,
+      details: payload.details,
+    });
   }
 
   return response.json() as Promise<T>;

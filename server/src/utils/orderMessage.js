@@ -1,4 +1,6 @@
 export const buildOrderWhatsappMessage = (order) => {
+  const isZeroAdvanceCod =
+    order.paymentMode === "cod_deposit" && Number(order.paymentAmount || 0) <= 0;
   const lines = [
     `New AI4Kids order: ${order.orderNumber}`,
     `Customer: ${order.customer.name}`,
@@ -6,7 +8,9 @@ export const buildOrderWhatsappMessage = (order) => {
     `Address: ${order.customer.address}, ${order.customer.city}, ${order.customer.state} - ${order.customer.pincode}`,
     `Payment mode: ${
       order.paymentMode === "cod_deposit"
-        ? `COD with Rs ${order.codConfirmationFee || order.paymentAmount} confirmation`
+        ? isZeroAdvanceCod
+          ? "Cash on Delivery (no advance payment)"
+          : `COD with Rs ${order.codConfirmationFee || order.paymentAmount} confirmation`
         : "Full payment"
     }`,
     `Payment status: ${order.paymentStatus}`,
@@ -14,7 +18,7 @@ export const buildOrderWhatsappMessage = (order) => {
     `Order total: Rs ${order.totalAmount}`,
   ];
 
-  if (order.paymentMode === "cod_deposit") {
+  if (order.paymentMode === "cod_deposit" && !isZeroAdvanceCod) {
     lines.push(`COD confirmation fee: Rs ${order.codConfirmationFee || order.paymentAmount}`);
   }
 

@@ -19,6 +19,7 @@ type CartContextValue = {
   addCombo: (combo: ComboOffer, quantity?: number) => void;
   updateQuantity: (itemKey: string, quantity: number) => void;
   removeItem: (itemKey: string) => void;
+  removeItems: (itemKeys: string[]) => void;
   clearCart: () => void;
   applyCoupon: (coupon: CouponState) => void;
   clearCoupon: () => void;
@@ -78,6 +79,7 @@ type CartAction =
   | { type: "ADD_ITEM"; payload: CartItem }
   | { type: "UPDATE_QUANTITY"; payload: { itemKey: string; quantity: number } }
   | { type: "REMOVE_ITEM"; payload: { itemKey: string } }
+  | { type: "REMOVE_ITEMS"; payload: { itemKeys: string[] } }
   | { type: "CLEAR_CART" }
   | { type: "APPLY_COUPON"; payload: CouponState }
   | { type: "CLEAR_COUPON" };
@@ -132,6 +134,14 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         coupon: null,
         items: state.items.filter((item) => item.itemKey !== action.payload.itemKey),
       };
+    case "REMOVE_ITEMS": {
+      const itemKeys = new Set(action.payload.itemKeys);
+      return {
+        ...state,
+        coupon: null,
+        items: state.items.filter((item) => !itemKeys.has(item.itemKey)),
+      };
+    }
     case "CLEAR_CART":
       return { items: [], coupon: null };
     case "APPLY_COUPON":
@@ -240,6 +250,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateQuantity: (itemKey, quantity) =>
         dispatch({ type: "UPDATE_QUANTITY", payload: { itemKey, quantity } }),
       removeItem: (itemKey) => dispatch({ type: "REMOVE_ITEM", payload: { itemKey } }),
+      removeItems: (itemKeys) => dispatch({ type: "REMOVE_ITEMS", payload: { itemKeys } }),
       clearCart: () => dispatch({ type: "CLEAR_CART" }),
       applyCoupon: (coupon) => dispatch({ type: "APPLY_COUPON", payload: coupon }),
       clearCoupon: () => dispatch({ type: "CLEAR_COUPON" }),

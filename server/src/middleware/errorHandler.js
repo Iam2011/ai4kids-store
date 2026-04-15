@@ -25,6 +25,8 @@ export const errorHandler = (error, req, res, next) => {
 
   res.status(error.statusCode || 500).json({
     message: error.message || "Something went wrong.",
+    code: error.code || undefined,
+    details: Array.isArray(error.details) ? error.details : undefined,
     stack: process.env.NODE_ENV === "production" ? undefined : error.stack,
   });
 };

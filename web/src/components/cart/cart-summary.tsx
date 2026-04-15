@@ -7,12 +7,10 @@ import { formatPrice } from "@/lib/utils/format-price";
 export function CartSummary({
   subtotal,
   discount,
-  codFee,
   total,
 }: {
   subtotal: number;
   discount: number;
-  codFee: number;
   total: number;
 }) {
   const router = useRouter();
@@ -29,12 +27,8 @@ export function CartSummary({
           <span>Coupon discount</span>
           <strong className="text-[#372b63]">-{formatPrice(discount)}</strong>
         </div>
-        <div className="flex items-center justify-between">
-          <span>COD Confirmation Fee</span>
-          <strong className="text-[#372b63]">{formatPrice(codFee)}</strong>
-        </div>
         <p className="rounded-[18px] bg-[#fff8ef] px-3 py-2 text-xs leading-5 text-[#8e6d54]">
-          If you choose Cash on Delivery, the confirmation fee is paid first and the balance stays due on delivery.
+          Cash on Delivery orders now place directly without any advance payment.
         </p>
         <div className="flex items-center justify-between border-t border-[#efe6fb] pt-3 text-base">
           <span className="font-semibold text-[#40346f]">Total</span>

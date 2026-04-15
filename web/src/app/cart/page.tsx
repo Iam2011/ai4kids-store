@@ -6,7 +6,7 @@ import { CartSummary } from "@/components/cart/cart-summary";
 import { TrustMarkers } from "@/components/trust/trust-markers";
 import { PageContainer } from "@/components/shared/page-container";
 import { EmptyState } from "@/components/shared/empty-state";
-import { calculateCodConfirmationFee, getPreviewTotal } from "@/lib/utils/pricing";
+import { getPreviewTotal } from "@/lib/utils/pricing";
 
 export default function CartPage() {
   const { items, subtotal, coupon, updateQuantity, removeItem } = useCart();
@@ -24,8 +24,6 @@ export default function CartPage() {
 
   const previewDiscount = coupon?.discountAmount || 0;
   const previewTotal = getPreviewTotal(subtotal, previewDiscount);
-  const codConfirmationFee = calculateCodConfirmationFee(items);
-
   return (
     <PageContainer>
       <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
@@ -34,7 +32,7 @@ export default function CartPage() {
           Review your toys before checkout
         </h1>
         <p className="mt-2 text-sm leading-6 text-[#6d6790]">
-          Check quantities, review pricing, and see the COD confirmation fee before you pay.
+          Check quantities, review pricing, and confirm your order details before checkout.
         </p>
       </section>
 
@@ -52,7 +50,6 @@ export default function CartPage() {
         <CartSummary
           subtotal={subtotal}
           discount={previewDiscount}
-          codFee={codConfirmationFee}
           total={previewTotal}
         />
       </div>

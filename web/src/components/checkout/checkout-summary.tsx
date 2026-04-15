@@ -51,16 +51,10 @@ export function CheckoutSummary({
           <strong className="text-[#372b63]">{formatPrice(total)}</strong>
         </div>
         {paymentMode === "cod_deposit" ? (
-          <>
-            <div className="flex items-center justify-between">
-              <span>COD Confirmation Fee</span>
-              <strong className="text-[#372b63]">{formatPrice(codFee)}</strong>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Balance on delivery</span>
-              <strong className="text-[#372b63]">{formatPrice(balanceDue)}</strong>
-            </div>
-          </>
+          <div className="flex items-center justify-between">
+            <span>Pay on delivery</span>
+            <strong className="text-[#372b63]">{formatPrice(balanceDue || total)}</strong>
+          </div>
         ) : null}
       </div>
 
@@ -85,7 +79,13 @@ export function CheckoutSummary({
       {errorMessage ? <p className="mt-4 text-sm text-[#d04f76]">{errorMessage}</p> : null}
 
       <Button className="mt-5 w-full" onClick={onSubmit} disabled={submitting}>
-        {submitting ? "Opening checkout..." : `Pay ${formatPrice(paymentAmount)}`}
+        {submitting
+          ? paymentMode === "cod_deposit"
+            ? "Placing order..."
+            : "Opening checkout..."
+          : paymentAmount > 0
+            ? `Pay ${formatPrice(paymentAmount)}`
+            : "Place Order"}
       </Button>
     </aside>
   );

@@ -1,14 +1,21 @@
 import { Coupon } from "../models/Coupon.js";
 import { Product } from "../models/Product.js";
 import { getComboOfferByKey } from "../config/comboOffers.js";
+import { MIN_VISIBLE_PRODUCT_PRICE } from "./productDerivation.js";
 
 const roundCurrency = (value) => Math.round((value + Number.EPSILON) * 100) / 100;
-const getCodFeePerProduct = () =>
-  Number(process.env.COD_CONFIRMATION_FEE_PER_ITEM || process.env.COD_CONFIRMATION_AMOUNT || 40);
-const getBillableUnitCount = (item) =>
-  item.itemType === "combo"
-    ? Math.max(1, Number(item.bundleItems?.length || 0)) * Number(item.quantity || 1)
-    : Number(item.quantity || 1);
+
+const throwCheckoutError = ({ message, statusCode = 400, code = "", details = [] }) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  if (code) {
+    error.code = code;
+  }
+  if (details.length) {
+    error.details = details;
+  }
+  throw error;
+};
 
 const buildComboItem = (comboOffer, quantity) => {
   const normalizedQuantity = Number(quantity || 1);
@@ -56,53 +63,65 @@ export const calculateCouponDiscount = ({ coupon, subtotal, paymentMode }) => {
 
 export const calculateOrderPricing = async ({ cartItems, couponCode, paymentMode }) => {
   if (!Array.isArray(cartItems) || cartItems.length === 0) {
-    const error = new Error("Your cart is empty.");
-    error.statusCode = 400;
-    throw error;
+    throwCheckoutError({ message: "Your cart is empty." });
   }
 
   const productIds = cartItems.map((item) => item.productId).filter(Boolean);
-  const products = await Product.find({ _id: { $in: productIds }, isActive: true }).lean();
+  const products = await Product.find({
+    _id: { $in: productIds },
+    isActive: true,
+    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
+  }).lean();
   const productMap = new Map(products.map((product) => [String(product._id), product]));
 
-  const items = cartItems.map((item) => {
+  const unavailableDetails = [];
+  const items = [];
+
+  for (const item of cartItems) {
     if (item.comboKey) {
       const comboOffer = getComboOfferByKey(item.comboKey);
 
       if (!comboOffer) {
-        const error = new Error("The selected combo offer is unavailable.");
-        error.statusCode = 400;
-        throw error;
+        unavailableDetails.push({
+          itemType: "combo",
+          comboKey: String(item.comboKey || ""),
+          name: String(item.name || "Selected combo offer"),
+        });
+        continue;
       }
 
       const quantity = Number(item.quantity || comboOffer.moq || 1);
 
       if (quantity < comboOffer.moq) {
-        const error = new Error(`${comboOffer.name} requires a minimum order of ${comboOffer.moq}.`);
-        error.statusCode = 400;
-        throw error;
+        throwCheckoutError({
+          message: `${comboOffer.name} requires a minimum order of ${comboOffer.moq}.`,
+        });
       }
 
-      return buildComboItem(comboOffer, quantity);
+      items.push(buildComboItem(comboOffer, quantity));
+      continue;
     }
 
     const product = productMap.get(String(item.productId));
 
     if (!product) {
-      const error = new Error("One or more products are unavailable.");
-      error.statusCode = 400;
-      throw error;
+      unavailableDetails.push({
+        itemType: "product",
+        productId: String(item.productId || ""),
+        name: String(item.name || "Unavailable product"),
+      });
+      continue;
     }
 
     const quantity = Number(item.quantity || 1);
 
     if (quantity < product.moq) {
-      const error = new Error(`${product.name} requires a minimum order of ${product.moq}.`);
-      error.statusCode = 400;
-      throw error;
+      throwCheckoutError({
+        message: `${product.name} requires a minimum order of ${product.moq}.`,
+      });
     }
 
-    return {
+    items.push({
       itemType: "product",
       product: product._id,
       comboKey: "",
@@ -119,8 +138,16 @@ export const calculateOrderPricing = async ({ cartItems, couponCode, paymentMode
       quantity,
       lineTotal: roundCurrency(product.price * quantity),
       bundleItems: [],
-    };
-  });
+    });
+  }
+
+  if (unavailableDetails.length) {
+    throwCheckoutError({
+      message: "One or more products are unavailable.",
+      code: "UNAVAILABLE_PRODUCTS",
+      details: unavailableDetails,
+    });
+  }
 
   const subtotal = roundCurrency(items.reduce((total, item) => total + item.lineTotal, 0));
   let coupon = null;
@@ -129,9 +156,7 @@ export const calculateOrderPricing = async ({ cartItems, couponCode, paymentMode
     coupon = await Coupon.findOne({ code: String(couponCode).trim().toUpperCase() }).lean();
 
     if (!coupon || !coupon.active) {
-      const error = new Error("Coupon code is invalid or inactive.");
-      error.statusCode = 400;
-      throw error;
+      throwCheckoutError({ message: "Coupon code is invalid or inactive." });
     }
   }
 
@@ -139,14 +164,10 @@ export const calculateOrderPricing = async ({ cartItems, couponCode, paymentMode
     calculateCouponDiscount({ coupon, subtotal, paymentMode })
   );
   const totalAmount = Math.max(0, roundCurrency(subtotal - discountAmount));
-  const codConfirmationFee = roundCurrency(
-    items.reduce((total, item) => total + getBillableUnitCount(item) * getCodFeePerProduct(), 0)
-  );
-  const paymentAmount =
-    paymentMode === "cod_deposit" ? Math.min(totalAmount, codConfirmationFee) : totalAmount;
-  const depositAmount = paymentMode === "cod_deposit" ? paymentAmount : 0;
-  const balanceDue =
-    paymentMode === "cod_deposit" ? roundCurrency(Math.max(0, totalAmount - paymentAmount)) : 0;
+  const codConfirmationFee = 0;
+  const paymentAmount = paymentMode === "cod_deposit" ? 0 : totalAmount;
+  const depositAmount = 0;
+  const balanceDue = paymentMode === "cod_deposit" ? totalAmount : 0;
 
   return {
     items,

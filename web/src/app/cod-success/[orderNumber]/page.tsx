@@ -11,6 +11,7 @@ export default async function CodSuccessPage({
 }) {
   const { orderNumber } = await params;
   const order = await getOrder(orderNumber).catch(() => null);
+  const isZeroAdvanceCod = Number(order?.paymentAmount || 0) <= 0;
 
   return (
     <PageContainer>
@@ -20,14 +21,22 @@ export default async function CodSuccessPage({
         </span>
         <h1 className="mt-2 text-3xl font-black text-[#40346f]">Your order is reserved.</h1>
         <p className="mt-3 text-sm leading-7 text-[#6d6790]">
-          We have received your COD confirmation payment. The remaining amount stays due when the order arrives.
+          {isZeroAdvanceCod
+            ? "Your cash on delivery order has been placed successfully. The amount will be collected when the order arrives."
+            : "We have received your COD confirmation payment. The remaining amount stays due when the order arrives."}
         </p>
         <div className="mt-5 rounded-[24px] bg-[#fff8ef] p-4 text-sm text-[#7e5b44]">
           <p>Order ID: <strong>{orderNumber}</strong></p>
           {order ? (
             <>
-              <p className="mt-2">Paid now: {formatPrice(order.paymentAmount)}</p>
-              <p>Balance on delivery: {formatPrice(order.balanceDue)}</p>
+              {isZeroAdvanceCod ? (
+                <p className="mt-2">Amount due on delivery: {formatPrice(order.totalAmount)}</p>
+              ) : (
+                <>
+                  <p className="mt-2">Paid now: {formatPrice(order.paymentAmount)}</p>
+                  <p>Balance on delivery: {formatPrice(order.balanceDue)}</p>
+                </>
+              )}
             </>
           ) : null}
         </div>

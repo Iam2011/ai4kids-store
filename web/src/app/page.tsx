@@ -6,7 +6,6 @@ import { AboutBlock } from "@/components/trust/about-block";
 import { PageContainer } from "@/components/shared/page-container";
 import { SectionHeader } from "@/components/shared/section-header";
 import { getProducts } from "@/lib/api/products";
-import { formatPrice } from "@/lib/utils/format-price";
 import type { Product } from "@/types/product";
 
 const homepageShowcaseNames = [
@@ -66,7 +65,7 @@ export default async function HomePage() {
         <SectionHeader title="Best Sellers" actionHref="/products?featured=true" />
         <ProductGrid products={bestSellerProducts} variant="home" />
         <p className="mt-4 text-center text-sm text-[#8b7fa8]">
-          COD Fee: {formatPrice(40)} per product
+          Cash on Delivery available with no advance payment.
         </p>
       </section>
 

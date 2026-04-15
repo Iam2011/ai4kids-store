@@ -9,6 +9,7 @@ import { TrustMarkers } from "@/components/trust/trust-markers";
 import { PageContainer } from "@/components/shared/page-container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { createPaymentOrder, lookupPincode, markPaymentFailure, verifyPayment } from "@/lib/api/checkout";
+import { ApiError } from "@/lib/api/client";
 import { calculateCodConfirmationFee, getPreviewTotal } from "@/lib/utils/pricing";
 import { getAnalyticsSnapshotForOrder, trackStoreEvent } from "@/lib/analytics/track";
 import { loadRazorpayScript } from "@/lib/utils/payment";
@@ -38,7 +39,7 @@ const validateCheckoutForm = (form: CheckoutCustomer) => {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, subtotal, coupon, clearCart } = useCart();
+  const { items, subtotal, coupon, clearCart, removeItems } = useCart();
   const [form, setForm] = useState(initialForm);
   const [paymentMode, setPaymentMode] = useState<PaymentMode>("full_payment");
   const [lookupMessage, setLookupMessage] = useState("");
@@ -56,8 +57,8 @@ export default function CheckoutPage() {
   const discount = couponAllowedForMode ? coupon?.discountAmount || 0 : 0;
   const total = getPreviewTotal(subtotal, discount);
   const codConfirmationFee = calculateCodConfirmationFee(items);
-  const paymentAmount = paymentMode === "cod_deposit" ? Math.min(total, codConfirmationFee) : total;
-  const balanceDue = paymentMode === "cod_deposit" ? Math.max(0, total - paymentAmount) : 0;
+  const paymentAmount = paymentMode === "cod_deposit" ? 0 : total;
+  const balanceDue = paymentMode === "cod_deposit" ? total : 0;
 
   useEffect(() => {
     if (!items.length || checkoutTrackedRef.current) return;
@@ -222,7 +223,38 @@ export default function CheckoutPage() {
 
       razorpay.open();
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Checkout failed.");
+      if (error instanceof ApiError && error.code === "UNAVAILABLE_PRODUCTS") {
+        const unavailableDetails = Array.isArray(error.details) ? error.details : [];
+        const unavailableItemKeys = items
+          .filter((item) =>
+            unavailableDetails.some((detail) => {
+              const detailRecord = detail as {
+                itemType?: string;
+                productId?: string;
+                comboKey?: string;
+              };
+
+              if (detailRecord.itemType === "combo") {
+                return item.itemType === "combo" && item.comboKey === detailRecord.comboKey;
+              }
+
+              return item.itemType === "product" && item.productId === detailRecord.productId;
+            })
+          )
+          .map((item) => item.itemKey);
+
+        if (unavailableItemKeys.length) {
+          removeItems(unavailableItemKeys);
+        }
+
+        setErrorMessage(
+          unavailableItemKeys.length
+            ? "Unavailable products were removed from your cart. Please review your order and try again."
+            : error.message
+        );
+      } else {
+        setErrorMessage(error instanceof Error ? error.message : "Checkout failed.");
+      }
       setSubmitting(false);
       setCheckoutToken(generateCheckoutToken());
     }

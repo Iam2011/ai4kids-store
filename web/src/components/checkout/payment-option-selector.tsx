@@ -23,7 +23,7 @@ export function PaymentOptionSelector({
         )}
       >
         <strong className="block text-sm text-[#3e336c]">Cash on Delivery</strong>
-        <span className="mt-1 block text-xs text-[#7f769d]">₹40 confirmation required</span>
+        <span className="mt-1 block text-xs text-[#7f769d]">Pay on delivery. No advance payment.</span>
       </button>
 
       <button
