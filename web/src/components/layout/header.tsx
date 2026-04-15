@@ -22,7 +22,12 @@ export function Header() {
   const router = useRouter();
   const { itemCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+  const isAdminRoute = pathname.startsWith("/admin");
   const isCheckoutRoute = pathname === "/checkout";
+
+  if (isAdminRoute) {
+    return null;
+  }
 
   return (
     <>

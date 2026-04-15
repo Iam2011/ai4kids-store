@@ -12,6 +12,7 @@ import { parseCatalogCsv } from "../utils/csvCatalogParser.js";
 import { slugify } from "../utils/slugify.js";
 import { parseCatalogWorkbook } from "../utils/xlsxCatalogParser.js";
 import {
+  MIN_VISIBLE_PRODUCT_PRICE,
   normalizeCategoryValue,
   normalizeProductTitle,
   transformCatalogRow,
@@ -41,6 +42,21 @@ const toBoolean = (value, defaultValue = false) => {
   return defaultValue;
 };
 
+const createHttpError = (message, statusCode = 400) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+};
+
+const assertMinimumProductPrice = (price) => {
+  if (!Number.isFinite(price) || price < MIN_VISIBLE_PRODUCT_PRICE) {
+    throw createHttpError(
+      `Products below Rs ${MIN_VISIBLE_PRODUCT_PRICE} are not allowed in the live catalog.`,
+      400
+    );
+  }
+};
+
 const normalizeProductPayload = (payload) => {
   const name = normalizeProductTitle(payload.name || "");
   const sku = String(payload.sku || "").trim();
@@ -57,6 +73,8 @@ const normalizeProductPayload = (payload) => {
         .split(",")
         .map((entry) => entry.trim())
         .filter(Boolean);
+
+  assertMinimumProductPrice(price);
 
   return {
     sku,
@@ -211,7 +229,7 @@ export const adminLogin = async (req, res) => {
 
 export const getAdminSummary = async (req, res) => {
   const [productCount, orderCount, pendingOrders, revenueData] = await Promise.all([
-    Product.countDocuments({}),
+    Product.countDocuments({ price: { $gte: MIN_VISIBLE_PRODUCT_PRICE } }),
     Order.countDocuments({}),
     Order.countDocuments({ orderStatus: { $in: ["pending", "confirmed"] } }),
     Order.aggregate([
@@ -231,7 +249,11 @@ export const getAdminSummary = async (req, res) => {
 };
 
 export const getAdminProducts = async (req, res) => {
-  const products = await Product.find({}).sort({ updatedAt: -1 }).lean();
+  const products = await Product.find({
+    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
+  })
+    .sort({ updatedAt: -1 })
+    .lean();
   res.json({ products });
 };
 
@@ -286,6 +308,16 @@ export const importAdminProducts = async (req, res) => {
       errors.push({
         row: index + 2,
         message: "Missing required name, SKU, image, or sale price.",
+      });
+      return;
+    }
+
+    const numericSalePrice = Number(String(salePrice).replace(/[^\d.]/g, ""));
+    if (!Number.isFinite(numericSalePrice) || numericSalePrice < MIN_VISIBLE_PRODUCT_PRICE) {
+      skipped += 1;
+      errors.push({
+        row: index + 2,
+        message: `Products below Rs ${MIN_VISIBLE_PRODUCT_PRICE} are not allowed in the live catalog.`,
       });
       return;
     }

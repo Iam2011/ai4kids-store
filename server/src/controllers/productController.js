@@ -1,6 +1,7 @@
 import { Product } from "../models/Product.js";
 import {
   getCategoryMatchers,
+  MIN_VISIBLE_PRODUCT_PRICE,
   normalizeCategoryValue,
   normalizeProductRecord,
 } from "../utils/productDerivation.js";
@@ -27,7 +28,7 @@ const buildCategoryQuery = (category) => {
 };
 
 const buildProductQuery = ({ search, ageGroup, category, featured }) => {
-  const query = { isActive: true };
+  const query = { isActive: true, price: { $gte: MIN_VISIBLE_PRODUCT_PRICE } };
 
   if (search) {
     query.$text = { $search: search };
@@ -88,7 +89,11 @@ export const getProducts = async (req, res) => {
 };
 
 export const getProductBySlug = async (req, res) => {
-  const storedProduct = await Product.findOne({ slug: req.params.slug, isActive: true }).lean();
+  const storedProduct = await Product.findOne({
+    slug: req.params.slug,
+    isActive: true,
+    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
+  }).lean();
 
   if (!storedProduct) {
     return res.status(404).json({ message: "Product not found." });
@@ -99,6 +104,7 @@ export const getProductBySlug = async (req, res) => {
   const relatedProducts = await Product.find({
     _id: { $ne: product._id },
     isActive: true,
+    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
     ...(relatedQuery || {}),
   })
     .sort({ featured: -1, discountPercent: -1 })

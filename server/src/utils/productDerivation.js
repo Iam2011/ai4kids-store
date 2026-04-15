@@ -1,4 +1,5 @@
 const CATALOG_SOURCE = "ai4kids_website_xlsx";
+export const MIN_VISIBLE_PRODUCT_PRICE = 500;
 
 const titleCorrections = {
   dargon: "Dragon",
