@@ -1,4 +1,8 @@
-const DEFAULT_API_URL = process.env.NEXT_PUBLIC_API_URL || "https://ai4kids-api.onrender.com/api";
+const DEFAULT_API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "development"
+    ? "http://127.0.0.1:5000/api"
+    : "https://ai4kids-api.onrender.com/api");
 
 export class ApiError extends Error {
   status: number;

@@ -17,6 +17,8 @@ app.set("trust proxy", true);
 const allowedOrigins = new Set(
   [
     "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://ai4kids.in",
     "https://www.ai4kids.in",
     process.env.CLIENT_URL,

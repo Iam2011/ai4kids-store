@@ -12,7 +12,6 @@ export function CheckoutSummary({
   subtotal,
   discount,
   total,
-  codFee,
   paymentAmount,
   balanceDue,
   paymentMode,
@@ -25,7 +24,6 @@ export function CheckoutSummary({
   subtotal: number;
   discount: number;
   total: number;
-  codFee: number;
   paymentAmount: number;
   balanceDue: number;
   paymentMode: PaymentMode;

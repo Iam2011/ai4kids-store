@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ADMIN_TOKEN_STORAGE_KEY,
@@ -19,7 +19,7 @@ import { formatPrice } from "@/lib/utils/format-price";
 import type { AdminAnalyticsReport, AdminOrder } from "@/types/admin";
 import type { Product } from "@/types/product";
 
-const MIN_VISIBLE_PRODUCT_PRICE = 500;
+const MIN_VISIBLE_PRODUCT_PRICE = 0;
 const confirmedOrderStatuses = new Set(["confirmed", "processing", "shipped", "delivered"]);
 
 type AdminProductFormState = {
@@ -137,7 +137,7 @@ const validateProductForm = (form: AdminProductFormState) => {
   if (!String(form.sku || "").trim()) return "SKU is required.";
   if (!String(form.name || "").trim()) return "Product name is required.";
   if (!String(form.imageUrl || "").trim()) return "Image URL is required.";
-  if (Number(form.price) < MIN_VISIBLE_PRODUCT_PRICE) {
+  if (MIN_VISIBLE_PRODUCT_PRICE > 0 && Number(form.price) < MIN_VISIBLE_PRODUCT_PRICE) {
     return `Products below ${formatPrice(MIN_VISIBLE_PRODUCT_PRICE)} are not allowed in the live catalog.`;
   }
   return "";
@@ -257,10 +257,10 @@ export function AdminDashboardPage() {
     [analyticsRange, customRange.endDate, customRange.startDate]
   );
 
-  const redirectToLogin = () => {
+  const redirectToLogin = useCallback(() => {
     window.localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
     router.replace("/admin");
-  };
+  }, [router]);
 
   const refreshAdminBasics = async (activeToken: string) => {
     const [summaryData, ordersData, productsData] = await Promise.all([
@@ -302,7 +302,7 @@ export function AdminDashboardPage() {
     };
 
     void load();
-  }, [token]);
+  }, [redirectToLogin, token]);
 
   useEffect(() => {
     if (!token) return;
@@ -325,7 +325,7 @@ export function AdminDashboardPage() {
     };
 
     void load();
-  }, [analyticsParams, token]);
+  }, [analyticsParams, redirectToLogin, token]);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>

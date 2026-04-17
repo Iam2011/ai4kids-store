@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/button";
 import { trackStoreEvent } from "@/lib/analytics/track";
@@ -10,6 +11,7 @@ type StageConfig = {
   label: string;
   alt: string;
   src: string;
+  slug: string;
   className: string;
   podiumClassName: string;
   labelClassName: string;
@@ -24,6 +26,7 @@ const mobileStages: StageConfig[] = [
     label: "Drone",
     alt: "Drone toy",
     src: "/assets/hero/live-2026/drone.png",
+    slug: "drone",
     className: "left-[58%] top-[26%] z-[30] w-[37%]",
     podiumClassName:
       "h-[16.5%] w-[100%] bg-[linear-gradient(180deg,#eef5ff_0%,#dbe8ff_60%,#c9d9ff_100%)]",
@@ -37,6 +40,7 @@ const mobileStages: StageConfig[] = [
     label: "Metal JCB",
     alt: "Metal JCB toy",
     src: "/assets/hero/live-2026/jcb.png",
+    slug: "metal-jcb",
     className: "left-[4.5%] top-[56.8%] z-[24] w-[33.5%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#fff8dc_0%,#ffefb5_60%,#ffe59f_100%)]",
@@ -50,6 +54,7 @@ const mobileStages: StageConfig[] = [
     label: "Sweet House",
     alt: "Sweet House toy",
     src: "/assets/hero/live-2026/sweet-house.png",
+    slug: "sweet-house",
     className: "left-[44%] top-[55.5%] z-[22] w-[49%]",
     podiumClassName:
       "h-[18.5%] w-[100%] bg-[linear-gradient(180deg,#fff1f7_0%,#ffdce8_58%,#ffcfe1_100%)]",
@@ -63,6 +68,7 @@ const mobileStages: StageConfig[] = [
     label: "Land Defender SUV",
     alt: "Land Defender SUV toy",
     src: "/assets/hero/live-2026/defender-suv.png",
+    slug: "land-defender-suv",
     className: "left-[3%] top-[82.5%] z-[18] w-[38%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e9fbf2_0%,#d7f8e5_60%,#c6f2d7_100%)]",
@@ -76,6 +82,7 @@ const mobileStages: StageConfig[] = [
     label: "Royal Enfield Classic 350",
     alt: "Royal Enfield Classic 350 toy",
     src: "/assets/hero/live-2026/royal-enfield.png",
+    slug: "royal-enfield-classic-350",
     className: "left-[60%] top-[82.8%] z-[18] w-[37%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e8fbf5_0%,#d7f8ec_60%,#caf6e4_100%)]",
@@ -92,6 +99,7 @@ const desktopStages: StageConfig[] = [
     label: "Metal JCB",
     alt: "Metal JCB toy",
     src: "/assets/hero/live-2026/jcb.png",
+    slug: "metal-jcb",
     className: "left-[42.5%] top-[23.5%] z-[24] w-[20.5%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#fff8dc_0%,#ffefb5_60%,#ffe59f_100%)]",
@@ -105,6 +113,7 @@ const desktopStages: StageConfig[] = [
     label: "Drone",
     alt: "Drone toy",
     src: "/assets/hero/live-2026/drone.png",
+    slug: "drone",
     className: "left-[73.5%] top-[12.5%] z-[30] w-[22.5%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#eef5ff_0%,#dbe8ff_60%,#c9d9ff_100%)]",
@@ -118,6 +127,7 @@ const desktopStages: StageConfig[] = [
     label: "Sweet House",
     alt: "Sweet House toy",
     src: "/assets/hero/live-2026/sweet-house.png",
+    slug: "sweet-house",
     className: "left-[53.5%] top-[40%] z-[22] w-[31.5%]",
     podiumClassName:
       "h-[19%] w-[100%] bg-[linear-gradient(180deg,#fff1f7_0%,#ffdce8_58%,#ffcfe1_100%)]",
@@ -131,6 +141,7 @@ const desktopStages: StageConfig[] = [
     label: "Land Defender SUV",
     alt: "Land Defender SUV toy",
     src: "/assets/hero/live-2026/defender-suv.png",
+    slug: "land-defender-suv",
     className: "left-[29%] top-[71%] z-[18] w-[20.5%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e9fbf2_0%,#d7f8e5_60%,#c6f2d7_100%)]",
@@ -144,6 +155,7 @@ const desktopStages: StageConfig[] = [
     label: "Royal Enfield Classic 350",
     alt: "Royal Enfield Classic 350 toy",
     src: "/assets/hero/live-2026/royal-enfield.png",
+    slug: "royal-enfield-classic-350",
     className: "left-[73%] top-[73.5%] z-[18] w-[21.5%]",
     podiumClassName:
       "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e8fbf5_0%,#d7f8ec_60%,#caf6e4_100%)]",
@@ -185,7 +197,7 @@ export function HeroBanner() {
       category: {
         categoryLabel: "Explore Toys",
       },
-    }).catch(() => {});
+    }).catch(() => { });
 
     router.push("/products");
   };
@@ -269,8 +281,10 @@ function DesktopTextBlock({ onExplore }: { onExplore: () => void }) {
 
 function MobileScene() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <MobileDecor />
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <MobileDecor />
+      </div>
 
       <div className="absolute inset-0">
         {mobileStages.map((stage) => (
@@ -284,7 +298,9 @@ function MobileScene() {
 function DesktopScene() {
   return (
     <div className="relative h-[680px] overflow-hidden rounded-[28px]">
-      <DesktopDecor />
+      <div className="pointer-events-none absolute inset-0">
+        <DesktopDecor />
+      </div>
 
       <div className="absolute inset-0">
         {desktopStages.map((stage) => (
@@ -309,7 +325,11 @@ function ProductStage({ stage }: { stage: StageConfig }) {
           className={`absolute left-1/2 -translate-x-1/2 rounded-full bg-[rgba(118,95,177,0.12)] blur-[16px] ${stage.shadowClassName}`}
         />
 
-        <div className={`absolute left-1/2 -translate-x-1/2 ${stage.imageClassName}`}>
+        <Link
+          href={`/products/${stage.slug}`}
+          aria-label={`Open ${stage.label}`}
+          className={`absolute left-1/2 z-30 -translate-x-1/2 ${stage.imageClassName} block cursor-pointer`}
+        >
           <Image
             src={stage.src}
             alt={stage.alt}
@@ -319,17 +339,19 @@ function ProductStage({ stage }: { stage: StageConfig }) {
             priority
             className="h-auto w-full object-contain [filter:drop-shadow(0_18px_30px_rgba(57,44,98,0.16))]"
           />
-        </div>
+        </Link>
 
-        <div className="absolute bottom-[4.5%] left-1/2 z-20 -translate-x-1/2">
-          <div
-            className={`inline-flex min-h-[32px] items-center justify-center rounded-full px-3 py-2 text-center text-[12px] font-semibold leading-none text-white shadow-[0_10px_22px_rgba(104,75,183,0.18)] lg:min-h-[36px] lg:px-4 lg:text-[14px] ${stage.labelClassName}`}
+        <div className="absolute bottom-[4.5%] left-1/2 z-40 -translate-x-1/2">
+          <Link
+            href={`/products/${stage.slug}`}
+            aria-label={`Open ${stage.label}`}
+            className={`inline-flex min-h-[32px] items-center justify-center rounded-full px-3 py-2 text-center text-[12px] font-semibold leading-none text-white shadow-[0_10px_22px_rgba(104,75,183,0.18)] lg:min-h-[36px] lg:px-4 lg:text-[14px] ${stage.labelClassName} cursor-pointer transition-transform duration-200 hover:scale-[1.03]`}
           >
             <span className="flex items-center gap-1.5 whitespace-nowrap">
               <LabelIcon />
               {stage.label}
             </span>
-          </div>
+          </Link>
         </div>
       </div>
     </div>

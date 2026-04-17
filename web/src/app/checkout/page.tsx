@@ -10,10 +10,53 @@ import { PageContainer } from "@/components/shared/page-container";
 import { EmptyState } from "@/components/shared/empty-state";
 import { createPaymentOrder, lookupPincode, markPaymentFailure, verifyPayment } from "@/lib/api/checkout";
 import { ApiError } from "@/lib/api/client";
-import { calculateCodConfirmationFee, getPreviewTotal } from "@/lib/utils/pricing";
+import { getPreviewTotal } from "@/lib/utils/pricing";
 import { getAnalyticsSnapshotForOrder, trackStoreEvent } from "@/lib/analytics/track";
 import { loadRazorpayScript } from "@/lib/utils/payment";
 import type { CheckoutCustomer, PaymentMode } from "@/types/checkout";
+
+type RazorpaySuccessResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
+type RazorpayFailureResponse = {
+  error?: {
+    description?: string;
+  };
+};
+
+type RazorpayInstance = {
+  open: () => void;
+  on: (eventName: "payment.failed", handler: (response: RazorpayFailureResponse) => void) => void;
+};
+
+type RazorpayOptions = {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  image: string;
+  order_id: string;
+  prefill: {
+    name: string;
+    contact: string;
+  };
+  notes: {
+    orderNumber: string;
+  };
+  theme: {
+    color: string;
+  };
+  handler: (response: RazorpaySuccessResponse) => Promise<void>;
+  modal: {
+    ondismiss: () => Promise<void>;
+  };
+};
+
+type RazorpayConstructor = new (options: RazorpayOptions) => RazorpayInstance;
 
 const initialForm: CheckoutCustomer = {
   name: "",
@@ -56,7 +99,6 @@ export default function CheckoutPage() {
     : false;
   const discount = couponAllowedForMode ? coupon?.discountAmount || 0 : 0;
   const total = getPreviewTotal(subtotal, discount);
-  const codConfirmationFee = calculateCodConfirmationFee(items);
   const paymentAmount = paymentMode === "cod_deposit" ? 0 : total;
   const balanceDue = paymentMode === "cod_deposit" ? total : 0;
 
@@ -160,7 +202,10 @@ export default function CheckoutPage() {
         throw new Error("Unable to load Razorpay checkout.");
       }
 
-      const RazorpayCtor = (window as typeof window & { Razorpay?: any }).Razorpay;
+      const RazorpayCtor = (window as typeof window & { Razorpay?: RazorpayConstructor }).Razorpay;
+      if (!RazorpayCtor) {
+        throw new Error("Razorpay checkout is unavailable.");
+      }
       const razorpay = new RazorpayCtor({
         key: order.keyId,
         amount: Math.round(order.amount * 100),
@@ -179,7 +224,7 @@ export default function CheckoutPage() {
         theme: {
           color: "#8d72ff",
         },
-        handler: async (response: Record<string, string>) => {
+        handler: async (response: RazorpaySuccessResponse) => {
           await verifyPayment({
             orderId: order.orderId,
             razorpay_order_id: response.razorpay_order_id,
@@ -209,7 +254,7 @@ export default function CheckoutPage() {
         },
       });
 
-      razorpay.on("payment.failed", async (response: any) => {
+      razorpay.on("payment.failed", async (response: RazorpayFailureResponse) => {
         await markPaymentFailure({
           orderId: order.orderId,
           reason: response.error?.description || "Razorpay payment failed.",
@@ -277,7 +322,6 @@ export default function CheckoutPage() {
           subtotal={subtotal}
           discount={discount}
           total={total}
-          codFee={codConfirmationFee}
           paymentAmount={paymentAmount}
           balanceDue={balanceDue}
           paymentMode={paymentMode}

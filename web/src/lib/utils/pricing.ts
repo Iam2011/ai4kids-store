@@ -1,6 +1,4 @@
-import type { CartItem } from "@/types/cart";
-
-export const calculateCodConfirmationFee = (items: CartItem[] = []) =>
+export const calculateCodConfirmationFee = () =>
   0;
 
 export const getPreviewTotal = (subtotal: number, discount: number) =>
