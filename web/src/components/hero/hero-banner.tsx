@@ -8,13 +8,23 @@ import { trackStoreEvent } from "@/lib/analytics/track";
 
 type CtaDestination = "/products" | "/products?featured=true";
 
-const heroProducts = {
+type HeroProduct = {
+  src: string;
+  alt: string;
+  label: string;
+  accent: string;
+  pedestal: string;
+  halo: string;
+};
+
+const heroProducts: Record<string, HeroProduct> = {
   drone: {
     src: "/assets/hero/live-2026/drone.png",
     alt: "Drone toy",
     label: "Drone",
     accent: "from-[#5d9cff] to-[#2d6dff]",
     pedestal: "from-[#e6f0ff] to-[#cfe0ff]",
+    halo: "bg-[radial-gradient(circle,rgba(93,156,255,0.24),rgba(255,255,255,0)_72%)]",
   },
   house: {
     src: "/assets/hero/live-2026/sweet-house.png",
@@ -22,6 +32,7 @@ const heroProducts = {
     label: "Sweet House",
     accent: "from-[#ff5b8a] to-[#ff4f7b]",
     pedestal: "from-[#ffe7f0] to-[#f9d9e8]",
+    halo: "bg-[radial-gradient(circle,rgba(255,116,155,0.18),rgba(196,183,255,0.14)_45%,rgba(255,255,255,0)_74%)]",
   },
   jcb: {
     src: "/assets/hero/live-2026/jcb.png",
@@ -29,6 +40,7 @@ const heroProducts = {
     label: "Metal JCB",
     accent: "from-[#ffcf3b] to-[#ffa800]",
     pedestal: "from-[#fff5ce] to-[#ffe9aa]",
+    halo: "bg-[radial-gradient(circle,rgba(255,208,67,0.24),rgba(255,255,255,0)_72%)]",
   },
   defender: {
     src: "/assets/hero/live-2026/defender-suv.png",
@@ -36,6 +48,7 @@ const heroProducts = {
     label: "Land Defender SUV",
     accent: "from-[#27c689] to-[#17b673]",
     pedestal: "from-[#ddf9e8] to-[#c7f2d7]",
+    halo: "bg-[radial-gradient(circle,rgba(39,198,137,0.18),rgba(255,255,255,0)_72%)]",
   },
   bike: {
     src: "/assets/hero/live-2026/royal-enfield.png",
@@ -43,6 +56,7 @@ const heroProducts = {
     label: "Royal Enfield Classic 350",
     accent: "from-[#25c8a8] to-[#19b98b]",
     pedestal: "from-[#ddfaef] to-[#caf6e4]",
+    halo: "bg-[radial-gradient(circle,rgba(37,200,168,0.18),rgba(255,255,255,0)_72%)]",
   },
 };
 
@@ -73,7 +87,7 @@ const assuranceItems = [
 const benefitItems = [
   {
     title: "Free Shipping",
-    subtitle: "On orders above ₹499",
+    subtitle: "On orders above Rs 499",
     color: "text-[#8a62ff]",
     bg: "bg-[#f3ecff]",
     icon: TruckIcon,
@@ -127,8 +141,8 @@ export function HeroBanner() {
       <div className="relative overflow-hidden rounded-[34px] border border-white/70 px-4 py-4 sm:px-6 sm:py-6 lg:px-10 lg:py-8">
         <HeroBackdrop />
 
-        <div className="relative z-10 hidden gap-8 lg:grid lg:grid-cols-[minmax(320px,460px)_1fr] lg:items-start">
-          <div className="flex min-h-[560px] flex-col justify-between pt-4">
+        <div className="relative z-10 hidden lg:grid lg:grid-cols-[minmax(320px,430px)_1fr] lg:gap-8 lg:items-start">
+          <div className="flex min-h-[565px] flex-col justify-between pt-4">
             <div>
               <TagPill />
               <h1 className="mt-6 text-[70px] font-black leading-[0.96] tracking-[-0.05em] text-[#1d1b62]">
@@ -147,7 +161,9 @@ export function HeroBanner() {
                   className="min-h-[56px] min-w-[188px] rounded-[999px] px-8 text-lg shadow-[0_18px_36px_rgba(123,72,255,0.28)]"
                 >
                   Explore Toys
-                  <span className="ml-3 text-xl leading-none">→</span>
+                  <span className="ml-3 text-xl leading-none" aria-hidden="true">
+                    &rarr;
+                  </span>
                 </Button>
                 <Button
                   variant="secondary"
@@ -214,7 +230,9 @@ export function HeroBanner() {
                   className="min-h-[44px] w-fit min-w-[146px] rounded-[999px] px-5 py-2 text-[14px] shadow-[0_16px_34px_rgba(123,72,255,0.26)]"
                 >
                   Explore Toys
-                  <span className="ml-2 text-base leading-none">→</span>
+                  <span className="ml-2 text-base leading-none" aria-hidden="true">
+                    &rarr;
+                  </span>
                 </Button>
                 <Button
                   variant="secondary"
@@ -274,57 +292,64 @@ export function HeroBanner() {
 
 function DesktopScene() {
   return (
-    <div className="relative min-h-[610px]">
+    <div className="relative h-[610px] overflow-hidden rounded-[36px]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(255,255,255,0.78),rgba(255,255,255,0)_24%),radial-gradient(circle_at_20%_16%,rgba(248,222,122,0.16),rgba(255,255,255,0)_18%),radial-gradient(circle_at_83%_14%,rgba(101,145,255,0.14),rgba(255,255,255,0)_19%),radial-gradient(circle_at_24%_84%,rgba(91,228,167,0.14),rgba(255,255,255,0)_18%),radial-gradient(circle_at_78%_85%,rgba(74,213,176,0.12),rgba(255,255,255,0)_18%)]" />
+      <div className="absolute left-[33%] top-[11%] h-[360px] w-[360px] rounded-full bg-[#efe5ff] opacity-70 blur-[14px]" />
+      <div className="absolute right-[10%] top-[6%] h-[180px] w-[180px] rounded-full bg-[#dfeaff] opacity-85 blur-[10px]" />
+      <div className="absolute left-[11%] top-[12%] h-[160px] w-[160px] rounded-full bg-[#fff0cf] opacity-90 blur-[12px]" />
+      <div className="absolute left-[8%] bottom-[10%] h-[170px] w-[170px] rounded-full bg-[#d9f8e3] opacity-90 blur-[12px]" />
+      <div className="absolute right-[6%] bottom-[10%] h-[165px] w-[165px] rounded-full bg-[#def9ec] opacity-85 blur-[12px]" />
+
       <ScenePaths className="absolute inset-0" />
       <Sparkles className="absolute inset-0" />
 
       <ProductPedestal
-        className="absolute left-[6%] top-[7%] w-[31%]"
-        imageClassName="w-[88%]"
+        className="absolute left-[7%] top-[10%] z-20 w-[26%]"
+        imageClassName="w-[94%]"
         product={heroProducts.jcb}
-        pedestalSize="h-[84px] w-[218px]"
+        pedestalSize="h-[76px] w-[204px]"
         pedestalOffset="bottom-[8px]"
-        labelWidth="w-fit"
+        labelWidth="w-[126px]"
         labelOffset="-bottom-2"
       />
 
       <ProductPedestal
-        className="absolute right-[1.5%] top-[2%] w-[33%]"
-        imageClassName="w-[96%]"
+        className="absolute right-[4%] top-[6%] z-30 w-[29%]"
+        imageClassName="w-[98%]"
         product={heroProducts.drone}
-        pedestalSize="h-[86px] w-[228px]"
-        pedestalOffset="bottom-[6px]"
+        pedestalSize="h-[78px] w-[214px]"
+        pedestalOffset="bottom-[10px]"
         labelWidth="w-[112px]"
-        labelOffset="-bottom-2"
+        labelOffset="-bottom-1"
       />
 
       <ProductPedestal
-        className="absolute left-[26%] top-[12%] z-10 w-[49%]"
-        imageClassName="w-[92%]"
+        className="absolute left-1/2 top-[12%] z-20 w-[44%] -translate-x-1/2"
+        imageClassName="w-[94%]"
         product={heroProducts.house}
-        pedestalSize="h-[112px] w-[316px]"
-        pedestalOffset="bottom-[10px]"
+        pedestalSize="h-[112px] w-[308px]"
+        pedestalOffset="bottom-[12px]"
         labelWidth="w-[150px]"
         labelOffset="-bottom-4"
         large
       />
 
       <ProductPedestal
-        className="absolute left-[1%] bottom-[4%] w-[34%]"
-        imageClassName="w-[96%]"
+        className="absolute left-[5%] bottom-[4%] z-20 w-[29%]"
+        imageClassName="w-[100%]"
         product={heroProducts.defender}
-        pedestalSize="h-[86px] w-[244px]"
-        pedestalOffset="bottom-[6px]"
+        pedestalSize="h-[78px] w-[226px]"
+        pedestalOffset="bottom-[8px]"
         labelWidth="w-[176px]"
         labelOffset="-bottom-2"
       />
 
       <ProductPedestal
-        className="absolute right-[0%] bottom-[4%] w-[33%]"
-        imageClassName="w-[96%]"
+        className="absolute right-[4%] bottom-[6%] z-20 w-[30%]"
+        imageClassName="w-[100%]"
         product={heroProducts.bike}
-        pedestalSize="h-[84px] w-[240px]"
-        pedestalOffset="bottom-[6px]"
+        pedestalSize="h-[78px] w-[224px]"
+        pedestalOffset="bottom-[8px]"
         labelWidth="w-[204px]"
         labelOffset="-bottom-2"
       />
@@ -334,26 +359,30 @@ function DesktopScene() {
 
 function MobileScene() {
   return (
-    <div className="relative min-h-[560px] sm:min-h-[610px]">
+    <div className="relative h-[575px] overflow-hidden rounded-[30px] sm:h-[620px]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_32%,rgba(255,255,255,0.78),rgba(255,255,255,0)_24%),radial-gradient(circle_at_82%_10%,rgba(93,156,255,0.12),rgba(255,255,255,0)_20%),radial-gradient(circle_at_16%_52%,rgba(255,208,67,0.14),rgba(255,255,255,0)_18%),radial-gradient(circle_at_22%_86%,rgba(39,198,137,0.14),rgba(255,255,255,0)_18%),radial-gradient(circle_at_78%_86%,rgba(37,200,168,0.12),rgba(255,255,255,0)_18%)]" />
+      <div className="absolute left-1/2 top-[18%] h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-[#efe5ff] opacity-75 blur-[12px]" />
+      <div className="absolute right-[10%] top-[4%] h-[110px] w-[110px] rounded-full bg-[#dfeaff] opacity-85 blur-[8px]" />
+
       <ScenePaths className="absolute inset-0 opacity-90" />
       <Sparkles className="absolute inset-0" />
 
       <ProductPedestal
-        className="absolute right-0 top-0 w-[48%]"
+        className="absolute right-[2%] top-[3%] z-30 w-[43%]"
         imageClassName="w-[96%]"
         product={heroProducts.drone}
         pedestalSize="h-[52px] w-[145px]"
-        pedestalOffset="bottom-[4px]"
+        pedestalOffset="bottom-[6px]"
         labelWidth="w-[92px]"
         labelOffset="-bottom-1"
         mobile
       />
 
       <ProductPedestal
-        className="absolute right-[10%] top-[20%] z-10 w-[66%]"
-        imageClassName="w-[92%]"
+        className="absolute left-1/2 top-[17%] z-20 w-[58%] -translate-x-1/2"
+        imageClassName="w-[94%]"
         product={heroProducts.house}
-        pedestalSize="h-[74px] w-[212px]"
+        pedestalSize="h-[76px] w-[214px]"
         pedestalOffset="bottom-[8px]"
         labelWidth="w-[128px]"
         labelOffset="-bottom-3"
@@ -362,34 +391,34 @@ function MobileScene() {
       />
 
       <ProductPedestal
-        className="absolute left-0 top-[37%] w-[44%]"
-        imageClassName="w-[94%]"
+        className="absolute left-[2%] top-[40%] z-20 w-[35%]"
+        imageClassName="w-[96%]"
         product={heroProducts.jcb}
-        pedestalSize="h-[52px] w-[142px]"
-        pedestalOffset="bottom-[5px]"
+        pedestalSize="h-[50px] w-[132px]"
+        pedestalOffset="bottom-[6px]"
         labelWidth="w-[98px]"
         labelOffset="-bottom-1"
         mobile
       />
 
       <ProductPedestal
-        className="absolute left-0 bottom-[2%] w-[50%]"
+        className="absolute left-[1%] bottom-[3%] z-20 w-[43%]"
         imageClassName="w-[98%]"
         product={heroProducts.defender}
-        pedestalSize="h-[56px] w-[168px]"
-        pedestalOffset="bottom-[5px]"
-        labelWidth="w-[146px]"
+        pedestalSize="h-[54px] w-[156px]"
+        pedestalOffset="bottom-[6px]"
+        labelWidth="w-[138px]"
         labelOffset="-bottom-1"
         mobile
       />
 
       <ProductPedestal
-        className="absolute right-0 bottom-[2%] w-[48%]"
+        className="absolute right-[1%] bottom-[4%] z-20 w-[44%]"
         imageClassName="w-[98%]"
         product={heroProducts.bike}
-        pedestalSize="h-[56px] w-[170px]"
-        pedestalOffset="bottom-[5px]"
-        labelWidth="w-[160px]"
+        pedestalSize="h-[54px] w-[158px]"
+        pedestalOffset="bottom-[6px]"
+        labelWidth="w-[152px]"
         labelOffset="-bottom-1"
         mobile
       />
@@ -409,13 +438,7 @@ function ProductPedestal({
   mobile = false,
 }: {
   className: string;
-  product: {
-    src: string;
-    alt: string;
-    label: string;
-    accent: string;
-    pedestal: string;
-  };
+  product: HeroProduct;
   pedestalSize: string;
   pedestalOffset: string;
   imageClassName: string;
@@ -428,10 +451,16 @@ function ProductPedestal({
     <div className={className}>
       <div className="relative flex justify-center">
         <div
+          className={`absolute left-1/2 top-1/2 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[8px] ${product.halo}`}
+        />
+
+        <div
           className={`absolute left-1/2 -translate-x-1/2 rounded-[999px] bg-gradient-to-b ${product.pedestal} shadow-[0_30px_50px_rgba(172,143,224,0.2)] ${pedestalSize} ${pedestalOffset}`}
         >
           <div className="absolute inset-x-[10%] top-3 h-[18%] rounded-full bg-white/70 blur-[2px]" />
         </div>
+
+        <div className="absolute left-1/2 top-[74%] h-7 w-[62%] -translate-x-1/2 rounded-full bg-[rgba(74,59,130,0.16)] blur-[14px]" />
 
         <Image
           src={product.src}
@@ -446,7 +475,9 @@ function ProductPedestal({
         <div
           className={`absolute left-1/2 z-20 -translate-x-1/2 rounded-[999px] bg-gradient-to-r ${product.accent} px-4 py-2 text-center text-white shadow-[0_12px_24px_rgba(104,75,183,0.28)] ${labelWidth} ${labelOffset}`}
         >
-          <span className={`flex items-center justify-center gap-1.5 font-semibold ${mobile ? "text-[11px]" : "text-sm"}`}>
+          <span
+            className={`flex items-center justify-center gap-1.5 font-semibold ${mobile ? "text-[11px]" : "text-sm"}`}
+          >
             <LabelDot />
             {product.label}
           </span>
@@ -472,7 +503,13 @@ function AssurancePill({
   compact?: boolean;
 }) {
   return (
-    <div className={`flex items-start gap-3 ${compact ? "min-w-0 flex-col rounded-[20px] border border-white/70 bg-white/72 p-3 text-center shadow-[0_14px_24px_rgba(175,145,220,0.12)]" : ""}`}>
+    <div
+      className={`flex items-start gap-3 ${
+        compact
+          ? "min-w-0 flex-col rounded-[20px] border border-white/70 bg-white/72 p-3 text-center shadow-[0_14px_24px_rgba(175,145,220,0.12)]"
+          : ""
+      }`}
+    >
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${bg} ${color}`}>
         <Icon className="h-5 w-5" />
       </div>
@@ -505,7 +542,9 @@ function BenefitCard({
 }) {
   return (
     <div
-      className={`flex items-center gap-4 px-4 py-5 sm:px-5 lg:px-7 ${index > 0 ? "border-t border-[#f0e8fb] lg:border-l lg:border-t-0" : ""}`}
+      className={`flex items-center gap-4 px-4 py-5 sm:px-5 lg:px-7 ${
+        index > 0 ? "border-t border-[#f0e8fb] lg:border-l lg:border-t-0" : ""
+      }`}
     >
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${bg} ${color}`}>
         <Icon className="h-5 w-5" />
@@ -592,7 +631,7 @@ function Sparkles({ className = "" }: { className?: string }) {
 
 function Sparkle({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={`h-5 w-5 fill-current ${className}`}>
+    <svg viewBox="0 0 24 24" className={`h-5 w-5 fill-current ${className}`} aria-hidden="true">
       <path d="M12 1.5l2.14 6.36L20.5 10l-6.36 2.14L12 18.5l-2.14-6.36L3.5 10l6.36-2.14L12 1.5z" />
     </svg>
   );
