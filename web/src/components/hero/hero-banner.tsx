@@ -5,7 +5,16 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/button";
 import { trackStoreEvent } from "@/lib/analytics/track";
 
-const heroProducts = {
+type HeroProduct = {
+  src: string;
+  alt: string;
+  label: string;
+  accent: string;
+  pedestal: string;
+  halo: string;
+};
+
+const heroProducts: Record<string, HeroProduct> = {
   drone: {
     src: "/assets/hero/live-2026/drone.png",
     alt: "Drone toy",
@@ -67,77 +76,170 @@ export function HeroBanner() {
       <div className="relative overflow-hidden rounded-[24px] border border-white/75 px-[18px] pb-[22px] pt-5 sm:px-6 sm:pb-7 sm:pt-6 lg:rounded-[34px] lg:px-10 lg:pb-10 lg:pt-8">
         <HeroBackdrop />
 
-        <div className="relative z-10 flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(380px,46%)_minmax(420px,54%)] lg:items-center lg:gap-10">
+        <div className="relative z-10 hidden lg:grid lg:grid-cols-[minmax(380px,46%)_minmax(420px,54%)] lg:items-center lg:gap-10">
           <div className="lg:max-w-[520px]">
             <HeroBadge />
-            <h1 className="mt-[18px] max-w-[260px] text-[clamp(32px,8vw,54px)] font-[800] leading-[0.96] tracking-[-0.05em] text-[#1d1b62] lg:mt-6 lg:max-w-[500px] lg:text-[clamp(72px,7vw,92px)]">
+            <h1 className="mt-6 max-w-[500px] text-[clamp(72px,7vw,92px)] font-[800] leading-[0.96] tracking-[-0.05em] text-[#1d1b62]">
               <span className="block">Play Smarter.</span>
               <span className="block bg-gradient-to-r from-[#7a48ff] to-[#5b2ff4] bg-clip-text text-transparent">
                 Grow Faster.
               </span>
             </h1>
-            <p className="mt-4 max-w-[270px] text-[15px] leading-[1.55] text-[#6b6a95] sm:text-[16px] lg:mt-6 lg:max-w-[360px] lg:text-[18px] lg:leading-9">
+            <p className="mt-6 max-w-[360px] text-[18px] leading-9 text-[#6b6a95]">
               Carefully selected toys that boost creativity, learning, and fun.
             </p>
-            <div className="mt-[18px] lg:mt-8">
+            <div className="mt-8">
               <Button
                 onClick={handleExplore}
-                className="min-h-[50px] w-fit rounded-[999px] px-6 text-[17px] font-semibold shadow-[0_16px_32px_rgba(123,72,255,0.24)] lg:min-h-[54px] lg:px-8 lg:text-[18px]"
+                className="min-h-[54px] w-fit rounded-[999px] px-8 text-[18px] font-semibold shadow-[0_16px_32px_rgba(123,72,255,0.24)]"
               >
                 Explore Toys
+                <span className="ml-2 text-lg leading-none" aria-hidden="true">
+                  &rarr;
+                </span>
               </Button>
             </div>
           </div>
 
-          <div className="relative mt-1 min-h-[560px] w-full overflow-visible lg:mt-0 lg:h-[620px] lg:min-h-[620px]">
-            <VisualBackdrop />
-            <ConnectorPaths />
-            <SparkleField />
-
-            <ProductStage
-              className="absolute right-[2%] top-[14px] z-30 w-[31%] lg:right-[5%] lg:top-[18px] lg:w-[29%]"
-              product={heroProducts.drone}
-              imageClassName="hero-float-drone w-[100%]"
-              pedestalClassName="h-[56px] w-[148px] lg:h-[82px] lg:w-[220px]"
-              labelClassName="w-[96px] text-[13px] lg:w-[108px] lg:text-[14px]"
-            />
-
-            <ProductStage
-              className="absolute left-1/2 top-[154px] z-20 w-[46%] -translate-x-1/2 lg:left-[51%] lg:top-[110px] lg:w-[44%]"
-              product={heroProducts.house}
-              imageClassName="hero-float-house w-[100%]"
-              pedestalClassName="h-[82px] w-[214px] lg:h-[118px] lg:w-[318px]"
-              labelClassName="w-[130px] text-[13px] lg:w-[148px] lg:text-[14px]"
-              shadowClassName="h-8 w-[68%] lg:h-10"
-            />
-
-            <ProductStage
-              className="absolute left-[4%] top-[272px] z-20 w-[27%] lg:left-[8%] lg:top-[130px] lg:w-[26%]"
-              product={heroProducts.jcb}
-              imageClassName="hero-float-jcb w-[100%]"
-              pedestalClassName="h-[52px] w-[132px] lg:h-[78px] lg:w-[204px]"
-              labelClassName="w-[104px] text-[13px] lg:w-[126px] lg:text-[14px]"
-            />
-
-            <ProductStage
-              className="absolute bottom-[42px] left-[5%] z-20 w-[29%] lg:bottom-[34px] lg:left-[6%] lg:w-[30%]"
-              product={heroProducts.defender}
-              imageClassName="hero-float-defender w-[100%]"
-              pedestalClassName="h-[56px] w-[160px] lg:h-[80px] lg:w-[232px]"
-              labelClassName="w-[142px] text-[13px] lg:w-[176px] lg:text-[14px]"
-            />
-
-            <ProductStage
-              className="absolute bottom-[44px] right-[3%] z-20 w-[31%] lg:bottom-[36px] lg:right-[5%] lg:w-[31%]"
-              product={heroProducts.bike}
-              imageClassName="hero-float-bike w-[100%]"
-              pedestalClassName="h-[56px] w-[164px] lg:h-[80px] lg:w-[228px]"
-              labelClassName="w-[154px] text-[13px] lg:w-[204px] lg:text-[14px]"
-            />
-          </div>
+          <DesktopVisualScene />
         </div>
+
+        <MobileHeroScene onExplore={handleExplore} />
       </div>
     </section>
+  );
+}
+
+function MobileHeroScene({ onExplore }: { onExplore: () => void }) {
+  return (
+    <div className="relative z-10 min-h-[740px] lg:hidden">
+      <VisualBackdrop mobile />
+      <ConnectorPaths mobile />
+      <SparkleField mobile />
+
+      <div className="relative z-20 max-w-[262px] pt-1">
+        <HeroBadge />
+        <h1 className="mt-[18px] max-w-[258px] text-[clamp(32px,8vw,54px)] font-[800] leading-[0.96] tracking-[-0.05em] text-[#1d1b62]">
+          <span className="block">Play Smarter.</span>
+          <span className="block bg-gradient-to-r from-[#7a48ff] to-[#5b2ff4] bg-clip-text text-transparent">
+            Grow Faster.
+          </span>
+        </h1>
+        <p className="mt-4 max-w-[260px] text-[16px] leading-[1.58] text-[#6b6a95]">
+          Carefully selected toys that boost creativity, learning, and fun.
+        </p>
+        <div className="mt-5">
+          <Button
+            onClick={onExplore}
+            className="min-h-[50px] w-fit rounded-[999px] px-6 text-[17px] font-semibold shadow-[0_16px_32px_rgba(123,72,255,0.24)]"
+          >
+            Explore Toys
+            <span className="ml-2 text-base leading-none" aria-hidden="true">
+              &rarr;
+            </span>
+          </Button>
+        </div>
+      </div>
+
+      <ProductStage
+        className="absolute right-[1.5%] top-[52px] z-30 w-[33%]"
+        product={heroProducts.drone}
+        imageClassName="hero-float-drone w-[100%]"
+        pedestalClassName="h-[54px] w-[144px]"
+        labelClassName="w-[92px] text-[13px]"
+        compact
+      />
+
+      <ProductStage
+        className="absolute left-[53%] top-[246px] z-20 w-[47%] -translate-x-1/2"
+        product={heroProducts.house}
+        imageClassName="hero-float-house w-[100%]"
+        pedestalClassName="h-[88px] w-[226px]"
+        labelClassName="w-[130px] text-[13px]"
+        shadowClassName="h-8 w-[72%]"
+        compact
+        large
+      />
+
+      <ProductStage
+        className="absolute left-[4%] top-[404px] z-20 w-[30%]"
+        product={heroProducts.jcb}
+        imageClassName="hero-float-jcb w-[100%]"
+        pedestalClassName="h-[50px] w-[128px]"
+        labelClassName="w-[100px] text-[13px]"
+        compact
+      />
+
+      <ProductStage
+        className="absolute bottom-[44px] left-[3%] z-20 w-[35%]"
+        product={heroProducts.defender}
+        imageClassName="hero-float-defender w-[100%]"
+        pedestalClassName="h-[58px] w-[164px]"
+        labelClassName="w-[146px] text-[13px]"
+        compact
+      />
+
+      <ProductStage
+        className="absolute bottom-[46px] right-[2%] z-20 w-[37%]"
+        product={heroProducts.bike}
+        imageClassName="hero-float-bike w-[100%]"
+        pedestalClassName="h-[58px] w-[166px]"
+        labelClassName="w-[156px] text-[13px]"
+        compact
+      />
+    </div>
+  );
+}
+
+function DesktopVisualScene() {
+  return (
+    <div className="relative h-[620px] overflow-hidden rounded-[36px]">
+      <VisualBackdrop />
+      <ConnectorPaths />
+      <SparkleField />
+
+      <ProductStage
+        className="absolute left-[8%] top-[124px] z-20 w-[26%]"
+        product={heroProducts.jcb}
+        imageClassName="hero-float-jcb w-[100%]"
+        pedestalClassName="h-[78px] w-[204px]"
+        labelClassName="w-[126px] text-[14px]"
+      />
+
+      <ProductStage
+        className="absolute right-[5%] top-[18px] z-30 w-[29%]"
+        product={heroProducts.drone}
+        imageClassName="hero-float-drone w-[100%]"
+        pedestalClassName="h-[82px] w-[220px]"
+        labelClassName="w-[108px] text-[14px]"
+      />
+
+      <ProductStage
+        className="absolute left-[51%] top-[110px] z-20 w-[44%] -translate-x-1/2"
+        product={heroProducts.house}
+        imageClassName="hero-float-house w-[100%]"
+        pedestalClassName="h-[118px] w-[318px]"
+        labelClassName="w-[148px] text-[14px]"
+        shadowClassName="h-10 w-[70%]"
+        large
+      />
+
+      <ProductStage
+        className="absolute bottom-[34px] left-[6%] z-20 w-[30%]"
+        product={heroProducts.defender}
+        imageClassName="hero-float-defender w-[100%]"
+        pedestalClassName="h-[80px] w-[232px]"
+        labelClassName="w-[176px] text-[14px]"
+      />
+
+      <ProductStage
+        className="absolute bottom-[36px] right-[5%] z-20 w-[31%]"
+        product={heroProducts.bike}
+        imageClassName="hero-float-bike w-[100%]"
+        pedestalClassName="h-[80px] w-[228px]"
+        labelClassName="w-[204px] text-[14px]"
+      />
+    </div>
   );
 }
 
@@ -148,13 +250,17 @@ function ProductStage({
   pedestalClassName,
   labelClassName,
   shadowClassName = "h-7 w-[64%]",
+  compact = false,
+  large = false,
 }: {
   className: string;
-  product: (typeof heroProducts)[keyof typeof heroProducts];
+  product: HeroProduct;
   imageClassName: string;
   pedestalClassName: string;
   labelClassName: string;
   shadowClassName?: string;
+  compact?: boolean;
+  large?: boolean;
 }) {
   return (
     <div className={className}>
@@ -174,9 +280,9 @@ function ProductStage({
         <Image
           src={product.src}
           alt={product.alt}
-          width={420}
-          height={420}
-          sizes="(max-width: 1024px) 45vw, 26vw"
+          width={large ? 420 : 290}
+          height={large ? 420 : 290}
+          sizes={compact ? "(max-width: 1024px) 42vw" : "(max-width: 1024px) 45vw, 26vw"}
           priority
           className={`relative z-10 h-auto [filter:drop-shadow(0_18px_30px_rgba(50,40,100,0.14))] ${imageClassName}`}
         />
@@ -217,8 +323,17 @@ function HeroBackdrop() {
   );
 }
 
-function VisualBackdrop() {
-  return (
+function VisualBackdrop({ mobile = false }: { mobile?: boolean }) {
+  return mobile ? (
+    <>
+      <div className="absolute left-[54%] top-[278px] h-[244px] w-[244px] -translate-x-1/2 rounded-full bg-[#efe5ff] opacity-80 blur-[18px]" />
+      <div className="absolute right-[2%] top-[62px] h-[108px] w-[108px] rounded-full bg-[#dfeaff] opacity-84 blur-[12px]" />
+      <div className="absolute left-[2%] top-[420px] h-[110px] w-[110px] rounded-full bg-[#fff2cc] opacity-78 blur-[12px]" />
+      <div className="absolute bottom-[72px] left-[3%] h-[112px] w-[112px] rounded-full bg-[#def9e8] opacity-82 blur-[14px]" />
+      <div className="absolute bottom-[74px] right-[3%] h-[112px] w-[112px] rounded-full bg-[#def9ef] opacity-78 blur-[14px]" />
+      <div className="absolute right-[0%] top-[20px] h-[90px] w-[90px] rounded-full bg-[#f6ecff] opacity-72 blur-[12px]" />
+    </>
+  ) : (
     <>
       <div className="absolute left-[42%] top-[22%] h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-[#efe5ff] opacity-80 blur-[16px] lg:left-[52%] lg:top-[24%] lg:h-[320px] lg:w-[320px]" />
       <div className="absolute right-[6%] top-[6%] h-[118px] w-[118px] rounded-full bg-[#dfeaff] opacity-85 blur-[12px] lg:h-[165px] lg:w-[165px]" />
@@ -229,55 +344,98 @@ function VisualBackdrop() {
   );
 }
 
-function ConnectorPaths() {
+function ConnectorPaths({ mobile = false }: { mobile?: boolean }) {
   return (
     <svg
       viewBox="0 0 1000 700"
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 h-full w-full"
     >
-      <path
-        d="M748 108c56 20 95 58 92 109-2 35-30 62-74 82"
-        fill="none"
-        stroke="rgba(243,189,92,0.48)"
-        strokeWidth="3"
-        strokeDasharray="8 14"
-        strokeLinecap="round"
-      />
-      <path
-        d="M263 350c54-48 112-63 191-40 45 13 72 18 115 4"
-        fill="none"
-        stroke="rgba(255,151,186,0.4)"
-        strokeWidth="3"
-        strokeDasharray="6 14"
-        strokeLinecap="round"
-      />
-      <path
-        d="M270 560c101-53 201-53 330-10 50 17 103 16 163-2"
-        fill="none"
-        stroke="rgba(144,112,255,0.34)"
-        strokeWidth="3"
-        strokeDasharray="6 16"
-        strokeLinecap="round"
-      />
+      {mobile ? (
+        <>
+          <path
+            d="M726 114c58 16 92 46 90 89-2 30-26 55-74 74"
+            fill="none"
+            stroke="rgba(243,189,92,0.42)"
+            strokeWidth="3"
+            strokeDasharray="8 14"
+            strokeLinecap="round"
+          />
+          <path
+            d="M224 412c86-94 200-104 350-52"
+            fill="none"
+            stroke="rgba(255,151,186,0.36)"
+            strokeWidth="3"
+            strokeDasharray="6 14"
+            strokeLinecap="round"
+          />
+          <path
+            d="M252 604c128-74 334-72 484-14"
+            fill="none"
+            stroke="rgba(144,112,255,0.3)"
+            strokeWidth="3"
+            strokeDasharray="6 16"
+            strokeLinecap="round"
+          />
+        </>
+      ) : (
+        <>
+          <path
+            d="M748 108c56 20 95 58 92 109-2 35-30 62-74 82"
+            fill="none"
+            stroke="rgba(243,189,92,0.48)"
+            strokeWidth="3"
+            strokeDasharray="8 14"
+            strokeLinecap="round"
+          />
+          <path
+            d="M263 350c54-48 112-63 191-40 45 13 72 18 115 4"
+            fill="none"
+            stroke="rgba(255,151,186,0.4)"
+            strokeWidth="3"
+            strokeDasharray="6 14"
+            strokeLinecap="round"
+          />
+          <path
+            d="M270 560c101-53 201-53 330-10 50 17 103 16 163-2"
+            fill="none"
+            stroke="rgba(144,112,255,0.34)"
+            strokeWidth="3"
+            strokeDasharray="6 16"
+            strokeLinecap="round"
+          />
+        </>
+      )}
     </svg>
   );
 }
 
-function SparkleField() {
+function SparkleField({ mobile = false }: { mobile?: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <Sparkle className="hero-sparkle absolute left-[12%] top-[8%] text-[#a490ff]" />
-      <Sparkle className="hero-sparkle absolute left-[54%] top-[32%] text-[#c39cff]" />
-      <Sparkle className="hero-sparkle absolute right-[9%] top-[24%] text-[#9c90ff]" />
-      <Sparkle className="hero-sparkle absolute right-[8%] top-[56%] text-[#ffa3c7]" />
-      <Sparkle className="hero-sparkle absolute left-[24%] bottom-[28%] text-[#ff9bbd]" />
+      {mobile ? (
+        <>
+          <Sparkle className="hero-sparkle absolute left-[50%] top-[58px] text-[#ff89b8]" />
+          <Sparkle className="hero-sparkle absolute right-[8%] top-[286px] text-[#9c90ff]" />
+          <Sparkle className="hero-sparkle absolute left-[13%] top-[520px] text-[#c39cff]" />
+          <Sparkle className="hero-sparkle absolute right-[14%] bottom-[156px] text-[#ff9bbd]" />
+          <Sparkle className="hero-sparkle absolute left-[47%] bottom-[138px] text-[#9a87ff]" />
+        </>
+      ) : (
+        <>
+          <Sparkle className="hero-sparkle absolute left-[12%] top-[8%] text-[#a490ff]" />
+          <Sparkle className="hero-sparkle absolute left-[54%] top-[32%] text-[#c39cff]" />
+          <Sparkle className="hero-sparkle absolute right-[9%] top-[24%] text-[#9c90ff]" />
+          <Sparkle className="hero-sparkle absolute right-[8%] top-[56%] text-[#ffa3c7]" />
+          <Sparkle className="hero-sparkle absolute left-[24%] bottom-[28%] text-[#ff9bbd]" />
 
-      <div className="absolute left-[34%] top-[15%] grid grid-cols-4 gap-2 opacity-60 lg:left-[24%]">
-        {Array.from({ length: 12 }).map((_, index) => (
-          <span key={index} className="h-1.5 w-1.5 rounded-full bg-[#9e8bf7]" />
-        ))}
-      </div>
+          <div className="absolute left-[34%] top-[15%] grid grid-cols-4 gap-2 opacity-60 lg:left-[24%]">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <span key={index} className="h-1.5 w-1.5 rounded-full bg-[#9e8bf7]" />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
