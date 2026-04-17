@@ -49,6 +49,10 @@ const createHttpError = (message, statusCode = 400) => {
 };
 
 const assertMinimumProductPrice = (price) => {
+  if (MIN_VISIBLE_PRODUCT_PRICE <= 0) {
+    return;
+  }
+
   if (!Number.isFinite(price) || price < MIN_VISIBLE_PRODUCT_PRICE) {
     throw createHttpError(
       `Products below Rs ${MIN_VISIBLE_PRODUCT_PRICE} are not allowed in the live catalog.`,
@@ -229,7 +233,7 @@ export const adminLogin = async (req, res) => {
 
 export const getAdminSummary = async (req, res) => {
   const [productCount, orderCount, pendingOrders, revenueData] = await Promise.all([
-    Product.countDocuments({ price: { $gte: MIN_VISIBLE_PRODUCT_PRICE } }),
+    Product.countDocuments({}),
     Order.countDocuments({}),
     Order.countDocuments({ orderStatus: { $in: ["pending", "confirmed"] } }),
     Order.aggregate([
@@ -249,9 +253,7 @@ export const getAdminSummary = async (req, res) => {
 };
 
 export const getAdminProducts = async (req, res) => {
-  const products = await Product.find({
-    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
-  })
+  const products = await Product.find({})
     .sort({ updatedAt: -1 })
     .lean();
   res.json({ products });
@@ -287,37 +289,24 @@ export const importAdminProducts = async (req, res) => {
   }
 
   const rows = await parseCatalogUploadRows(req.body, filename);
-  const existingProducts = await Product.find({}, { sku: 1, slug: 1 }).lean();
-  const existingBySku = new Map(existingProducts.map((product) => [product.sku, product]));
-  const usedSlugs = new Set(existingProducts.map((product) => product.slug).filter(Boolean));
   const catalogSource = buildImportCatalogSource(filename);
-  const operations = [];
+  const nextProducts = [];
+  const usedSlugs = new Set();
   const errors = [];
   let created = 0;
-  let updated = 0;
   let skipped = 0;
 
   rows.forEach((row, index) => {
-    const name = String(row.name || "").trim();
-    const sku = String(row.sku || "").trim();
+    const name = String(row["Product Name"] || row.name || "").trim();
     const imageUrl = String(row.main_image || row.image1 || row.imageUrl || "").trim();
-    const salePrice = String(row.sale_price || row.price || "").trim();
+    const salePrice = String(row["Selling Price"] || row.sale_price || row.price || "").trim();
+    const handle = String(row["1"] || row.slug || "").trim();
 
-    if (!name || !sku || !imageUrl || !salePrice) {
+    if (!name || !handle || !imageUrl || !salePrice) {
       skipped += 1;
       errors.push({
         row: index + 2,
-        message: "Missing required name, SKU, image, or sale price.",
-      });
-      return;
-    }
-
-    const numericSalePrice = Number(String(salePrice).replace(/[^\d.]/g, ""));
-    if (!Number.isFinite(numericSalePrice) || numericSalePrice < MIN_VISIBLE_PRODUCT_PRICE) {
-      skipped += 1;
-      errors.push({
-        row: index + 2,
-        message: `Products below Rs ${MIN_VISIBLE_PRODUCT_PRICE} are not allowed in the live catalog.`,
+        message: "Missing required handle, name, image, or selling price.",
       });
       return;
     }
@@ -325,52 +314,35 @@ export const importAdminProducts = async (req, res) => {
     const transformed = transformCatalogRow(
       {
         ...row,
-        sale_price: salePrice,
+        slug: handle,
+        name,
         main_image: imageUrl,
+        sale_price: salePrice,
       },
       index,
       catalogSource
     );
-    const existing = existingBySku.get(transformed.sku);
-    const nextSlug = ensureUniqueSlug(
-      transformed.slug || transformed.name,
-      usedSlugs,
-      existing?.slug || ""
-    );
-    const payload = {
+
+    const nextSlug = ensureUniqueSlug(transformed.slug || transformed.name, usedSlugs);
+    nextProducts.push({
       ...transformed,
       slug: nextSlug,
       catalogSource,
-    };
-
-    if (existing) {
-      updated += 1;
-      operations.push({
-        updateOne: {
-          filter: { sku: transformed.sku },
-          update: { $set: payload },
-          upsert: false,
-        },
-      });
-    } else {
-      created += 1;
-      operations.push({
-        insertOne: {
-          document: payload,
-        },
-      });
-    }
+    });
+    created += 1;
   });
 
-  if (operations.length) {
-    await Product.bulkWrite(operations, { ordered: false });
+  await Product.deleteMany({});
+
+  if (nextProducts.length) {
+    await Product.insertMany(nextProducts, { ordered: true });
   }
 
   res.json({
     summary: {
       filename,
       created,
-      updated,
+      updated: 0,
       skipped,
       failed: errors.length,
       totalRows: rows.length,

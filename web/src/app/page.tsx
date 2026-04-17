@@ -7,54 +7,16 @@ import { TrustedFamiliesCard } from "@/components/trust/trusted-families-card";
 import { PageContainer } from "@/components/shared/page-container";
 import { SectionHeader } from "@/components/shared/section-header";
 import { getProducts } from "@/lib/api/products";
-import type { Product } from "@/types/product";
-
-const homepageShowcaseNames = [
-  "T22 SCOOTER LIGHT MUSIC SENSOR",
-  "TB 5141 ROCK CAR BIG TOY BOI",
-  "GSH818-36 BUBBLE GUN CHARGEABLE",
-  "3012 THUNDER STRIKE",
-  "GY 2090-14 GOYO STUNT CAR",
-  "2915 THUNDER STRIKE GUN",
-  "611 SCOOTER",
-  "S52P 4K SCREEN DRONE",
-  "668-25 PRINCESS HOUSE 156 PCS",
-  "CH1328 MAGNETIC MIND CRAFT 169 PCS",
-];
-
-const normalizeName = (value: string) => String(value || "").trim().toLowerCase();
-
-const resolveShowcaseProduct = (products: Product[], targetName: string) => {
-  const normalizedTarget = normalizeName(targetName);
-  return (
-    products.find((product) => normalizeName(product.name) === normalizedTarget) ||
-    products.find((product) => normalizeName(product.name).includes(normalizedTarget)) ||
-    products[0] ||
-    null
-  );
-};
 
 export default async function HomePage() {
-  const productResponses = await Promise.all(
-    homepageShowcaseNames.map((name) =>
-      getProducts(
-        {
-          search: name,
-          limit: 8,
-        },
-        60
-      ).catch(() => ({ products: [] as Product[] }))
-    )
-  );
-
-  const showcaseProducts = productResponses
-    .map((response, index) =>
-      resolveShowcaseProduct(response.products || [], homepageShowcaseNames[index])
-    )
-    .filter(Boolean) as Product[];
-
-  const bestSellerProducts = showcaseProducts.slice(0, 4);
-  const newArrivalProducts = showcaseProducts.slice(4, 10);
+  const featuredRailResponse = await getProducts(
+    {
+      homeRail: true,
+      limit: 39,
+      sort: "featured",
+    },
+    60
+  ).catch(() => ({ products: [] }));
 
   return (
     <PageContainer className="max-w-[404px] gap-4 px-4 pb-32 pt-4 sm:max-w-3xl lg:max-w-6xl">
@@ -64,16 +26,8 @@ export default async function HomePage() {
       <CategoryGrid />
 
       <section className="rounded-[30px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(255,246,252,0.94))] p-5 shadow-[0_24px_54px_rgba(185,153,224,0.16)]">
-        <SectionHeader title="Best Sellers" actionHref="/products?featured=true" />
-        <ProductGrid products={bestSellerProducts} variant="home" />
-        <p className="mt-4 text-center text-sm text-[#8b7fa8]">
-          Cash on Delivery available with no advance payment.
-        </p>
-      </section>
-
-      <section className="rounded-[30px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(255,246,252,0.94))] p-5 shadow-[0_24px_54px_rgba(185,153,224,0.16)]">
-        <SectionHeader title="New Arrivals" actionHref="/products?sort=latest" />
-        <ProductGrid products={newArrivalProducts} variant="home" />
+        <SectionHeader title="Featured Toys" actionHref="/products" />
+        <ProductGrid products={featuredRailResponse.products || []} variant="featuredRail" />
       </section>
 
       <AboutBlock />

@@ -6,6 +6,7 @@ type ProductQuery = {
   ageGroup?: string;
   category?: string;
   featured?: string | boolean;
+  homeRail?: string | boolean;
   sort?: string;
   limit?: number;
 };

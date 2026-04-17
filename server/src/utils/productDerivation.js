@@ -1,5 +1,7 @@
-const CATALOG_SOURCE = "ai4kids_website_xlsx";
-export const MIN_VISIBLE_PRODUCT_PRICE = 500;
+import { slugify } from "./slugify.js";
+
+const CATALOG_SOURCE = "zee_master_file_pricing_framework_continued";
+export const MIN_VISIBLE_PRODUCT_PRICE = 0;
 
 const titleCorrections = {
   dargon: "Dragon",
@@ -144,6 +146,45 @@ const parseNumber = (value, fallback = 0) => {
   return Number.isFinite(normalized) ? normalized : fallback;
 };
 
+const getField = (row, keys = []) => {
+  for (const key of keys) {
+    const value = row?.[key];
+    if (value !== undefined && value !== null && String(value).trim()) {
+      return String(value).trim();
+    }
+  }
+
+  return "";
+};
+
+const toDirectImageUrl = (value = "") => {
+  const url = String(value || "").trim();
+  if (!url) return "";
+
+  const driveId =
+    url.match(/\/file\/d\/([^/]+)/i)?.[1] ||
+    url.match(/[?&]id=([^&]+)/i)?.[1] ||
+    "";
+
+  if (driveId) {
+    return `https://drive.google.com/uc?export=view&id=${driveId}`;
+  }
+
+  return url;
+};
+
+const getMainImageSource = (url = "") =>
+  /drive\.google\.com/i.test(String(url || "")) ? "google_drive" : "external";
+
+const normalizeDiscountPercent = (value = "") => {
+  const parsed = parseNumber(value, 0);
+  if (parsed > 0 && parsed <= 1) {
+    return Math.round(parsed * 100);
+  }
+
+  return Math.max(0, Math.min(90, Math.round(parsed)));
+};
+
 const unique = (values) => Array.from(new Set(values.filter(Boolean)));
 
 const capitalize = (value) => (value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value);
@@ -264,11 +305,15 @@ export const getNormalizedStorefrontCategories = () =>
   normalizedCategoryMap.map((entry) => entry.label);
 
 export const transformCatalogRow = (row, index, catalogSource = getCatalogSource()) => {
-  const rawName = String(row.name || "").trim();
+  const rawHandle = getField(row, ["1", "slug", "handle"]);
+  const rawName = getField(row, ["Product Name", "name", "title"]);
   const name = normalizeProductTitle(rawName);
-  const rawCategory = String(row.category || "").trim();
-  const price = parseNumber(row.sale_price);
-  const discountPercent = Math.max(0, Math.min(90, parseNumber(row.discount_percent)));
+  const rawCategory = getField(row, ["Category", "category"]);
+  const subCategory = getField(row, ["Sub Category", "subCategory", "sub_category"]);
+  const price = parseNumber(getField(row, ["Selling Price", "sale_price", "price"]));
+  const discountPercent = normalizeDiscountPercent(
+    getField(row, ["Discount %", "discount_percent", "discountPercent"])
+  );
   const rating = Math.max(0, Math.min(5, parseNumber(row.rating, 4.5)));
   const reviewCount = Math.max(0, parseNumber(row.review_count, 0));
   const normalizedCategory = normalizeCategoryValue(rawCategory, name);
@@ -278,22 +323,39 @@ export const transformCatalogRow = (row, index, catalogSource = getCatalogSource
     price,
     normalizedCategory,
   });
-  const originalPrice = deriveOriginalPrice(price, parseNumber(row.mrp), discountPercent);
-  const gallery = unique([row.main_image, row.image1, row.image2, row.image3]);
+  const originalPrice = deriveOriginalPrice(
+    price,
+    parseNumber(getField(row, ["MRP", "mrp", "originalPrice"])),
+    discountPercent
+  );
+  const gallery = unique(
+    [
+      getField(row, ["main_image", "image1", "imageUrl"]),
+      getField(row, ["Image 2", "image2"]),
+      getField(row, ["image3", "Image 3"]),
+    ].map(toDirectImageUrl)
+  );
   const imageUrl = gallery[0] || "";
   const features = unique(
-    String(row.features || "")
-      .split(",")
-      .map((entry) => entry.trim())
+    [
+      ...String(getField(row, ["features", "Features"]))
+        .split(",")
+        .map((entry) => entry.trim()),
+      getField(row, ["Material", "material"]),
+      getField(row, ["Color", "color"]),
+      getField(row, ["Size", "size"]),
+      getField(row, ["Accessories List", "accessories"]),
+    ]
   );
   const stockCount = deriveStockCount(row.sku || row.id || index, name);
   const limitedStock = stockCount <= 11;
   const featured = discountPercent >= 28 || rating >= 4.7 || reviewCount >= 160 || index < 30;
+  const mainImageSource = getMainImageSource(getField(row, ["main_image", "image1", "imageUrl"]));
 
   return {
-    sku: String(row.sku || `SKU-${index + 1}`).trim(),
+    sku: String(getField(row, ["sku"]) || `ZEE-${slugify(rawHandle || name || index + 1)}`).trim(),
     name,
-    slug: String(row.slug || "")
+    slug: String(rawHandle || getField(row, ["slug"]) || "")
       .trim()
       .toLowerCase(),
     price,
@@ -303,11 +365,13 @@ export const transformCatalogRow = (row, index, catalogSource = getCatalogSource
     gallery,
     features,
     videoUrl: "",
-    description: String(row.description || "").trim(),
-    shortDescription: String(row.short_description || "").trim(),
+    description: getField(row, ["Description", "description"]),
+    shortDescription:
+      getField(row, ["short_description"]) ||
+      getField(row, ["Description", "description"]).slice(0, 180).trim(),
     category: normalizedCategory,
     rawCategory,
-    subCategory: rawCategory || normalizedCategory,
+    subCategory: subCategory || rawCategory || normalizedCategory,
     ageGroup,
     moq: 1,
     stockCount,
@@ -323,6 +387,8 @@ export const transformCatalogRow = (row, index, catalogSource = getCatalogSource
     }),
     rating,
     reviewCount,
+    mainImageSource,
+    homeRailEligible: mainImageSource === "google_drive",
     catalogSource,
     isActive: true,
   };

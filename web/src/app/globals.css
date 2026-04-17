@@ -103,6 +103,16 @@ img {
   }
 }
 
+@keyframes home-rail-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 .hero-float-drone {
   animation: hero-float-drift 7s ease-in-out infinite;
 }
@@ -127,13 +137,18 @@ img {
   animation: hero-sparkle-pulse 6.5s ease-in-out infinite;
 }
 
+.home-rail-float {
+  animation: home-rail-float 6.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-float-drone,
   .hero-float-jcb,
   .hero-float-defender,
   .hero-float-bike,
   .hero-float-house,
-  .hero-sparkle {
+  .hero-sparkle,
+  .home-rail-float {
     animation: none !important;
   }
 }

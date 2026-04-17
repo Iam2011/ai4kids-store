@@ -26,6 +26,8 @@ const productSchema = new mongoose.Schema(
     tags: { type: [String], default: [] },
     rating: { type: Number, default: 4.5, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0, min: 0 },
+    mainImageSource: { type: String, default: "external", trim: true },
+    homeRailEligible: { type: Boolean, default: false },
     catalogSource: { type: String, default: "", trim: true },
     isActive: { type: Boolean, default: true },
   },

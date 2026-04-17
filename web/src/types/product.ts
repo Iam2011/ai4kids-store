@@ -24,6 +24,8 @@ export type Product = {
   tags?: string[];
   rating?: number;
   reviewCount?: number;
+  mainImageSource?: "google_drive" | "external";
+  homeRailEligible?: boolean;
   createdAt?: string;
   updatedAt?: string;
   isActive?: boolean;
@@ -36,6 +38,7 @@ export type ProductsResponse = {
     category: string;
     search: string;
     featured: string;
+    homeRail: string;
     sort: string;
   };
   products: Product[];

@@ -1,7 +1,6 @@
 import { Product } from "../models/Product.js";
 import {
   getCategoryMatchers,
-  MIN_VISIBLE_PRODUCT_PRICE,
   normalizeCategoryValue,
   normalizeProductRecord,
 } from "../utils/productDerivation.js";
@@ -28,7 +27,7 @@ const buildCategoryQuery = (category) => {
 };
 
 const buildProductQuery = ({ search, ageGroup, category, featured }) => {
-  const query = { isActive: true, price: { $gte: MIN_VISIBLE_PRODUCT_PRICE } };
+  const query = { isActive: true };
 
   if (search) {
     query.$text = { $search: search };
@@ -44,6 +43,10 @@ const buildProductQuery = ({ search, ageGroup, category, featured }) => {
 
   if (featured === "true") {
     query.featured = true;
+  }
+
+  if (featured === "homeRail") {
+    query.homeRailEligible = true;
   }
 
   return query;
@@ -65,10 +68,17 @@ const buildSort = (sortBy) => {
 };
 
 export const getProducts = async (req, res) => {
-  const { search, ageGroup, category, featured, sort, limit } = req.query;
+  const { search, ageGroup, category, featured, sort, limit, homeRail } = req.query;
   const products = (
     await Product.find(
-    buildProductQuery({ search, ageGroup, category, featured })
+    {
+      ...buildProductQuery({
+        search,
+        ageGroup,
+        category,
+        featured: homeRail === "true" ? "homeRail" : featured,
+      }),
+    }
   )
     .sort(buildSort(sort))
     .limit(Math.min(Number(limit) || 24, 100))
@@ -82,6 +92,7 @@ export const getProducts = async (req, res) => {
       category: category || "",
       search: search || "",
       featured: featured || "",
+      homeRail: homeRail || "",
       sort: sort || "featured",
     },
     products,
@@ -92,7 +103,6 @@ export const getProductBySlug = async (req, res) => {
   const storedProduct = await Product.findOne({
     slug: req.params.slug,
     isActive: true,
-    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
   }).lean();
 
   if (!storedProduct) {
@@ -104,7 +114,6 @@ export const getProductBySlug = async (req, res) => {
   const relatedProducts = await Product.find({
     _id: { $ne: product._id },
     isActive: true,
-    price: { $gte: MIN_VISIBLE_PRODUCT_PRICE },
     ...(relatedQuery || {}),
   })
     .sort({ featured: -1, discountPercent: -1 })

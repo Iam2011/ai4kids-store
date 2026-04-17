@@ -41,7 +41,7 @@ const resolveCatalogPath = () => {
     (String(process.env.CATALOG_CSV_PATH || "").toLowerCase().endsWith(".xlsx")
       ? process.env.CATALOG_CSV_PATH
       : "") ||
-    "./data/AI4Kids_website.xlsx";
+    "./data/zee_master_file_pricing_framework_continued.xlsx";
   return path.isAbsolute(configuredPath)
     ? configuredPath
     : path.resolve(__dirname, "../../", configuredPath);
@@ -98,11 +98,10 @@ export const seedCatalog = async ({ onlyIfEmpty = false } = {}) => {
   const rows = await parseCatalogWorkbook(catalogPath);
   const validRows = rows.filter(
     (row) =>
-      row.name &&
-      row.slug &&
-      row.sku &&
+      (row["Product Name"] || row.name) &&
+      (row["1"] || row.slug) &&
       (row.main_image || row.image1) &&
-      row.sale_price
+      (row["Selling Price"] || row.sale_price)
   );
   const products = normalizeRows(validRows, catalogSource);
 
