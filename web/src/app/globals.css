@@ -72,3 +72,68 @@ img {
 .line-clamp-2 {
   -webkit-line-clamp: 2;
 }
+
+@keyframes hero-float-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes hero-float-house {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes hero-sparkle-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.hero-float-drone {
+  animation: hero-float-drift 7s ease-in-out infinite;
+}
+
+.hero-float-jcb {
+  animation: hero-float-drift 7.6s ease-in-out infinite;
+}
+
+.hero-float-defender {
+  animation: hero-float-drift 8.2s ease-in-out infinite;
+}
+
+.hero-float-bike {
+  animation: hero-float-drift 8.8s ease-in-out infinite;
+}
+
+.hero-float-house {
+  animation: hero-float-house 8.5s ease-in-out infinite;
+}
+
+.hero-sparkle {
+  animation: hero-sparkle-pulse 6.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-drone,
+  .hero-float-jcb,
+  .hero-float-defender,
+  .hero-float-bike,
+  .hero-float-house,
+  .hero-sparkle {
+    animation: none !important;
+  }
+}
