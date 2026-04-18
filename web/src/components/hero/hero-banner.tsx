@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/button";
 import { trackStoreEvent } from "@/lib/analytics/track";
@@ -16,7 +17,7 @@ type StageConfig = {
   imageClassName: string;
   labelClassName: string;
   imageSizes: string;
-  floatClassName: string;
+  visualOnly?: boolean;
 };
 
 const mobileStages: StageConfig[] = [
@@ -32,7 +33,6 @@ const mobileStages: StageConfig[] = [
     imageClassName: "bottom-[18%] w-[86%] sm:w-[88%]",
     labelClassName: "min-w-[88px] bg-[#3E73FF]",
     imageSizes: "(max-width: 1024px) 32vw, 14vw",
-    floatClassName: "hero-drift-drone",
   },
   {
     key: "house",
@@ -46,7 +46,7 @@ const mobileStages: StageConfig[] = [
     imageClassName: "bottom-[13%] w-[93%] sm:w-[94%]",
     labelClassName: "min-w-[112px] bg-[#FF4F86]",
     imageSizes: "(max-width: 1024px) 46vw, 20vw",
-    floatClassName: "hero-drift-house",
+    visualOnly: true,
   },
   {
     key: "jcb",
@@ -60,7 +60,7 @@ const mobileStages: StageConfig[] = [
     imageClassName: "bottom-[17%] w-[88%] sm:w-[90%]",
     labelClassName: "min-w-[100px] bg-[#F2B400]",
     imageSizes: "(max-width: 1024px) 26vw, 12vw",
-    floatClassName: "hero-drift-jcb",
+    visualOnly: true,
   },
   {
     key: "defender",
@@ -74,7 +74,6 @@ const mobileStages: StageConfig[] = [
     imageClassName: "bottom-[17%] w-[87%] sm:w-[89%]",
     labelClassName: "min-w-[138px] bg-[#19B56B]",
     imageSizes: "(max-width: 1024px) 31vw, 15vw",
-    floatClassName: "hero-drift-defender",
   },
   {
     key: "bike",
@@ -88,7 +87,6 @@ const mobileStages: StageConfig[] = [
     imageClassName: "bottom-[17%] w-[88%] sm:w-[90%]",
     labelClassName: "min-w-[170px] bg-[#1DBA76]",
     imageSizes: "(max-width: 1024px) 30vw, 14vw",
-    floatClassName: "hero-drift-bike",
   },
 ];
 
@@ -105,7 +103,6 @@ const desktopStages: StageConfig[] = [
     imageClassName: "bottom-[17%] w-[90%]",
     labelClassName: "min-w-[116px] bg-[#F2B400]",
     imageSizes: "(max-width: 1400px) 15vw, 13vw",
-    floatClassName: "hero-drift-jcb",
   },
   {
     key: "drone",
@@ -119,7 +116,6 @@ const desktopStages: StageConfig[] = [
     imageClassName: "bottom-[18%] w-[88%]",
     labelClassName: "min-w-[98px] bg-[#3E73FF]",
     imageSizes: "(max-width: 1400px) 17vw, 15vw",
-    floatClassName: "hero-drift-drone",
   },
   {
     key: "house",
@@ -133,7 +129,6 @@ const desktopStages: StageConfig[] = [
     imageClassName: "bottom-[13%] w-[94%]",
     labelClassName: "min-w-[130px] bg-[#FF4F86]",
     imageSizes: "(max-width: 1400px) 25vw, 22vw",
-    floatClassName: "hero-drift-house",
   },
   {
     key: "defender",
@@ -147,7 +142,6 @@ const desktopStages: StageConfig[] = [
     imageClassName: "bottom-[17%] w-[89%]",
     labelClassName: "min-w-[172px] bg-[#19B56B]",
     imageSizes: "(max-width: 1400px) 20vw, 18vw",
-    floatClassName: "hero-drift-defender",
   },
   {
     key: "bike",
@@ -161,16 +155,10 @@ const desktopStages: StageConfig[] = [
     imageClassName: "bottom-[17%] w-[90%]",
     labelClassName: "min-w-[210px] bg-[#1DBA76]",
     imageSizes: "(max-width: 1400px) 19vw, 17vw",
-    floatClassName: "hero-drift-bike",
   },
 ];
 
-const mobileSparkles = [
-  "left-[63%] top-[15%] text-[#f58cab]",
-  "right-[6%] top-[34%] text-[#f7b739]",
-  "left-[31%] top-[73%] text-[#8b78ff]",
-  "right-[11%] top-[74%] text-[#ffa2bf]",
-];
+const mobileSparkles = ["left-[63%] top-[15%] text-[#f58cab]", "right-[6%] top-[34%] text-[#f7b739]"];
 
 const desktopSparkles = [
   "left-[41%] top-[11%] text-[#f58cab]",
@@ -179,7 +167,15 @@ const desktopSparkles = [
   "right-[20%] top-[63%] text-[#ffa2bf]",
 ];
 
-export function HeroBanner() {
+export function HeroBanner({
+  heroLinks,
+}: {
+  heroLinks?: {
+    drone?: string;
+    defender?: string;
+    bike?: string;
+  };
+}) {
   const router = useRouter();
 
   const handleExplore = async () => {
@@ -196,39 +192,52 @@ export function HeroBanner() {
   return (
     <section className="overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(180deg,#F8F3FF_0%,#F7F5FF_48%,#EEF6FF_100%)] shadow-[0_24px_60px_rgba(186,156,226,0.18)]">
       <div className="relative lg:hidden">
-        <div className="relative min-h-[820px] px-[18px] pb-5 pt-[18px] sm:min-h-[850px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_10%,rgba(225,211,255,0.75),transparent_18%),radial-gradient(circle_at_66%_55%,rgba(255,220,236,0.72),transparent_20%),radial-gradient(circle_at_18%_85%,rgba(216,244,222,0.72),transparent_18%)]" />
+        <div className="relative min-h-[610px] px-0 pb-0 pt-0 sm:min-h-[626px]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_83%_12%,rgba(232,220,255,0.8),transparent_17%),radial-gradient(circle_at_60%_61%,rgba(255,221,233,0.72),transparent_18%),radial-gradient(circle_at_15%_88%,rgba(219,243,255,0.62),transparent_20%)]" />
           <MobileConnectorLines />
           <Sparkles mode="mobile" />
 
-          <div className="relative z-20 max-w-[270px] sm:max-w-[284px]">
+          <div className="relative z-20 ml-[55px] pt-[15px]">
+            <div className="max-w-[291px]">
             <HeroBadge />
 
-            <h1 className="mt-4 max-w-[272px] text-[clamp(32px,8.3vw,54px)] font-[800] leading-[0.96] tracking-[-0.05em] text-[#1D2240] sm:max-w-[284px]">
+            <h1 className="mt-[8px] max-w-[288px] text-[36px] font-[700] leading-[1.1] tracking-[-0.05em] text-[#1D2240]">
               <span className="block">Play Smarter.</span>
               <span className="block bg-gradient-to-r from-[#6F5BFF] to-[#D86BC8] bg-clip-text text-transparent">
                 Grow Faster.
               </span>
             </h1>
 
-            <p className="mt-4 max-w-[244px] text-[15px] leading-[1.62] text-[#5B6285] sm:max-w-[258px]">
-              Carefully selected toys that boost creativity, learning, and fun in a home-like
-              environment.
+            <p className="mt-0 max-w-[194px] text-[17px] leading-[1.4] text-[#666666]">
+              Carefully selected toys that boost creativity, learning, and fun.
             </p>
 
-            <div className="mt-5">
+            <div className="mt-[18px]">
               <Button
                 onClick={handleExplore}
-                className="min-h-[48px] rounded-full bg-[linear-gradient(90deg,#FF6E7A_0%,#7C5CFF_100%)] px-5 text-[15px] font-semibold text-white shadow-[0_16px_28px_rgba(111,91,255,0.22)] sm:min-h-[50px] sm:px-6 sm:text-[16px]"
+                className="min-h-[37px] rounded-full bg-[linear-gradient(90deg,#3200FC_4%,#FF0065_98%)] px-[18px] text-[16px] font-[800] tracking-[0.05em] text-black shadow-[0_12px_24px_rgba(111,91,255,0.16)]"
               >
-                Explore Toys
+                SHOP NOW
               </Button>
+            </div>
             </div>
           </div>
 
-          <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-x-0 bottom-0 top-[106px]">
             {mobileStages.map((stage) => (
-              <ProductStage key={stage.key} stage={stage} />
+              <ProductStage
+                key={stage.key}
+                stage={stage}
+                href={
+                  stage.key === "drone"
+                    ? heroLinks?.drone
+                    : stage.key === "defender"
+                      ? heroLinks?.defender
+                      : stage.key === "bike"
+                        ? heroLinks?.bike
+                        : undefined
+                }
+              />
             ))}
           </div>
         </div>
@@ -274,115 +283,61 @@ export function HeroBanner() {
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes heroDrift {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-8px);
-          }
-        }
-
-        @keyframes heroDriftDrone {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-10px) rotate(-1deg);
-          }
-        }
-
-        @keyframes heroSparkle {
-          0%,
-          100% {
-            opacity: 0.25;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.6;
-            transform: scale(1.06);
-          }
-        }
-
-        .hero-drift-house,
-        .hero-drift-jcb,
-        .hero-drift-defender,
-        .hero-drift-bike {
-          animation: heroDrift 7.2s ease-in-out infinite;
-          will-change: transform;
-        }
-
-        .hero-drift-drone {
-          animation: heroDriftDrone 6.2s ease-in-out infinite;
-          will-change: transform;
-        }
-
-        .hero-sparkle {
-          animation: heroSparkle 4.6s ease-in-out infinite;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .hero-drift-house,
-          .hero-drift-jcb,
-          .hero-drift-defender,
-          .hero-drift-bike,
-          .hero-drift-drone,
-          .hero-sparkle {
-            animation: none !important;
-          }
-        }
-      `}</style>
     </section>
   );
 }
 
-function ProductStage({ stage }: { stage: StageConfig }) {
-  return (
-    <div className={`absolute ${stage.wrapperClassName}`}>
-      <div className="relative min-h-[122px]">
-        <div
-          className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-[999px] shadow-[0_18px_30px_rgba(63,72,119,0.1)] ${stage.platformClassName}`}
-        >
-          <div className="absolute inset-x-[10%] top-[12%] h-[22%] rounded-full bg-white/50 blur-[2px]" />
-        </div>
+function ProductStage({ stage, href }: { stage: StageConfig; href?: string }) {
+  const content = (
+    <div className="relative min-h-[122px]">
+      <div
+        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-[999px] shadow-[0_18px_30px_rgba(63,72,119,0.1)] ${stage.platformClassName}`}
+      >
+        <div className="absolute inset-x-[10%] top-[12%] h-[22%] rounded-full bg-white/50 blur-[2px]" />
+      </div>
 
-        <div
-          className={`absolute left-1/2 -translate-x-1/2 rounded-full bg-[rgba(30,50,90,0.12)] blur-[15px] ${stage.shadowClassName}`}
+      <div
+        className={`absolute left-1/2 -translate-x-1/2 rounded-full bg-[rgba(30,50,90,0.12)] blur-[15px] ${stage.shadowClassName}`}
+      />
+
+      <div className={`absolute left-1/2 z-20 -translate-x-1/2 ${stage.imageClassName}`}>
+        <Image
+          src={stage.src}
+          alt={stage.alt}
+          width={640}
+          height={640}
+          priority
+          sizes={stage.imageSizes}
+          className="h-auto w-full object-contain [filter:drop-shadow(0_16px_28px_rgba(63,72,119,0.12))]"
         />
+      </div>
 
+      <div className="absolute bottom-[4%] left-1/2 z-30 -translate-x-1/2">
         <div
-          className={`absolute left-1/2 z-20 -translate-x-1/2 ${stage.imageClassName} ${stage.floatClassName}`}
+          className={`inline-flex min-h-[30px] items-center justify-center rounded-full px-2.5 py-1.5 text-center text-[11px] font-semibold leading-none text-white shadow-[0_10px_20px_rgba(80,40,120,0.16)] sm:min-h-[32px] sm:px-3 sm:py-2 sm:text-[12px] lg:min-h-[36px] lg:px-4 lg:text-[14px] ${stage.labelClassName}`}
         >
-          <Image
-            src={stage.src}
-            alt={stage.alt}
-            width={640}
-            height={640}
-            priority
-            sizes={stage.imageSizes}
-            className="h-auto w-full object-contain [filter:drop-shadow(0_16px_28px_rgba(63,72,119,0.12))]"
-          />
-        </div>
-
-        <div className="absolute bottom-[4%] left-1/2 z-30 -translate-x-1/2">
-          <div
-            className={`inline-flex min-h-[30px] items-center justify-center rounded-full px-2.5 py-1.5 text-center text-[11px] font-semibold leading-none text-white shadow-[0_10px_20px_rgba(80,40,120,0.16)] sm:min-h-[32px] sm:px-3 sm:py-2 sm:text-[12px] lg:min-h-[36px] lg:px-4 lg:text-[14px] ${stage.labelClassName}`}
-          >
-            {stage.label}
-          </div>
+          {stage.label}
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <div className={`absolute ${stage.wrapperClassName}`}>
+      {href && !stage.visualOnly ? (
+        <Link href={`/products/${href}`} className="block pointer-events-auto" aria-label={stage.label}>
+          {content}
+        </Link>
+      ) : (
+        content
+      )}
     </div>
   );
 }
 
 function HeroBadge() {
   return (
-    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/80 bg-[#EEF0FF]/92 px-[14px] py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#4B5CDB] shadow-[0_12px_24px_rgba(175,145,220,0.1)] sm:text-[12px]">
+    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/80 bg-[#EEF0FF]/92 px-[14px] py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#4B5CDB] shadow-[0_12px_24px_rgba(175,145,220,0.1)] sm:text-[12px]">
       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/75 text-[#6F5BFF]">
         <StarIcon className="h-3 w-3" />
       </span>
@@ -422,15 +377,7 @@ function MobileConnectorLines() {
         strokeLinecap="round"
         opacity="0.55"
       />
-      <path
-        d="M48 71 C43 78, 49 84, 59 86"
-        fill="none"
-        stroke="#B7BDF8"
-        strokeWidth="0.24"
-        strokeDasharray="0.9 1.2"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
+      <path d="M48 71 C43 78, 49 84, 59 86" fill="none" stroke="#B7BDF8" strokeWidth="0.24" strokeDasharray="0.9 1.2" strokeLinecap="round" opacity="0.5" />
     </svg>
   );
 }

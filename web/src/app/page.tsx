@@ -18,9 +18,21 @@ export default async function HomePage() {
     60
   ).catch(() => ({ products: [] }));
 
+  const products = featuredRailResponse.products || [];
+  const findHeroSlug = (...needles: string[]) =>
+    products.find((product) =>
+      needles.every((needle) => product.name.toLowerCase().includes(needle.toLowerCase()))
+    )?.slug;
+
+  const heroLinks = {
+    drone: findHeroSlug("drone"),
+    defender: findHeroSlug("defender"),
+    bike: findHeroSlug("royal", "enfield"),
+  };
+
   return (
     <PageContainer className="max-w-[404px] gap-4 px-4 pb-32 pt-4 sm:max-w-3xl lg:max-w-6xl">
-      <HeroBanner />
+      <HeroBanner heroLinks={heroLinks} />
       <BenefitsGrid />
       <TrustedFamiliesCard />
       <CategoryGrid />
