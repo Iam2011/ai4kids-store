@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shared/button";
 import { trackStoreEvent } from "@/lib/analytics/track";
@@ -11,13 +10,13 @@ type StageConfig = {
   label: string;
   alt: string;
   src: string;
-  slug: string;
-  className: string;
-  podiumClassName: string;
-  labelClassName: string;
-  imageClassName: string;
+  wrapperClassName: string;
+  platformClassName: string;
   shadowClassName: string;
+  imageClassName: string;
+  labelClassName: string;
   imageSizes: string;
+  floatClassName: string;
 };
 
 const mobileStages: StageConfig[] = [
@@ -26,70 +25,70 @@ const mobileStages: StageConfig[] = [
     label: "Drone",
     alt: "Drone toy",
     src: "/assets/hero/live-2026/drone.png",
-    slug: "drone",
-    className: "left-[58%] top-[26%] z-[30] w-[37%]",
-    podiumClassName:
-      "h-[16.5%] w-[100%] bg-[linear-gradient(180deg,#eef5ff_0%,#dbe8ff_60%,#c9d9ff_100%)]",
-    labelClassName: "bg-[#2d6dff] min-w-[92px]",
-    imageClassName: "hero-float-drone bottom-[18%] w-[90%]",
-    shadowClassName: "bottom-[13%] h-[8%] w-[72%]",
-    imageSizes: "(max-width: 1024px) 30vw, 18vw",
-  },
-  {
-    key: "jcb",
-    label: "Metal JCB",
-    alt: "Metal JCB toy",
-    src: "/assets/hero/live-2026/jcb.png",
-    slug: "metal-jcb",
-    className: "left-[4.5%] top-[56.8%] z-[24] w-[33.5%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#fff8dc_0%,#ffefb5_60%,#ffe59f_100%)]",
-    labelClassName: "bg-[#ffb312] min-w-[108px]",
-    imageClassName: "hero-float-jcb bottom-[17%] w-[91%]",
-    shadowClassName: "bottom-[12%] h-[7.5%] w-[72%]",
-    imageSizes: "(max-width: 1024px) 28vw, 14vw",
+    wrapperClassName: "right-[4%] top-[20%] z-[30] w-[30%] sm:right-[3%] sm:top-[18.5%] sm:w-[31%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#f2f8ff_0%,#dff2ff_60%,#d3e9ff_100%)]",
+    shadowClassName: "bottom-[10%] h-[8%] w-[68%]",
+    imageClassName: "bottom-[18%] w-[86%] sm:w-[88%]",
+    labelClassName: "min-w-[88px] bg-[#3E73FF]",
+    imageSizes: "(max-width: 1024px) 32vw, 14vw",
+    floatClassName: "hero-drift-drone",
   },
   {
     key: "house",
     label: "Sweet House",
     alt: "Sweet House toy",
     src: "/assets/hero/live-2026/sweet-house.png",
-    slug: "sweet-house",
-    className: "left-[44%] top-[55.5%] z-[22] w-[49%]",
-    podiumClassName:
-      "h-[18.5%] w-[100%] bg-[linear-gradient(180deg,#fff1f7_0%,#ffdce8_58%,#ffcfe1_100%)]",
-    labelClassName: "bg-[#ff4f7b] min-w-[122px]",
-    imageClassName: "hero-float-house bottom-[12%] w-[95%]",
-    shadowClassName: "bottom-[10%] h-[9%] w-[76%]",
-    imageSizes: "(max-width: 1024px) 42vw, 22vw",
+    wrapperClassName: "left-[45%] top-[42.5%] z-[22] w-[44%] -translate-x-[6%] sm:left-[44%] sm:top-[43%] sm:w-[46%]",
+    platformClassName:
+      "h-[18%] w-[100%] bg-[linear-gradient(180deg,#ffeef5_0%,#ffd9e8_62%,#ffcddd_100%)]",
+    shadowClassName: "bottom-[9%] h-[8.5%] w-[74%]",
+    imageClassName: "bottom-[13%] w-[93%] sm:w-[94%]",
+    labelClassName: "min-w-[112px] bg-[#FF4F86]",
+    imageSizes: "(max-width: 1024px) 46vw, 20vw",
+    floatClassName: "hero-drift-house",
+  },
+  {
+    key: "jcb",
+    label: "Metal JCB",
+    alt: "Metal JCB toy",
+    src: "/assets/hero/live-2026/jcb.png",
+    wrapperClassName: "left-[4%] top-[55%] z-[24] w-[28%] sm:left-[4%] sm:top-[53.5%] sm:w-[27%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#fff9dc_0%,#fff1b8_60%,#ffe79c_100%)]",
+    shadowClassName: "bottom-[10%] h-[7%] w-[68%]",
+    imageClassName: "bottom-[17%] w-[88%] sm:w-[90%]",
+    labelClassName: "min-w-[100px] bg-[#F2B400]",
+    imageSizes: "(max-width: 1024px) 26vw, 12vw",
+    floatClassName: "hero-drift-jcb",
   },
   {
     key: "defender",
     label: "Land Defender SUV",
     alt: "Land Defender SUV toy",
     src: "/assets/hero/live-2026/defender-suv.png",
-    slug: "land-defender-suv",
-    className: "left-[3%] top-[82.5%] z-[18] w-[38%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e9fbf2_0%,#d7f8e5_60%,#c6f2d7_100%)]",
-    labelClassName: "bg-[#17b673] min-w-[156px]",
-    imageClassName: "hero-float-defender bottom-[17%] w-[88%]",
-    shadowClassName: "bottom-[12%] h-[7%] w-[74%]",
-    imageSizes: "(max-width: 1024px) 31vw, 17vw",
+    wrapperClassName: "left-[2%] bottom-[8.5%] z-[18] w-[34%] sm:left-[3%] sm:bottom-[8%] sm:w-[35%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#eef9ea_0%,#ddf4db_60%,#cef0cb_100%)]",
+    shadowClassName: "bottom-[10%] h-[7%] w-[70%]",
+    imageClassName: "bottom-[17%] w-[87%] sm:w-[89%]",
+    labelClassName: "min-w-[138px] bg-[#19B56B]",
+    imageSizes: "(max-width: 1024px) 31vw, 15vw",
+    floatClassName: "hero-drift-defender",
   },
   {
     key: "bike",
     label: "Royal Enfield Classic 350",
     alt: "Royal Enfield Classic 350 toy",
     src: "/assets/hero/live-2026/royal-enfield.png",
-    slug: "royal-enfield-classic-350",
-    className: "left-[60%] top-[82.8%] z-[18] w-[37%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e8fbf5_0%,#d7f8ec_60%,#caf6e4_100%)]",
-    labelClassName: "bg-[#19b98b] min-w-[194px]",
-    imageClassName: "hero-float-bike bottom-[17%] w-[90%]",
-    shadowClassName: "bottom-[12%] h-[7%] w-[74%]",
-    imageSizes: "(max-width: 1024px) 30vw, 16vw",
+    wrapperClassName: "right-[2%] bottom-[9%] z-[18] w-[30%] sm:right-[3%] sm:bottom-[8.5%] sm:w-[31%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#eefbe2_0%,#ddf7c8_60%,#d0f0b8_100%)]",
+    shadowClassName: "bottom-[10%] h-[7%] w-[70%]",
+    imageClassName: "bottom-[17%] w-[88%] sm:w-[90%]",
+    labelClassName: "min-w-[170px] bg-[#1DBA76]",
+    imageSizes: "(max-width: 1024px) 30vw, 14vw",
+    floatClassName: "hero-drift-bike",
   },
 ];
 
@@ -99,94 +98,86 @@ const desktopStages: StageConfig[] = [
     label: "Metal JCB",
     alt: "Metal JCB toy",
     src: "/assets/hero/live-2026/jcb.png",
-    slug: "metal-jcb",
-    className: "left-[42.5%] top-[23.5%] z-[24] w-[20.5%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#fff8dc_0%,#ffefb5_60%,#ffe59f_100%)]",
-    labelClassName: "bg-[#ffb312] min-w-[126px]",
-    imageClassName: "hero-float-jcb bottom-[18%] w-[92%]",
-    shadowClassName: "bottom-[12%] h-[7%] w-[72%]",
-    imageSizes: "(max-width: 1280px) 16vw, 14vw",
+    wrapperClassName: "left-[11%] top-[26%] z-[24] w-[20%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#fff9dc_0%,#fff1b8_60%,#ffe79c_100%)]",
+    shadowClassName: "bottom-[10%] h-[7%] w-[68%]",
+    imageClassName: "bottom-[17%] w-[90%]",
+    labelClassName: "min-w-[116px] bg-[#F2B400]",
+    imageSizes: "(max-width: 1400px) 15vw, 13vw",
+    floatClassName: "hero-drift-jcb",
   },
   {
     key: "drone",
     label: "Drone",
     alt: "Drone toy",
     src: "/assets/hero/live-2026/drone.png",
-    slug: "drone",
-    className: "left-[73.5%] top-[12.5%] z-[30] w-[22.5%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#eef5ff_0%,#dbe8ff_60%,#c9d9ff_100%)]",
-    labelClassName: "bg-[#2d6dff] min-w-[104px]",
-    imageClassName: "hero-float-drone bottom-[18%] w-[91%]",
-    shadowClassName: "bottom-[12.5%] h-[7%] w-[72%]",
-    imageSizes: "(max-width: 1280px) 18vw, 16vw",
+    wrapperClassName: "right-[3%] top-[10%] z-[30] w-[22%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#f2f8ff_0%,#dff2ff_60%,#d3e9ff_100%)]",
+    shadowClassName: "bottom-[10%] h-[8%] w-[68%]",
+    imageClassName: "bottom-[18%] w-[88%]",
+    labelClassName: "min-w-[98px] bg-[#3E73FF]",
+    imageSizes: "(max-width: 1400px) 17vw, 15vw",
+    floatClassName: "hero-drift-drone",
   },
   {
     key: "house",
     label: "Sweet House",
     alt: "Sweet House toy",
     src: "/assets/hero/live-2026/sweet-house.png",
-    slug: "sweet-house",
-    className: "left-[53.5%] top-[40%] z-[22] w-[31.5%]",
-    podiumClassName:
-      "h-[19%] w-[100%] bg-[linear-gradient(180deg,#fff1f7_0%,#ffdce8_58%,#ffcfe1_100%)]",
-    labelClassName: "bg-[#ff4f7b] min-w-[136px]",
-    imageClassName: "hero-float-house bottom-[11%] w-[94%]",
-    shadowClassName: "bottom-[9%] h-[8.5%] w-[76%]",
-    imageSizes: "(max-width: 1280px) 26vw, 22vw",
+    wrapperClassName: "left-[36%] top-[33%] z-[22] w-[34%]",
+    platformClassName:
+      "h-[18%] w-[100%] bg-[linear-gradient(180deg,#ffeef5_0%,#ffd9e8_62%,#ffcddd_100%)]",
+    shadowClassName: "bottom-[9%] h-[8.5%] w-[74%]",
+    imageClassName: "bottom-[13%] w-[94%]",
+    labelClassName: "min-w-[130px] bg-[#FF4F86]",
+    imageSizes: "(max-width: 1400px) 25vw, 22vw",
+    floatClassName: "hero-drift-house",
   },
   {
     key: "defender",
     label: "Land Defender SUV",
     alt: "Land Defender SUV toy",
     src: "/assets/hero/live-2026/defender-suv.png",
-    slug: "land-defender-suv",
-    className: "left-[29%] top-[71%] z-[18] w-[20.5%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e9fbf2_0%,#d7f8e5_60%,#c6f2d7_100%)]",
-    labelClassName: "bg-[#17b673] min-w-[178px]",
-    imageClassName: "hero-float-defender bottom-[17%] w-[89%]",
-    shadowClassName: "bottom-[11.5%] h-[7%] w-[72%]",
-    imageSizes: "(max-width: 1280px) 18vw, 15vw",
+    wrapperClassName: "left-[2%] bottom-[8%] z-[18] w-[24%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#eef9ea_0%,#ddf4db_60%,#cef0cb_100%)]",
+    shadowClassName: "bottom-[10%] h-[7%] w-[70%]",
+    imageClassName: "bottom-[17%] w-[89%]",
+    labelClassName: "min-w-[172px] bg-[#19B56B]",
+    imageSizes: "(max-width: 1400px) 20vw, 18vw",
+    floatClassName: "hero-drift-defender",
   },
   {
     key: "bike",
     label: "Royal Enfield Classic 350",
     alt: "Royal Enfield Classic 350 toy",
     src: "/assets/hero/live-2026/royal-enfield.png",
-    slug: "royal-enfield-classic-350",
-    className: "left-[73%] top-[73.5%] z-[18] w-[21.5%]",
-    podiumClassName:
-      "h-[16%] w-[100%] bg-[linear-gradient(180deg,#e8fbf5_0%,#d7f8ec_60%,#caf6e4_100%)]",
-    labelClassName: "bg-[#19b98b] min-w-[216px]",
-    imageClassName: "hero-float-bike bottom-[16%] w-[89%]",
-    shadowClassName: "bottom-[11.5%] h-[7%] w-[74%]",
-    imageSizes: "(max-width: 1280px) 18vw, 15vw",
+    wrapperClassName: "right-[2%] bottom-[8%] z-[18] w-[23%]",
+    platformClassName:
+      "h-[15%] w-[100%] bg-[linear-gradient(180deg,#eefbe2_0%,#ddf7c8_60%,#d0f0b8_100%)]",
+    shadowClassName: "bottom-[10%] h-[7%] w-[70%]",
+    imageClassName: "bottom-[17%] w-[90%]",
+    labelClassName: "min-w-[210px] bg-[#1DBA76]",
+    imageSizes: "(max-width: 1400px) 19vw, 17vw",
+    floatClassName: "hero-drift-bike",
   },
 ];
 
-const sparkleMap = {
-  mobile: [
-    { className: "left-[48%] top-[9%] text-[#ff6f98]" },
-    { className: "left-[82.5%] top-[29.5%] text-[#ffca48]" },
-    { className: "left-[90%] top-[41.5%] text-[#9c8cff]" },
-    { className: "left-[73.5%] top-[66%] text-[#ff93b7]" },
-    { className: "left-[57%] top-[82%] text-[#8669ff]" },
-    { className: "left-[29%] top-[76%] text-[#ff99be]" },
-    { className: "left-[46%] top-[95%] text-[#886fff]" },
-  ],
-  desktop: [
-    { className: "left-[58.5%] top-[6.5%] text-[#ff6f98]" },
-    { className: "left-[83%] top-[10%] text-[#ff92bb]" },
-    { className: "left-[95.5%] top-[12.5%] text-[#ffca48]" },
-    { className: "left-[77.5%] top-[30%] text-[#8d7dff]" },
-    { className: "left-[97%] top-[34.5%] text-[#ff97bb]" },
-    { className: "left-[54%] top-[58%] text-[#886fff]" },
-    { className: "left-[40.5%] top-[65%] text-[#ffa2c0]" },
-    { className: "left-[96.5%] top-[66.5%] text-[#9a87ff]" },
-  ],
-};
+const mobileSparkles = [
+  "left-[63%] top-[15%] text-[#f58cab]",
+  "right-[6%] top-[34%] text-[#f7b739]",
+  "left-[31%] top-[73%] text-[#8b78ff]",
+  "right-[11%] top-[74%] text-[#ffa2bf]",
+];
+
+const desktopSparkles = [
+  "left-[41%] top-[11%] text-[#f58cab]",
+  "right-[11%] top-[14%] text-[#f7b739]",
+  "left-[58%] top-[58%] text-[#8b78ff]",
+  "right-[20%] top-[63%] text-[#ffa2bf]",
+];
 
 export function HeroBanner() {
   const router = useRouter();
@@ -197,311 +188,202 @@ export function HeroBanner() {
       category: {
         categoryLabel: "Explore Toys",
       },
-    }).catch(() => { });
+    }).catch(() => {});
 
     router.push("/products");
   };
 
   return (
-    <section className="overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(135deg,#fbf6ff_0%,#fff5f9_48%,#f6f0ff_100%)] shadow-[0_24px_60px_rgba(186,156,226,0.18)]">
-      <div className="hidden lg:grid lg:grid-cols-[40%_60%] lg:items-center lg:gap-2 lg:px-10 lg:py-8">
-        <DesktopTextBlock onExplore={handleExplore} />
-        <DesktopScene />
+    <section className="overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(180deg,#F8F3FF_0%,#F7F5FF_48%,#EEF6FF_100%)] shadow-[0_24px_60px_rgba(186,156,226,0.18)]">
+      <div className="relative lg:hidden">
+        <div className="relative min-h-[820px] px-[18px] pb-5 pt-[18px] sm:min-h-[850px]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_10%,rgba(225,211,255,0.75),transparent_18%),radial-gradient(circle_at_66%_55%,rgba(255,220,236,0.72),transparent_20%),radial-gradient(circle_at_18%_85%,rgba(216,244,222,0.72),transparent_18%)]" />
+          <MobileConnectorLines />
+          <Sparkles mode="mobile" />
+
+          <div className="relative z-20 max-w-[270px] sm:max-w-[284px]">
+            <HeroBadge />
+
+            <h1 className="mt-4 max-w-[272px] text-[clamp(32px,8.3vw,54px)] font-[800] leading-[0.96] tracking-[-0.05em] text-[#1D2240] sm:max-w-[284px]">
+              <span className="block">Play Smarter.</span>
+              <span className="block bg-gradient-to-r from-[#6F5BFF] to-[#D86BC8] bg-clip-text text-transparent">
+                Grow Faster.
+              </span>
+            </h1>
+
+            <p className="mt-4 max-w-[244px] text-[15px] leading-[1.62] text-[#5B6285] sm:max-w-[258px]">
+              Carefully selected toys that boost creativity, learning, and fun in a home-like
+              environment.
+            </p>
+
+            <div className="mt-5">
+              <Button
+                onClick={handleExplore}
+                className="min-h-[48px] rounded-full bg-[linear-gradient(90deg,#FF6E7A_0%,#7C5CFF_100%)] px-5 text-[15px] font-semibold text-white shadow-[0_16px_28px_rgba(111,91,255,0.22)] sm:min-h-[50px] sm:px-6 sm:text-[16px]"
+              >
+                Explore Toys
+              </Button>
+            </div>
+          </div>
+
+          <div className="pointer-events-none absolute inset-0">
+            {mobileStages.map((stage) => (
+              <ProductStage key={stage.key} stage={stage} />
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="relative min-h-[910px] px-5 pb-6 pt-6 lg:hidden">
-        <MobileTextBlock onExplore={handleExplore} />
-        <MobileScene />
+      <div className="hidden lg:block">
+        <div className="relative grid min-h-[690px] grid-cols-[44%_56%] gap-4 px-8 py-8 xl:px-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_64%_12%,rgba(225,211,255,0.72),transparent_16%),radial-gradient(circle_at_62%_56%,rgba(255,220,236,0.68),transparent_18%),radial-gradient(circle_at_80%_80%,rgba(216,244,222,0.68),transparent_18%)]" />
+          <DesktopConnectorLines />
+          <Sparkles mode="desktop" />
+
+          <div className="relative z-20 flex items-center pl-4 xl:pl-6">
+            <div className="max-w-[540px]">
+              <HeroBadge />
+
+              <h1 className="mt-7 max-w-[520px] text-[clamp(70px,7vw,94px)] font-[800] leading-[0.93] tracking-[-0.055em] text-[#1D2240]">
+                <span className="block">Play Smarter.</span>
+                <span className="block bg-gradient-to-r from-[#6F5BFF] to-[#D86BC8] bg-clip-text text-transparent">
+                  Grow Faster.
+                </span>
+              </h1>
+
+              <p className="mt-6 max-w-[360px] text-[18px] leading-[1.65] text-[#5B6285]">
+                Carefully selected toys that boost creativity, learning, and fun in a home-like
+                environment.
+              </p>
+
+              <div className="mt-8">
+                <Button
+                  onClick={handleExplore}
+                  className="min-h-[58px] rounded-full bg-[linear-gradient(90deg,#FF6E7A_0%,#7C5CFF_100%)] px-8 text-[17px] font-semibold text-white shadow-[0_18px_30px_rgba(111,91,255,0.2)]"
+                >
+                  Explore Toys
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative z-20 min-h-[640px]">
+            {desktopStages.map((stage) => (
+              <ProductStage key={stage.key} stage={stage} />
+            ))}
+          </div>
+        </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes heroDrift {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        @keyframes heroDriftDrone {
+          0%,
+          100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-10px) rotate(-1deg);
+          }
+        }
+
+        @keyframes heroSparkle {
+          0%,
+          100% {
+            opacity: 0.25;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.6;
+            transform: scale(1.06);
+          }
+        }
+
+        .hero-drift-house,
+        .hero-drift-jcb,
+        .hero-drift-defender,
+        .hero-drift-bike {
+          animation: heroDrift 7.2s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        .hero-drift-drone {
+          animation: heroDriftDrone 6.2s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        .hero-sparkle {
+          animation: heroSparkle 4.6s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hero-drift-house,
+          .hero-drift-jcb,
+          .hero-drift-defender,
+          .hero-drift-bike,
+          .hero-drift-drone,
+          .hero-sparkle {
+            animation: none !important;
+          }
+        }
+      `}</style>
     </section>
-  );
-}
-
-function MobileTextBlock({ onExplore }: { onExplore: () => void }) {
-  return (
-    <div className="relative z-20 max-w-[280px]">
-      <HeroBadge />
-
-      <h1 className="mt-5 max-w-[270px] text-[clamp(34px,8.7vw,58px)] font-[800] leading-[0.96] tracking-[-0.05em] text-[#17185f]">
-        <span className="block">Play Smarter.</span>
-        <span className="block bg-gradient-to-r from-[#7b48ff] to-[#5b2ff4] bg-clip-text text-transparent">
-          Grow Faster.
-        </span>
-      </h1>
-
-      <p className="mt-4 max-w-[250px] text-[15px] leading-[1.55] text-[#67698f]">
-        Carefully selected toys that boost creativity, learning, and fun.
-      </p>
-
-      <div className="mt-6">
-        <Button
-          onClick={onExplore}
-          className="min-h-[50px] rounded-full px-6 text-[17px] font-semibold shadow-[0_16px_30px_rgba(123,72,255,0.24)]"
-        >
-          Explore Toys
-          <span className="ml-2 text-base leading-none" aria-hidden="true">
-            &rarr;
-          </span>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function DesktopTextBlock({ onExplore }: { onExplore: () => void }) {
-  return (
-    <div className="relative z-20 max-w-[520px] pl-4">
-      <HeroBadge />
-
-      <h1 className="mt-8 max-w-[520px] text-[clamp(72px,7vw,96px)] font-[800] leading-[0.94] tracking-[-0.055em] text-[#17185f]">
-        <span className="block">Play Smarter.</span>
-        <span className="block bg-gradient-to-r from-[#7b48ff] to-[#5b2ff4] bg-clip-text text-transparent">
-          Grow Faster.
-        </span>
-      </h1>
-
-      <p className="mt-7 max-w-[320px] text-[19px] leading-[1.58] text-[#67698f]">
-        Carefully selected toys that boost creativity, learning, and fun.
-      </p>
-
-      <div className="mt-10">
-        <Button
-          onClick={onExplore}
-          className="min-h-[62px] rounded-full px-8 text-[18px] font-semibold shadow-[0_18px_34px_rgba(123,72,255,0.22)]"
-        >
-          Explore Toys
-          <span className="ml-2 text-lg leading-none" aria-hidden="true">
-            &rarr;
-          </span>
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function MobileScene() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <MobileDecor />
-      </div>
-
-      <div className="absolute inset-0">
-        {mobileStages.map((stage) => (
-          <ProductStage key={stage.key} stage={stage} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DesktopScene() {
-  return (
-    <div className="relative h-[680px] overflow-hidden rounded-[28px]">
-      <div className="pointer-events-none absolute inset-0">
-        <DesktopDecor />
-      </div>
-
-      <div className="absolute inset-0">
-        {desktopStages.map((stage) => (
-          <ProductStage key={stage.key} stage={stage} />
-        ))}
-      </div>
-    </div>
   );
 }
 
 function ProductStage({ stage }: { stage: StageConfig }) {
   return (
-    <div className={`absolute ${stage.className}`}>
-      <div className="relative h-full min-h-[118px]">
+    <div className={`absolute ${stage.wrapperClassName}`}>
+      <div className="relative min-h-[122px]">
         <div
-          className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-[999px] shadow-[0_18px_34px_rgba(136,116,183,0.14)] ${stage.podiumClassName}`}
+          className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-[999px] shadow-[0_18px_30px_rgba(63,72,119,0.1)] ${stage.platformClassName}`}
         >
-          <div className="absolute inset-x-[9%] top-[12%] h-[24%] rounded-full bg-white/55 blur-[2px]" />
+          <div className="absolute inset-x-[10%] top-[12%] h-[22%] rounded-full bg-white/50 blur-[2px]" />
         </div>
 
         <div
-          className={`absolute left-1/2 -translate-x-1/2 rounded-full bg-[rgba(118,95,177,0.12)] blur-[16px] ${stage.shadowClassName}`}
+          className={`absolute left-1/2 -translate-x-1/2 rounded-full bg-[rgba(30,50,90,0.12)] blur-[15px] ${stage.shadowClassName}`}
         />
 
-        <Link
-          href={`/products/${stage.slug}`}
-          aria-label={`Open ${stage.label}`}
-          className={`absolute left-1/2 z-30 -translate-x-1/2 ${stage.imageClassName} block cursor-pointer`}
+        <div
+          className={`absolute left-1/2 z-20 -translate-x-1/2 ${stage.imageClassName} ${stage.floatClassName}`}
         >
           <Image
             src={stage.src}
             alt={stage.alt}
             width={640}
             height={640}
-            sizes={stage.imageSizes}
             priority
-            className="h-auto w-full object-contain [filter:drop-shadow(0_18px_30px_rgba(57,44,98,0.16))]"
+            sizes={stage.imageSizes}
+            className="h-auto w-full object-contain [filter:drop-shadow(0_16px_28px_rgba(63,72,119,0.12))]"
           />
-        </Link>
+        </div>
 
-        <div className="absolute bottom-[4.5%] left-1/2 z-40 -translate-x-1/2">
-          <Link
-            href={`/products/${stage.slug}`}
-            aria-label={`Open ${stage.label}`}
-            className={`inline-flex min-h-[32px] items-center justify-center rounded-full px-3 py-2 text-center text-[12px] font-semibold leading-none text-white shadow-[0_10px_22px_rgba(104,75,183,0.18)] lg:min-h-[36px] lg:px-4 lg:text-[14px] ${stage.labelClassName} cursor-pointer transition-transform duration-200 hover:scale-[1.03]`}
+        <div className="absolute bottom-[4%] left-1/2 z-30 -translate-x-1/2">
+          <div
+            className={`inline-flex min-h-[30px] items-center justify-center rounded-full px-2.5 py-1.5 text-center text-[11px] font-semibold leading-none text-white shadow-[0_10px_20px_rgba(80,40,120,0.16)] sm:min-h-[32px] sm:px-3 sm:py-2 sm:text-[12px] lg:min-h-[36px] lg:px-4 lg:text-[14px] ${stage.labelClassName}`}
           >
-            <span className="flex items-center gap-1.5 whitespace-nowrap">
-              <LabelIcon />
-              {stage.label}
-            </span>
-          </Link>
+            {stage.label}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function MobileDecor() {
-  return (
-    <>
-      <div className="absolute right-[7%] top-[5%] h-[12%] w-[23%] rounded-full bg-[#eadcf3] opacity-65 blur-[2px]" />
-      <Sparkles mode="mobile" />
-
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="absolute inset-0 h-full w-full"
-        aria-hidden="true"
-      >
-        <path
-          d="M71 39 C72 45, 78 45, 79 52"
-          fill="none"
-          stroke="#8f81ff"
-          strokeWidth="0.22"
-          strokeDasharray="0.9 1.2"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-        <path
-          d="M66 39 C60 46, 54 48, 49 53"
-          fill="none"
-          stroke="#ffb84f"
-          strokeWidth="0.22"
-          strokeDasharray="0.9 1.2"
-          strokeLinecap="round"
-          opacity="0.78"
-        />
-        <path
-          d="M35 63 C42 69, 44 75, 44 79"
-          fill="none"
-          stroke="#ff99be"
-          strokeWidth="0.22"
-          strokeDasharray="0.9 1.2"
-          strokeLinecap="round"
-          opacity="0.82"
-        />
-        <path
-          d="M56 72 C53 78, 51 84, 55 89"
-          fill="none"
-          stroke="#917dff"
-          strokeWidth="0.22"
-          strokeDasharray="0.9 1.2"
-          strokeLinecap="round"
-          opacity="0.76"
-        />
-        <path
-          d="M77 71 C84 72, 86 77, 84 85"
-          fill="none"
-          stroke="#ff9fbc"
-          strokeWidth="0.22"
-          strokeDasharray="0.9 1.2"
-          strokeLinecap="round"
-          opacity="0.76"
-        />
-      </svg>
-    </>
-  );
-}
-
-function DesktopDecor() {
-  return (
-    <>
-      <div className="absolute left-[54%] top-[2.5%] h-[18%] w-[18%] -translate-x-1/2 rounded-full bg-[#eadcf3] opacity-58 blur-[2px]" />
-      <Sparkles mode="desktop" />
-
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="absolute inset-0 h-full w-full"
-        aria-hidden="true"
-      >
-        <path
-          d="M69 13 C72 18, 73 24, 71 29"
-          fill="none"
-          stroke="#f1c356"
-          strokeWidth="0.18"
-          strokeDasharray="0.7 1.1"
-          strokeLinecap="round"
-          opacity="0.85"
-        />
-        <path
-          d="M79 30 C83 34, 82 39, 81 44"
-          fill="none"
-          stroke="#ff9ac0"
-          strokeWidth="0.18"
-          strokeDasharray="0.7 1.1"
-          strokeLinecap="round"
-          opacity="0.82"
-        />
-        <path
-          d="M43 55 C50 53, 53 59, 52 65"
-          fill="none"
-          stroke="#ffb65b"
-          strokeWidth="0.18"
-          strokeDasharray="0.7 1.1"
-          strokeLinecap="round"
-          opacity="0.8"
-        />
-        <path
-          d="M58 63 C58 74, 55 85, 64 96"
-          fill="none"
-          stroke="#9c8cff"
-          strokeWidth="0.18"
-          strokeDasharray="0.7 1.1"
-          strokeLinecap="round"
-          opacity="0.78"
-        />
-        <path
-          d="M81 46 C79 58, 79 69, 81 81"
-          fill="none"
-          stroke="#8b7dff"
-          strokeWidth="0.18"
-          strokeDasharray="0.7 1.1"
-          strokeLinecap="round"
-          opacity="0.72"
-        />
-      </svg>
-    </>
-  );
-}
-
-function Sparkles({ mode }: { mode: "mobile" | "desktop" }) {
-  return (
-    <>
-      {sparkleMap[mode].map((sparkle, index) => (
-        <div
-          key={`${mode}-${index}`}
-          className={`hero-sparkle absolute ${sparkle.className}`}
-          aria-hidden="true"
-        >
-          <SparkleIcon />
-        </div>
-      ))}
-    </>
-  );
-}
-
 function HeroBadge() {
   return (
-    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/85 bg-white/94 px-[14px] py-2 text-[13px] font-semibold text-[#5b45d3] shadow-[0_12px_24px_rgba(175,145,220,0.12)] lg:px-4 lg:text-[15px]">
-      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#efe7ff] text-[#724cff]">
+    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/80 bg-[#EEF0FF]/92 px-[14px] py-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#4B5CDB] shadow-[0_12px_24px_rgba(175,145,220,0.1)] sm:text-[12px]">
+      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/75 text-[#6F5BFF]">
         <StarIcon className="h-3 w-3" />
       </span>
       Smart Toys for Smart Kids
@@ -509,11 +391,77 @@ function HeroBadge() {
   );
 }
 
-function LabelIcon() {
+function Sparkles({ mode }: { mode: "mobile" | "desktop" }) {
+  const sparkles = mode === "mobile" ? mobileSparkles : desktopSparkles;
+
   return (
-    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/18">
-      <span className="h-1.5 w-1.5 rounded-full bg-white" />
-    </span>
+    <>
+      {sparkles.map((className, index) => (
+        <div key={`${mode}-${index}`} className={`hero-sparkle absolute ${className}`} aria-hidden="true">
+          <SparkleIcon />
+        </div>
+      ))}
+    </>
+  );
+}
+
+function MobileConnectorLines() {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    >
+      <path
+        d="M69 35 C63 43, 56 47, 48 53"
+        fill="none"
+        stroke="#F5A3B7"
+        strokeWidth="0.24"
+        strokeDasharray="0.9 1.2"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <path
+        d="M48 71 C43 78, 49 84, 59 86"
+        fill="none"
+        stroke="#B7BDF8"
+        strokeWidth="0.24"
+        strokeDasharray="0.9 1.2"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
+  );
+}
+
+function DesktopConnectorLines() {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    >
+      <path
+        d="M69 18 C74 23, 73 30, 70 38"
+        fill="none"
+        stroke="#F5A3B7"
+        strokeWidth="0.18"
+        strokeDasharray="0.8 1.15"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+      <path
+        d="M49 58 C45 67, 49 79, 60 87"
+        fill="none"
+        stroke="#B7BDF8"
+        strokeWidth="0.18"
+        strokeDasharray="0.8 1.15"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+    </svg>
   );
 }
 
