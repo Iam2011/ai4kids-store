@@ -10,7 +10,7 @@ export function ProductGrid({
 }) {
   if (variant === "featuredRail") {
     return (
-      <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="grid grid-cols-2 gap-3">
         {products.map((product) => (
           <ProductCard key={product._id || product.slug} product={product} variant={variant} />
         ))}

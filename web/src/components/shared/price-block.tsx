@@ -3,22 +3,19 @@ import { formatPrice } from "@/lib/utils/format-price";
 export function PriceBlock({
   price,
   originalPrice,
-  discountPercent,
+  discountPercent: _discountPercent,
 }: {
   price: number;
   originalPrice?: number;
   discountPercent?: number;
 }) {
+  void _discountPercent;
+
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      <strong className="text-lg font-black text-[#2d2557]">{formatPrice(price)}</strong>
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+      <strong className="text-[1.02rem] font-black text-[#2d2557]">{formatPrice(price)}</strong>
       {originalPrice && originalPrice > price ? (
-        <span className="text-sm text-[#9a89b6] line-through">{formatPrice(originalPrice)}</span>
-      ) : null}
-      {discountPercent ? (
-        <span className="rounded-full bg-[#ffede7] px-2.5 py-1 text-[11px] font-bold text-[#ff6f48]">
-          {discountPercent}% OFF
-        </span>
+        <span className="text-[12px] font-medium text-[#9788b3] line-through">{formatPrice(originalPrice)}</span>
       ) : null}
     </div>
   );

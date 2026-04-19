@@ -9,35 +9,34 @@ import { SectionHeader } from "@/components/shared/section-header";
 import { getProducts } from "@/lib/api/products";
 
 export default async function HomePage() {
-  const featuredRailResponse = await getProducts(
-    {
-      homeRail: true,
-      limit: 39,
-      sort: "featured",
-    },
-    60
-  ).catch(() => ({ products: [] }));
-
-  const products = featuredRailResponse.products || [];
-  const findHeroSlug = (...needles: string[]) =>
-    products.find((product) =>
-      needles.every((needle) => product.name.toLowerCase().includes(needle.toLowerCase()))
-    )?.slug;
+  const [featuredRailResponse, droneResponse, defenderResponse, bikeResponse] = await Promise.all([
+    getProducts(
+      {
+        homeRail: true,
+        limit: 4,
+        sort: "featured",
+      },
+      60
+    ).catch(() => ({ products: [] })),
+    getProducts({ search: "E-88 DRONE WHITE", limit: 1 }, 60).catch(() => ({ products: [] })),
+    getProducts({ search: "defender", limit: 1 }, 60).catch(() => ({ products: [] })),
+    getProducts({ search: "royal enfield", limit: 1 }, 60).catch(() => ({ products: [] })),
+  ]);
 
   const heroLinks = {
-    drone: findHeroSlug("drone"),
-    defender: findHeroSlug("defender"),
-    bike: findHeroSlug("royal", "enfield"),
+    drone: droneResponse.products?.[0]?.slug,
+    defender: defenderResponse.products?.[0]?.slug,
+    bike: bikeResponse.products?.[0]?.slug,
   };
 
   return (
-    <PageContainer className="max-w-[404px] gap-4 px-4 pb-32 pt-4 sm:max-w-3xl lg:max-w-6xl">
+    <PageContainer className="max-w-[404px] gap-4 px-4 pb-32 pt-4">
       <HeroBanner heroLinks={heroLinks} />
       <BenefitsGrid />
       <TrustedFamiliesCard />
       <CategoryGrid />
 
-      <section className="rounded-[30px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.97),rgba(255,246,252,0.94))] p-5 shadow-[0_24px_54px_rgba(185,153,224,0.16)]">
+      <section className="rounded-[30px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(247,243,255,0.96))] p-4 shadow-[0_20px_48px_rgba(160,129,213,0.15)]">
         <SectionHeader title="Featured Toys" actionHref="/products" />
         <ProductGrid products={featuredRailResponse.products || []} variant="featuredRail" />
       </section>

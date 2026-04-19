@@ -31,8 +31,8 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 px-4 pt-4 sm:px-6">
-        <div className="relative mx-auto flex h-[66px] w-full max-w-[460px] items-center rounded-[28px] border border-white/80 bg-white/95 px-4 shadow-[0_18px_44px_rgba(192,160,232,0.28)] backdrop-blur sm:max-w-3xl lg:max-w-6xl">
+      <header className="sticky top-0 z-40 px-4 pt-4">
+        <div className="relative mx-auto flex h-[66px] w-full max-w-[460px] items-center rounded-[28px] border border-white/80 bg-white/95 px-4 shadow-[0_18px_44px_rgba(192,160,232,0.28)] backdrop-blur">
           <button
             type="button"
             aria-label="Open menu"
@@ -53,7 +53,7 @@ export function Header() {
               width={128}
               height={40}
               priority
-              className="h-auto w-[122px] sm:w-[136px]"
+              className="h-auto w-[122px]"
             />
           </Link>
 

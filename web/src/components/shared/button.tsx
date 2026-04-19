@@ -17,9 +17,9 @@ export function Button({
       className={cn(
         "inline-flex min-h-11 items-center justify-center rounded-full px-4 py-3 text-sm font-semibold transition-transform duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60",
         variant === "primary" &&
-          "bg-gradient-to-r from-[#ff7f6b] via-[#ff6b96] to-[#8f6dff] text-white shadow-[0_14px_30px_rgba(255,107,150,0.25)]",
+          "bg-[linear-gradient(180deg,#3200fc_4%,#ff0065_98%)] text-white shadow-[0_14px_30px_rgba(98,54,255,0.22)]",
         variant === "secondary" &&
-          "border border-[#eadcf4] bg-white/95 text-[#4a3f75] shadow-[0_12px_24px_rgba(139,116,180,0.12)]",
+          "border border-[#eadcf4] bg-[linear-gradient(180deg,#ffffff_0%,#f8f3ff_100%)] text-[#4a3f75] shadow-[0_12px_24px_rgba(139,116,180,0.12)]",
         variant === "ghost" && "bg-transparent text-[#6d6790]",
         className
       )}

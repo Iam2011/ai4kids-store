@@ -54,7 +54,7 @@ export function ProductDetailView({
   };
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
+    <div className="grid gap-5">
       <section className="rounded-[30px] bg-white/95 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.15)]">
         <div className="relative aspect-square overflow-hidden rounded-[24px] bg-gradient-to-br from-[#fff8ef] to-[#f4f2ff]">
           <Image src={selectedImage} alt={displayName} fill sizes="(max-width: 1024px) 100vw, 640px" className="object-contain p-5" />
@@ -129,7 +129,7 @@ export function ProductDetailView({
       </section>
 
       {relatedProducts.length ? (
-        <section className="lg:col-span-2 rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
+        <section className="rounded-[30px] bg-white/90 p-5 shadow-[0_24px_60px_rgba(153,132,196,0.14)]">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9a89b6]">You may also like</p>
