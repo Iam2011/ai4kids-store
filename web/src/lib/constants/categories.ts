@@ -20,7 +20,7 @@ export const homepageCategories = [
     href: "/products?category=Remote%20Control%20Toys",
     icon: "/assets/categories/premium/cars-rc.png",
     toneClassName: "from-[#fff8fe] to-[#f7f0ff]",
-    imageClassName: "scale-[1.16] object-center",
+    imageClassName: "scale-[1.35] object-[center_54%]",
   },
   {
     label: "Guns",
@@ -28,7 +28,7 @@ export const homepageCategories = [
     href: "/products?category=Gun%20%26%20Blasters",
     icon: "/assets/categories/premium/guns.png",
     toneClassName: "from-[#fffaf0] to-[#fff1dd]",
-    imageClassName: "scale-[1.14] object-center",
+    imageClassName: "scale-[1.28] object-[center_58%]",
   },
   {
     label: "Learning",
@@ -36,7 +36,7 @@ export const homepageCategories = [
     href: "/products?category=Educational%20%26%20Learning%20Toys",
     icon: "/assets/categories/premium/learning.png",
     toneClassName: "from-[#fbfff5] to-[#eff9dc]",
-    imageClassName: "scale-[1.1] object-center",
+    imageClassName: "scale-[1.24] object-[center_56%]",
   },
   {
     label: "Games",
@@ -44,7 +44,7 @@ export const homepageCategories = [
     href: "/products?category=Games%20%26%20Indoor%20Toys",
     icon: "/assets/categories/premium/games.png",
     toneClassName: "from-[#faf8ff] to-[#f2edff]",
-    imageClassName: "scale-[1.08] object-center",
+    imageClassName: "scale-[1.22] object-[center_56%]",
   },
   {
     label: "Dolls",
@@ -52,7 +52,7 @@ export const homepageCategories = [
     href: "/products?category=Dolls%20%26%20Soft%20Toys",
     icon: "/assets/categories/premium/dolls.png",
     toneClassName: "from-[#fff9fb] to-[#fff1f7]",
-    imageClassName: "scale-[1.14] object-center",
+    imageClassName: "scale-[1.3] object-[center_55%]",
   },
   {
     label: "Kitchen",
@@ -60,7 +60,7 @@ export const homepageCategories = [
     href: "/products?category=Role%20Play%20%26%20Kitchen%20Toys",
     icon: "/assets/categories/premium/kitchen.png",
     toneClassName: "from-[#fff9f7] to-[#fff0f4]",
-    imageClassName: "scale-[1.08] object-center",
+    imageClassName: "scale-[1.2] object-[center_57%]",
   },
   {
     label: "Sports",
@@ -68,7 +68,7 @@ export const homepageCategories = [
     href: "/products?category=Outdoor%20%26%20Sports%20Toys",
     icon: "/assets/categories/premium/sports.png",
     toneClassName: "from-[#fffdf9] to-[#f4f2ff]",
-    imageClassName: "scale-[1.08] object-center",
+    imageClassName: "scale-[1.24] object-[center_56%]",
   },
   {
     label: "Outdoor",
@@ -76,6 +76,6 @@ export const homepageCategories = [
     href: "/products?category=Outdoor%20%26%20Sports%20Toys",
     icon: "/assets/categories/premium/outdoor.png",
     toneClassName: "from-[#fbfff7] to-[#eef8db]",
-    imageClassName: "scale-[1.08] object-center",
+    imageClassName: "scale-[1.18] object-[center_56%]",
   },
 ] as const;

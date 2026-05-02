@@ -22,7 +22,7 @@ export function ProductsClientPage({
   const router = useRouter();
 
   return (
-    <PageContainer>
+    <PageContainer className="max-w-[1240px] gap-4 px-3 pb-28 pt-4 sm:px-4 md:gap-5">
       <ProductFilters
         onSearchSubmit={(term) => {
           if (!String(term || "").trim()) return;
